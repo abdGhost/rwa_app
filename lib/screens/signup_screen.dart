@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:rwa_app/screens/signup_screen.dart';
+import 'package:rwa_app/screens/setting_screen.dart';
 import 'package:rwa_app/widgets/auth_divider_widget.dart';
 import 'package:rwa_app/widgets/back_title_appbar_widget.dart';
 import 'package:rwa_app/widgets/custom_textfield_widget.dart';
 import 'package:rwa_app/widgets/social_auth_widget.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class SignupScreen extends StatelessWidget {
+  const SignupScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const BackTitleAppBar(title: 'Login'),
+      appBar: const BackTitleAppBar(title: 'Signup'),
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
@@ -51,8 +51,19 @@ class LoginScreen extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               const CustomTextField(hint: 'example@gmail.com'),
+              const SizedBox(height: 14),
 
-              const SizedBox(height: 16),
+              const Text(
+                'Username',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 2),
+              const CustomTextField(hint: 'Username'),
+              const SizedBox(height: 14),
               const Text(
                 'Password',
                 style: TextStyle(
@@ -70,24 +81,22 @@ class LoginScreen extends StatelessWidget {
                   child: Icon(Icons.visibility, size: 20),
                 ),
               ),
-              const SizedBox(height: 4),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    minimumSize: Size(0, 0),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  onPressed: () {},
-                  child: const Text(
-                    'Forget Password?',
-                    style: TextStyle(
-                      color: Color(0xFF348F6C),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+              const SizedBox(height: 14),
+              const Text(
+                'Confirm Password',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 2),
+              const CustomTextField(
+                hint: 'Confirm Password',
+                obscure: true,
+                suffix: Padding(
+                  padding: EdgeInsets.only(right: 12),
+                  child: Icon(Icons.visibility, size: 20),
                 ),
               ),
 
@@ -102,7 +111,14 @@ class LoginScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(5),
                     ),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SettingsScreen(),
+                      ),
+                    );
+                  },
                   child: const Text(
                     'Log In',
                     style: TextStyle(
@@ -123,14 +139,7 @@ class LoginScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 12),
                   ),
                   GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SignupScreen(),
-                        ),
-                      );
-                    },
+                    onTap: () {},
                     child: const Text(
                       'SIGNUP',
                       style: TextStyle(
