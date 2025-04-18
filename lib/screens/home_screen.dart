@@ -15,10 +15,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final double totalSpacing = 2 * 3;
-    final double cardWidth =
-        (MediaQuery.of(context).size.width - 24 - totalSpacing) / 4;
-
     return Scaffold(
       backgroundColor: const Color.fromRGBO(247, 247, 247, 1),
       appBar: AppBar(
@@ -73,58 +69,107 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          const SizedBox(height: 12),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Row(
-              children: [
-                StatCard(
-                  title: 'Market Cap',
-                  value: '\$2.79 T',
-                  change: '+5.78%',
-                  changeColor: const Color.fromARGB(255, 109, 247, 114),
-                  width: cardWidth,
-                  isFirst: true,
-                ),
-                const SizedBox(width: 2),
-                StatCard(
-                  title: 'Volume',
-                  value: '\$3.48 T',
-                  change: '+8.59%',
-                  changeColor: const Color.fromARGB(255, 109, 247, 114),
-                  width: cardWidth,
-                ),
-                const SizedBox(width: 2),
-                StatCard(
-                  title: 'Dominance',
-                  value: '26.46%',
-                  subtitle: 'LINK',
-                  changeColor: Colors.blue,
-                  width: cardWidth,
-                ),
-                const SizedBox(width: 2),
-                StatCard(
-                  title: 'Fear & Greed',
-                  value: '31',
-                  changeColor: Colors.red,
-                  width: cardWidth,
-                  isLast: true,
-                  isFearGreed: true,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-          Expanded(
-            child: Center(
-              child: Text(
-                'Selected Coin: $selectedCoin',
-                style: GoogleFonts.inter(fontSize: 16, color: Colors.black),
+      body: DefaultTabController(
+        length: 5,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                children: [
+                  StatCard(
+                    title: 'Market Cap',
+                    value: '\$2.79 T',
+                    change: '5.78%',
+                    changeColor: const Color.fromARGB(255, 109, 247, 114),
+                    width: (MediaQuery.of(context).size.width - 24 - 6) / 4,
+                    isFirst: true,
+                  ),
+                  const SizedBox(width: 2),
+                  StatCard(
+                    title: 'Volume',
+                    value: '\$3.48 T',
+                    change: '8.59%',
+                    changeColor: const Color.fromARGB(255, 109, 247, 114),
+                    width: (MediaQuery.of(context).size.width - 24 - 6) / 4,
+                  ),
+                  const SizedBox(width: 2),
+                  StatCard(
+                    title: 'Dominance',
+                    value: '26.46%',
+                    subtitle: 'LINK',
+                    changeColor: Colors.blue,
+                    width: (MediaQuery.of(context).size.width - 24 - 6) / 4,
+                  ),
+                  const SizedBox(width: 2),
+                  StatCard(
+                    title: 'Fear & Greed',
+                    value: '31',
+                    changeColor: Colors.red,
+                    width: (MediaQuery.of(context).size.width - 24 - 6) / 4,
+                    isLast: true,
+                    isFearGreed: true,
+                  ),
+                ],
               ),
             ),
+            const SizedBox(height: 2),
+
+            // Tab Bar
+            const TabBarSection(),
+
+            // Tab View
+            Expanded(
+              child: TabBarView(
+                children: [
+                  Center(child: Text('All Coins')),
+                  Center(child: Text('Top Coins')),
+                  Center(child: Text('Watchlist')),
+                  Center(child: Text('Trending')),
+                  Center(child: Text('Top Gainers')),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class TabBarSection extends StatelessWidget {
+  const TabBarSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12), // match StatCard
+      child: TabBar(
+        isScrollable: true,
+        tabAlignment: TabAlignment.start,
+        labelPadding: const EdgeInsets.only(right: 12),
+        indicator: const UnderlineTabIndicator(
+          borderSide: BorderSide(
+            color: Color.fromARGB(255, 63, 167, 127),
+            width: 2,
           ),
+          insets: EdgeInsets.only(bottom: 10),
+        ),
+        indicatorSize: TabBarIndicatorSize.label,
+        dividerColor: Colors.transparent,
+        labelColor: Colors.black,
+        unselectedLabelColor: Colors.grey,
+        labelStyle: GoogleFonts.inter(
+          fontWeight: FontWeight.bold,
+          fontSize: 13,
+        ),
+        unselectedLabelStyle: GoogleFonts.inter(fontSize: 13),
+        tabs: const [
+          Tab(text: "All Coins"),
+          Tab(text: "Top Coins"),
+          Tab(text: "Watchlist"),
+          Tab(text: "Trending"),
+          Tab(text: "Top Gainers"),
         ],
       ),
     );
@@ -186,8 +231,6 @@ class StatCard extends StatelessWidget {
         children: [
           Text(
             title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.inter(
               fontSize: 10,
               fontWeight: FontWeight.w500,

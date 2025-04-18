@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:rwa_app/screens/botttom_nav_screen.dart';
-import 'package:rwa_app/screens/home_screen.dart';
 import 'package:rwa_app/screens/select_language_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
