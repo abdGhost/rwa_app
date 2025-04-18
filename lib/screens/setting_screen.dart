@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:rwa_app/screens/botttom_nav_screen.dart';
+import 'package:rwa_app/screens/home_screen.dart';
+import 'package:rwa_app/screens/select_language_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -87,11 +90,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                     divider(),
-                    settingTile(
-                      title: "Language",
-                      trailing: const Text(
-                        "English",
-                        style: TextStyle(color: Colors.black54, fontSize: 13),
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SelectLanguageScreen(),
+                          ),
+                        );
+                      },
+
+                      child: settingTile(
+                        title: "Language",
+                        trailing: const Text(
+                          "English",
+                          style: TextStyle(color: Colors.black54, fontSize: 13),
+                        ),
                       ),
                     ),
                   ],
@@ -112,7 +126,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 height: 48,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Navigate to next screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BottomNavScreen(),
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF348F6C),
