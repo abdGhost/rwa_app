@@ -356,7 +356,7 @@ class AllCoinsTable extends StatelessWidget {
                   .toString()
                   .startsWith('+');
 
-              return GestureDetector(
+              return InkWell(
                 onTap: () {
                   Navigator.push(
                     context,
