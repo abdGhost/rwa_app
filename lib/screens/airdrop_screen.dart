@@ -70,7 +70,7 @@ class _AirdropScreenState extends State<AirdropScreen> {
             const SizedBox(height: 12),
             Center(
               child: Image.asset(
-                'assets/airdrop_banner.png',
+                'assets/airdrop.gif',
                 width: 200,
                 height: 200,
                 fit: BoxFit.cover,
@@ -174,15 +174,25 @@ class FilterTab extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? const Color(0xFF1CB379) : Colors.white,
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: const Color(0xFF1CB379)),
+          // rgba(238, 241, 246, 1)
+          color:
+              isActive
+                  ? Color.fromRGBO(28, 179, 121, 0.3)
+                  : Color.fromRGBO(238, 241, 246, 1),
+          borderRadius: BorderRadius.circular(6),
+          border:
+              isActive
+                  ? Border.all(color: Color.fromRGBO(52, 143, 108, 0.3))
+                  : Border.all(color: Color.fromRGBO(0, 0, 0, 0.1)),
         ),
         child: Text(
           text,
           style: TextStyle(
             fontSize: 12,
-            color: isActive ? Colors.white : const Color(0xFF1CB379),
+            color:
+                isActive
+                    ? Color.fromRGBO(34, 113, 82, 1)
+                    : Color.fromRGBO(77, 77, 77, 1),
             fontWeight: FontWeight.w500,
           ),
         ),
