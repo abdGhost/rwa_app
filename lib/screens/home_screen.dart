@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rwa_app/screens/coin_search_screen.dart';
+import 'package:rwa_app/screens/coins_table_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -193,11 +194,11 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: TabBarView(
                 children: [
-                  const AllCoinsTable(),
-                  Center(child: Text('Top Coins')),
-                  Center(child: Text('Watchlist')),
-                  Center(child: Text('Trending')),
-                  Center(child: Text('Top Gainers')),
+                  CoinsTable(coins: allCoins),
+                  CoinsTable(coins: topCoins),
+                  CoinsTable(coins: watchlistCoins),
+                  CoinsTable(coins: trendingCoins),
+                  CoinsTable(coins: topGainers),
                 ],
               ),
             ),
@@ -208,297 +209,77 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class AllCoinsTable extends StatelessWidget {
-  const AllCoinsTable({super.key});
+// Inside your HomeScreen widget
+final List<Map<String, Object>> allCoins = [
+  {
+    'rank': 1,
+    'name': 'LINK',
+    'price': '\$12.719',
+    'change': '-1.991%',
+    'changeColor': Colors.red,
+    'marketCap': '\$8,354,278,807',
+    'icon': 'assets/logo.png',
+  },
+  {
+    'rank': 2,
+    'name': 'AVAX',
+    'price': '\$19.1032',
+    'change': '-3.014%',
+    'changeColor': Colors.red,
+    'marketCap': '\$7,943,278,710',
+    'icon': 'assets/logo.png',
+  },
+  // Add more coins
+];
 
-  @override
-  Widget build(BuildContext context) {
-    final List<Map<String, Object>> coins = [
-      {
-        'rank': 1,
-        'name': 'LINK',
-        'price': '\$12.719',
-        'change': '-1.991%',
-        'changeColor': Colors.red,
-        'marketCap': '\$8,354,278,807',
-        'icon': 'assets/logo.png',
-      },
-      {
-        'rank': 2,
-        'name': 'AVAX',
-        'price': '\$19.1032',
-        'change': '-3.014%',
-        'changeColor': Colors.red,
-        'marketCap': '\$7,943,278,710',
-        'icon': 'assets/logo.png',
-      },
-      {
-        'rank': 3,
-        'name': 'HBAR',
-        'price': '\$0.16849',
-        'change': '+2.012%',
-        'changeColor': Colors.green,
-        'marketCap': '\$7,116,928,090',
-        'icon': 'assets/logo.png',
-      },
-      {
-        'rank': 4,
-        'name': 'OM',
-        'price': '\$6.385',
-        'change': '+0.692%',
-        'changeColor': Colors.green,
-        'marketCap': '\$6,186,811,651',
-        'icon': 'assets/logo.png',
-      },
-      {
-        'rank': 1,
-        'name': 'LINK',
-        'price': '\$12.719',
-        'change': '-1.991%',
-        'changeColor': Colors.red,
-        'marketCap': '\$8,354,278,807',
-        'icon': 'assets/logo.png',
-      },
-      {
-        'rank': 2,
-        'name': 'AVAX',
-        'price': '\$19.1032',
-        'change': '-3.014%',
-        'changeColor': Colors.red,
-        'marketCap': '\$7,943,278,710',
-        'icon': 'assets/logo.png',
-      },
-      {
-        'rank': 3,
-        'name': 'HBAR',
-        'price': '\$0.16849',
-        'change': '+2.012%',
-        'changeColor': Colors.green,
-        'marketCap': '\$7,116,928,090',
-        'icon': 'assets/logo.png',
-      },
-      {
-        'rank': 4,
-        'name': 'OM',
-        'price': '\$6.385',
-        'change': '+0.692%',
-        'changeColor': Colors.green,
-        'marketCap': '\$6,186,811,651',
-        'icon': 'assets/logo.png',
-      },
-      {
-        'rank': 1,
-        'name': 'LINK',
-        'price': '\$12.719',
-        'change': '-1.991%',
-        'changeColor': Colors.red,
-        'marketCap': '\$8,354,278,807',
-        'icon': 'assets/logo.png',
-      },
-      {
-        'rank': 2,
-        'name': 'AVAX',
-        'price': '\$19.1032',
-        'change': '-3.014%',
-        'changeColor': Colors.red,
-        'marketCap': '\$7,943,278,710',
-        'icon': 'assets/logo.png',
-      },
-      {
-        'rank': 3,
-        'name': 'HBAR',
-        'price': '\$0.16849',
-        'change': '+2.012%',
-        'changeColor': Colors.green,
-        'marketCap': '\$7,116,928,090',
-        'icon': 'assets/logo.png',
-      },
-      {
-        'rank': 4,
-        'name': 'OM',
-        'price': '\$6.385',
-        'change': '+0.692%',
-        'changeColor': Colors.green,
-        'marketCap': '\$6,186,811,651',
-        'icon': 'assets/logo.png',
-      },
-    ];
+final List<Map<String, Object>> topCoins = [
+  {
+    'rank': 1,
+    'name': 'BTC',
+    'price': '\$64000.22',
+    'change': '+2.4%',
+    'changeColor': Colors.green,
+    'marketCap': '\$1,300,000,000,000',
+    'icon': 'assets/logo.png',
+  },
+  {
+    'rank': 2,
+    'name': 'ETH',
+    'price': '\$3800.76',
+    'change': '+1.1%',
+    'changeColor': Colors.green,
+    'marketCap': '\$450,000,000,000',
+    'icon': 'assets/logo.png',
+  },
+];
 
-    return Column(
-      children: [
-        const SizedBox(height: 8),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: _buildHeaderRow(),
-        ),
-        const Divider(
-          height: 1,
-          thickness: .6,
-          color: Color.fromARGB(255, 194, 194, 194),
-        ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: coins.length,
-            itemBuilder: (context, index) {
-              final coin = coins[index];
-              final priceRaw = (coin['price'] as String).replaceAll(
-                RegExp(r'[^\d.]'),
-                '',
-              );
-              final changeRaw = (coin['change'] as String).replaceAll(
-                RegExp(r'[^\d.]'),
-                '',
-              );
-              final isNegative = (coin['change'] as String)
-                  .toString()
-                  .startsWith('-');
-              final isPositive = (coin['change'] as String)
-                  .toString()
-                  .startsWith('+');
+final List<Map<String, Object>> trendingCoins = [
+  {
+    'rank': 1,
+    'name': 'PEPE',
+    'price': '\$0.00000123',
+    'change': '+18.2%',
+    'changeColor': Colors.green,
+    'marketCap': '\$1,000,000,000',
+    'icon': 'assets/logo.png',
+  },
+];
 
-              return InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (_) => CoinDetailScreen(
-                            coinName: coin['name'].toString(),
-                          ),
-                    ),
-                  );
-                },
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 14,
-                      ),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 20,
-                            child: Center(
-                              child: Text('${coin['rank']}', style: _rowStyle),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Image.asset(
-                            coin['icon'] as String,
-                            width: 20,
-                            height: 20,
-                          ),
-                          const SizedBox(width: 0),
-                          SizedBox(
-                            width: 40,
-                            child: Center(
-                              child: Text(
-                                coin['name'] as String,
-                                style: _rowStyle,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          SizedBox(
-                            width: 50,
-                            child: Center(
-                              child: Text(
-                                '\$${double.parse(priceRaw).toStringAsFixed(2)}',
-                                style: _rowStyle,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          SizedBox(
-                            width: 50,
-                            child: Center(
-                              child: Text(
-                                '${isNegative
-                                    ? '-'
-                                    : isPositive
-                                    ? '+'
-                                    : ''}${double.parse(changeRaw).toStringAsFixed(2)}%',
-                                style: _rowStyle.copyWith(
-                                  color: coin['changeColor'] as Color,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          SizedBox(
-                            width: 110,
-                            child: Text(
-                              coin['marketCap'] as String,
-                              textAlign: TextAlign.center,
-                              style: _rowStyle,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Divider(
-                      height: 1,
-                      thickness: .6,
-                      color: Color.fromARGB(255, 194, 194, 194),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
+final List<Map<String, Object>> watchlistCoins = [
+  // Populate user's saved coins here
+];
 
-  Widget _buildHeaderRow() {
-    return SizedBox(
-      height: 40,
-      child: Row(
-        children: const [
-          SizedBox(
-            width: 20,
-            child: Center(child: Text('#', style: _headerStyle)),
-          ),
-          SizedBox(width: 8),
-          SizedBox(width: 20), // Icon
-          SizedBox(
-            width: 40,
-            child: Center(child: Text('Coin', style: _headerStyle)),
-          ),
-          SizedBox(width: 10),
-          SizedBox(
-            width: 50,
-            child: Center(child: Text('Price', style: _headerStyle)),
-          ),
-          SizedBox(width: 10),
-          SizedBox(
-            width: 50,
-            child: Center(child: Text('24H', style: _headerStyle)),
-          ),
-          SizedBox(width: 10),
-          SizedBox(
-            width: 110,
-            child: Center(child: Text('Market Cap', style: _headerStyle)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  static const TextStyle _headerStyle = TextStyle(
-    fontWeight: FontWeight.w600,
-    fontSize: 12,
-    color: Colors.grey,
-  );
-
-  static const TextStyle _rowStyle = TextStyle(
-    fontWeight: FontWeight.normal,
-    fontSize: 12,
-    color: Colors.black,
-  );
-}
+final List<Map<String, Object>> topGainers = [
+  {
+    'rank': 1,
+    'name': 'DOGE',
+    'price': '\$0.33',
+    'change': '+24.3%',
+    'changeColor': Colors.green,
+    'marketCap': '\$49,000,000,000',
+    'icon': 'assets/logo.png',
+  },
+];
 
 class CoinDetailScreen extends StatelessWidget {
   final String coinName;
