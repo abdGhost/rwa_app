@@ -83,7 +83,6 @@ class CoinsTable extends StatelessWidget {
                             width: 20,
                             height: 20,
                           ),
-                          const SizedBox(width: 3),
                           SizedBox(
                             width: 40,
                             child: Center(
@@ -95,7 +94,7 @@ class CoinsTable extends StatelessWidget {
                           ),
                           const SizedBox(width: 10),
                           SizedBox(
-                            width: 50,
+                            width: 60,
                             child: Center(
                               child: Text(
                                 '\$${double.parse(priceRaw).toStringAsFixed(2)}',
@@ -105,7 +104,7 @@ class CoinsTable extends StatelessWidget {
                           ),
                           const SizedBox(width: 10),
                           SizedBox(
-                            width: 50,
+                            width: 48,
                             child: Center(
                               child: Text(
                                 '${isNegative

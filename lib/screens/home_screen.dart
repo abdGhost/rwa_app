@@ -209,7 +209,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// Inside your HomeScreen widget
 final List<Map<String, Object>> allCoins = [
   {
     'rank': 1,
