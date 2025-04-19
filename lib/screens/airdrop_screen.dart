@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rwa_app/widgets/airdrop/airdrop_card.dart';
 
 class AirdropScreen extends StatefulWidget {
   const AirdropScreen({super.key});
@@ -66,7 +67,7 @@ class _AirdropScreenState extends State<AirdropScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Center(
               child: Image.asset(
                 'assets/airdrop_banner.png',
@@ -75,7 +76,7 @@ class _AirdropScreenState extends State<AirdropScreen> {
                 fit: BoxFit.cover,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
 
             // Scrollable Filter Tabs
             SingleChildScrollView(
@@ -100,7 +101,7 @@ class _AirdropScreenState extends State<AirdropScreen> {
               ),
             ),
 
-            const SizedBox(height: 4),
+            const SizedBox(height: 10),
 
             // Scrollable Card Section
             Expanded(
@@ -185,191 +186,6 @@ class FilterTab extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
-      ),
-    );
-  }
-}
-
-// 🪂 Airdrop Card Widget
-class AirdropCard extends StatelessWidget {
-  final String project;
-  final String token;
-  final String chain;
-  final String reward;
-  final String date;
-  final String eligibility;
-  final String status;
-
-  const AirdropCard({
-    super.key,
-    required this.project,
-    required this.token,
-    required this.chain,
-    required this.reward,
-    required this.date,
-    required this.eligibility,
-    required this.status,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final bool isLive = status == "Live";
-    final bool isEnded = status == "Ended";
-
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Title + Status
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text("🎯 ", style: TextStyle(fontSize: 18)),
-              Expanded(
-                child: Text(
-                  project,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color:
-                      isLive
-                          ? const Color(0xFFDFFBEA)
-                          : isEnded
-                          ? const Color(0xFFFEE9E9)
-                          : Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      isLive ? Icons.check_circle : Icons.cancel,
-                      size: 14,
-                      color: isLive ? const Color(0xFF1CB379) : Colors.red,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      status,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        color: isLive ? const Color(0xFF1CB379) : Colors.red,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            "Token: $token  |  Chain: $chain",
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w400,
-              color: Colors.black,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text.rich(
-            TextSpan(
-              children: [
-                const TextSpan(
-                  text: "🎁 Reward: ",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
-                  ),
-                ),
-                TextSpan(
-                  text: reward,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.black,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 4),
-          Text(
-            "🗓️ $date",
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w400,
-              color: Colors.black,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text.rich(
-            TextSpan(
-              children: [
-                const TextSpan(
-                  text: "✅ Eligibility: ",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
-                  ),
-                ),
-                TextSpan(
-                  text: eligibility,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.black,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-              Text(
-                "🔍 View Details",
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  color: Color.fromRGBO(48, 96, 184, 1),
-                ),
-              ),
-              Text(
-                "⏰ Set Reminder",
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.black,
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
