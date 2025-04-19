@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class TabBarSection extends StatelessWidget {
-  const TabBarSection({super.key});
+  final void Function(int)? onTap;
+
+  const TabBarSection({super.key, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12), // match StatCard
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       child: TabBar(
+        onTap: onTap,
         isScrollable: true,
         tabAlignment: TabAlignment.start,
         labelPadding: const EdgeInsets.only(right: 12),
