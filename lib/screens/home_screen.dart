@@ -1,3 +1,4 @@
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -118,11 +119,81 @@ class _HomeScreenState extends State<HomeScreen> {
             // Tab Bar
             const TabBarSection(),
 
+            // 👉 Add Button Row here
+            const SizedBox(height: 0),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                children: [
+                  // USD Button
+                  // rgba(238, 241, 246, 1)
+                  ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color.fromRGBO(238, 241, 246, 1),
+                      foregroundColor: Color.fromRGBO(0, 0, 0, 1),
+                      elevation: 0,
+                      side: const BorderSide(
+                        color: Color.fromRGBO(238, 241, 246, 1),
+                        width: 1,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4, // 👈 smaller height
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      textStyle: GoogleFonts.inter(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 12, // 👈 smaller font
+                      ),
+                      minimumSize: const Size(
+                        0,
+                        28,
+                      ), // 👈 tighter height constraint
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: const Text('USD'),
+                  ),
+                  const SizedBox(width: 8),
+
+                  ElevatedButton.icon(
+                    onPressed: () {},
+                    icon: const Icon(Icons.tune, size: 14), // 👈 smaller icon
+                    label: const Text('Customize'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color.fromRGBO(238, 241, 246, 1),
+                      foregroundColor: Color.fromRGBO(0, 0, 0, 1),
+                      elevation: 0,
+                      side: const BorderSide(
+                        color: Color.fromRGBO(238, 241, 246, 1),
+                        width: 1,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4, // 👈 tighter padding
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      textStyle: GoogleFonts.inter(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 12,
+                      ),
+                      minimumSize: const Size(0, 28),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
             // Tab View
             Expanded(
               child: TabBarView(
                 children: [
-                  Center(child: Text('All Coins')),
+                  const AllCoinsTable(),
                   Center(child: Text('Top Coins')),
                   Center(child: Text('Watchlist')),
                   Center(child: Text('Trending')),
@@ -131,6 +202,316 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class AllCoinsTable extends StatelessWidget {
+  const AllCoinsTable({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Map<String, Object>> coins = [
+      {
+        'rank': 1,
+        'name': 'LINK',
+        'price': '\$12.719',
+        'change': '-1.991%',
+        'changeColor': Colors.red,
+        'marketCap': '\$8,354,278,807',
+        'icon': 'assets/logo.png',
+      },
+      {
+        'rank': 2,
+        'name': 'AVAX',
+        'price': '\$19.1032',
+        'change': '-3.014%',
+        'changeColor': Colors.red,
+        'marketCap': '\$7,943,278,710',
+        'icon': 'assets/logo.png',
+      },
+      {
+        'rank': 3,
+        'name': 'HBAR',
+        'price': '\$0.16849',
+        'change': '+2.012%',
+        'changeColor': Colors.green,
+        'marketCap': '\$7,116,928,090',
+        'icon': 'assets/logo.png',
+      },
+      {
+        'rank': 4,
+        'name': 'OM',
+        'price': '\$6.385',
+        'change': '+0.692%',
+        'changeColor': Colors.green,
+        'marketCap': '\$6,186,811,651',
+        'icon': 'assets/logo.png',
+      },
+      {
+        'rank': 1,
+        'name': 'LINK',
+        'price': '\$12.719',
+        'change': '-1.991%',
+        'changeColor': Colors.red,
+        'marketCap': '\$8,354,278,807',
+        'icon': 'assets/logo.png',
+      },
+      {
+        'rank': 2,
+        'name': 'AVAX',
+        'price': '\$19.1032',
+        'change': '-3.014%',
+        'changeColor': Colors.red,
+        'marketCap': '\$7,943,278,710',
+        'icon': 'assets/logo.png',
+      },
+      {
+        'rank': 3,
+        'name': 'HBAR',
+        'price': '\$0.16849',
+        'change': '+2.012%',
+        'changeColor': Colors.green,
+        'marketCap': '\$7,116,928,090',
+        'icon': 'assets/logo.png',
+      },
+      {
+        'rank': 4,
+        'name': 'OM',
+        'price': '\$6.385',
+        'change': '+0.692%',
+        'changeColor': Colors.green,
+        'marketCap': '\$6,186,811,651',
+        'icon': 'assets/logo.png',
+      },
+      {
+        'rank': 1,
+        'name': 'LINK',
+        'price': '\$12.719',
+        'change': '-1.991%',
+        'changeColor': Colors.red,
+        'marketCap': '\$8,354,278,807',
+        'icon': 'assets/logo.png',
+      },
+      {
+        'rank': 2,
+        'name': 'AVAX',
+        'price': '\$19.1032',
+        'change': '-3.014%',
+        'changeColor': Colors.red,
+        'marketCap': '\$7,943,278,710',
+        'icon': 'assets/logo.png',
+      },
+      {
+        'rank': 3,
+        'name': 'HBAR',
+        'price': '\$0.16849',
+        'change': '+2.012%',
+        'changeColor': Colors.green,
+        'marketCap': '\$7,116,928,090',
+        'icon': 'assets/logo.png',
+      },
+      {
+        'rank': 4,
+        'name': 'OM',
+        'price': '\$6.385',
+        'change': '+0.692%',
+        'changeColor': Colors.green,
+        'marketCap': '\$6,186,811,651',
+        'icon': 'assets/logo.png',
+      },
+    ];
+
+    return Column(
+      children: [
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: _buildHeaderRow(),
+        ),
+        const Divider(
+          height: 1,
+          thickness: .6,
+          color: Color.fromARGB(255, 194, 194, 194),
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: coins.length,
+            itemBuilder: (context, index) {
+              final coin = coins[index];
+              final priceRaw = (coin['price'] as String).replaceAll(
+                RegExp(r'[^\d.]'),
+                '',
+              );
+              final changeRaw = (coin['change'] as String).replaceAll(
+                RegExp(r'[^\d.]'),
+                '',
+              );
+              final isNegative = (coin['change'] as String)
+                  .toString()
+                  .startsWith('-');
+              final isPositive = (coin['change'] as String)
+                  .toString()
+                  .startsWith('+');
+
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (_) => CoinDetailScreen(
+                            coinName: coin['name'].toString(),
+                          ),
+                    ),
+                  );
+                },
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 14,
+                      ),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 20,
+                            child: Center(
+                              child: Text('${coin['rank']}', style: _rowStyle),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Image.asset(
+                            coin['icon'] as String,
+                            width: 20,
+                            height: 20,
+                          ),
+                          const SizedBox(width: 0),
+                          SizedBox(
+                            width: 40,
+                            child: Center(
+                              child: Text(
+                                coin['name'] as String,
+                                style: _rowStyle,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          SizedBox(
+                            width: 50,
+                            child: Center(
+                              child: Text(
+                                '\$${double.parse(priceRaw).toStringAsFixed(2)}',
+                                style: _rowStyle,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          SizedBox(
+                            width: 50,
+                            child: Center(
+                              child: Text(
+                                '${isNegative
+                                    ? '-'
+                                    : isPositive
+                                    ? '+'
+                                    : ''}${double.parse(changeRaw).toStringAsFixed(2)}%',
+                                style: _rowStyle.copyWith(
+                                  color: coin['changeColor'] as Color,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          SizedBox(
+                            width: 110,
+                            child: Text(
+                              coin['marketCap'] as String,
+                              textAlign: TextAlign.center,
+                              style: _rowStyle,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(
+                      height: 1,
+                      thickness: .6,
+                      color: Color.fromARGB(255, 194, 194, 194),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHeaderRow() {
+    return SizedBox(
+      height: 40,
+      child: Row(
+        children: const [
+          SizedBox(
+            width: 20,
+            child: Center(child: Text('#', style: _headerStyle)),
+          ),
+          SizedBox(width: 8),
+          SizedBox(width: 20), // Icon
+          SizedBox(
+            width: 40,
+            child: Center(child: Text('Coin', style: _headerStyle)),
+          ),
+          SizedBox(width: 10),
+          SizedBox(
+            width: 50,
+            child: Center(child: Text('Price', style: _headerStyle)),
+          ),
+          SizedBox(width: 10),
+          SizedBox(
+            width: 50,
+            child: Center(child: Text('24H', style: _headerStyle)),
+          ),
+          SizedBox(width: 10),
+          SizedBox(
+            width: 110,
+            child: Center(child: Text('Market Cap', style: _headerStyle)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static const TextStyle _headerStyle = TextStyle(
+    fontWeight: FontWeight.w600,
+    fontSize: 12,
+    color: Colors.grey,
+  );
+
+  static const TextStyle _rowStyle = TextStyle(
+    fontWeight: FontWeight.normal,
+    fontSize: 12,
+    color: Colors.black,
+  );
+}
+
+class CoinDetailScreen extends StatelessWidget {
+  final String coinName;
+  const CoinDetailScreen({super.key, required this.coinName});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('$coinName Details')),
+      body: Center(
+        child: Text(
+          'Details for $coinName',
+          style: const TextStyle(fontSize: 18),
         ),
       ),
     );
