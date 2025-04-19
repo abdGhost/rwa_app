@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:rwa_app/widgets/blogs/blog_detail_screen.dart';
 import 'package:rwa_app/widgets/blogs/blogs_card.dart';
 import 'package:rwa_app/widgets/news/news_appbar_title_row.dart';
+import 'package:rwa_app/widgets/news/news_detail_screen.dart';
 import 'package:rwa_app/widgets/news/news_tab_buttons.dart';
 import 'package:rwa_app/widgets/news/news_card_main.dart';
 import 'package:rwa_app/widgets/news/news_card_side.dart';
@@ -73,51 +75,62 @@ class _NewsScreenState extends State<NewsScreen> {
         'title': 'RWA Protocols Cross \$10B in Total Value Locked...',
         'subtitle': 'Concerns rise over regulatory risks...',
         'source': 'CryptoSlate',
-        'time': '21 minutes ago',
+        'time': 'April 27, 2025 10:12 PM',
+        'content':
+            '''The total value locked (TVL) in RWA protocols has crossed the \$10B milestone...
+
+"Tokenized RWAs are now a foundational layer in DeFi," said James Walton.''',
+        'quote': 'Tokenized RWAs are now a foundational layer in DeFi.',
+        'bulletPoints': [
+          'Regulatory risks are rising.',
+          'Liquidity concerns are real.',
+          'Some platforms lack investor protection.',
+        ],
       },
       {
         'image': 'assets/news_blogs/news_2.png',
         'title': 'China’s CPIC Launches \$100M Tokenized RWA Fund...',
         'subtitle': 'CPIC and HashKey bring institutional capital...',
         'source': 'CoinDesk',
-        'time': '42 minutes ago',
-      },
-      {
-        'image': 'assets/news_blogs/news_1.png',
-        'title': 'Top RWA Projects by Development Activity',
-        'subtitle': '',
-        'source': 'Blockchain.News',
-        'time': '1 hour ago',
-      },
-      {
-        'image': 'assets/news_blogs/news_1.png',
-        'title': 'Top 5 RWA Projects You Can’t Miss in 2024',
-        'subtitle': '',
-        'source': 'Blockchain.News',
-        'time': '2 hours ago',
-      },
-      {
-        'image': 'assets/news_blogs/news_1.png',
-        'title': 'Top 5 RWA Projects You Can’t Miss in 2024',
-        'subtitle': '',
-        'source': 'Blockchain.News',
-        'time': '2 hours ago',
-      },
-      {
-        'image': 'assets/news_blogs/news_1.png',
-        'title': 'Top 5 RWA Projects You Can’t Miss in 2024',
-        'subtitle': '',
-        'source': 'Blockchain.News',
-        'time': '2 hours ago',
+        'time': 'April 12, 2025 10:12 PM',
+        'content':
+            '''The \$100M fund will tokenize assets like real estate, bonds, and infrastructure...
+
+HashKey will provide custody and compliance.''',
+        'quote': 'Tokenization is the future of financial assets.',
+        'bulletPoints': [],
       },
     ];
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       children: [
-        NewsCardMain(item: newsItems.first),
+        GestureDetector(
+          onTap:
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => NewsDetailScreen(news: newsItems.first),
+                ),
+              ),
+          child: NewsCardMain(item: newsItems.first),
+        ),
         const SizedBox(height: 10),
-        ...newsItems.skip(1).map((item) => NewsCardSide(item: item)),
+        ...newsItems
+            .skip(1)
+            .map(
+              (item) => NewsCardSide(
+                item: item,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => NewsDetailScreen(news: item),
+                    ),
+                  );
+                },
+              ),
+            ),
       ],
     );
   }
@@ -130,25 +143,45 @@ class _NewsScreenState extends State<NewsScreen> {
         'author': 'Alex Foster',
         'time': '7 Minutes read',
         'image': 'assets/news_blogs/news_1.png',
+        'content':
+            '''RWAs bring stability but off-chain enforcement is still weak.
+
+Analysts warn that investor protection is lacking.''',
+        'quote': 'RWAs are only as strong as their legal enforcement.',
+        'bulletPoints': [
+          'Legal clarity is lacking.',
+          'Insurance coverage is inconsistent.',
+        ],
       },
       {
         'title': 'RWA Airdrops: The Next Big Opportunity in DeFi?',
-        'subtitle': 'Token airdrops are becoming a powerful way...',
+        'subtitle': 'Token airdrops are becoming a powerful tool...',
         'author': 'Vanessa Liu',
         'time': '4 Minutes read',
-      },
-      {
-        'title': 'Real Estate on the Blockchain: A Quiet Revolution',
-        'subtitle': 'Lowering investment barriers...',
-        'author': 'Priya Desai',
-        'time': '6 Minutes read',
-        'image': 'assets/news_blogs/news_1.png',
+        'image': '',
+        'content':
+            '''Major RWA protocols are planning token airdrops to boost participation.''',
+        'quote': null,
+        'bulletPoints': [],
       },
     ];
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 12),
-      children: blogs.map((blog) => BlogCard(blog: blog)).toList(),
+      children:
+          blogs.map((blog) {
+            return BlogCard(
+              blog: blog,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BlogDetailScreen(blog: blog),
+                  ),
+                );
+              },
+            );
+          }).toList(),
     );
   }
 }
