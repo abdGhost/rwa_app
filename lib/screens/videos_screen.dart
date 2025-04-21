@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class VideosScreen extends StatelessWidget {
@@ -7,6 +8,7 @@ class VideosScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF7F7F7),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
@@ -14,10 +16,8 @@ class VideosScreen extends StatelessWidget {
         toolbarHeight: 40,
         title: Row(
           children: [
-            Image.asset('assets/logo.png', width: 32, height: 32),
-            const SizedBox(width: 8),
             Text(
-              'RWA CAMP',
+              'Video',
               style: GoogleFonts.inter(
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
@@ -26,8 +26,17 @@ class VideosScreen extends StatelessWidget {
             ),
           ],
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: SvgPicture.asset(
+              'assets/profile_outline.svg',
+              width: 30,
+              height: 30,
+            ),
+          ),
+        ],
       ),
-      backgroundColor: Colors.white,
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
         backgroundColor: const Color(0xFF348F6C),
@@ -281,7 +290,7 @@ class VideosScreen extends StatelessWidget {
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.only(top: 4, bottom: 4, right: 4, left: 4),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         color: Colors.white,

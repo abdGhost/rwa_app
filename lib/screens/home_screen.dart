@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
       length: 5,
       initialIndex: _selectedTabIndex,
       child: Scaffold(
-        backgroundColor: const Color.fromRGBO(247, 247, 247, 1),
+        backgroundColor: const Color(0xFFF7F7F7),
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 1,
