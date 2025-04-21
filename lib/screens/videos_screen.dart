@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class VideosScreen extends StatelessWidget {
   const VideosScreen({super.key});
@@ -6,6 +7,26 @@ class VideosScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 1,
+        automaticallyImplyLeading: false,
+        toolbarHeight: 40,
+        title: Row(
+          children: [
+            Image.asset('assets/logo.png', width: 32, height: 32),
+            const SizedBox(width: 8),
+            Text(
+              'RWA CAMP',
+              style: GoogleFonts.inter(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ],
+        ),
+      ),
       backgroundColor: Colors.white,
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
@@ -19,21 +40,6 @@ class VideosScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Title
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text(
-                    "Videos",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF000000),
-                    ),
-                  ),
-                  Icon(Icons.more_vert),
-                ],
-              ),
-              const SizedBox(height: 4),
 
               // Educational Videos Section
               _sectionTitle("Educational Videos"),
@@ -102,7 +108,7 @@ class VideosScreen extends StatelessWidget {
                 "Scheduled",
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
 
               // Recorded Interviews
               _sectionTitle("Recorded Interviews"),
@@ -269,11 +275,13 @@ class VideosScreen extends StatelessWidget {
   static Widget _recordedInterviewCard(
     String title,
     String guest,
-    String imagePath,
-  ) {
+    String imagePath, {
+    String subtitle =
+        "Exclusive discussion on unlocking credit for emerging markets through real-world lending protocols.",
+  }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(8),
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(top: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         color: Colors.white,
@@ -292,12 +300,12 @@ class VideosScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             child: Image.asset(
               imagePath,
-              width: 100,
-              height: 80,
+              width: 120,
+              height: 90,
               fit: BoxFit.cover,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 6),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -310,17 +318,29 @@ class VideosScreen extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                     color: Color(0xFF000000),
+                    height: 1.3,
                   ),
                 ),
-                const SizedBox(height: 4),
                 Text(
                   guest,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF818181),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF348f6c),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 10,
                     fontWeight: FontWeight.w400,
+                    color: Color(0xFF818181),
+                    height: 1.3,
                   ),
                 ),
               ],
