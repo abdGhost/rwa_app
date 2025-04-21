@@ -30,83 +30,67 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white70,
-        backgroundColor: const Color.fromRGBO(52, 143, 108, 1),
+        selectedItemColor: Color(0xFF348F6C),
+        unselectedItemColor: Color(0xFF818181),
+        showUnselectedLabels: true,
+        backgroundColor: const Color(0xFFFFFFFF),
         type: BottomNavigationBarType.fixed,
-        selectedLabelStyle: const TextStyle(fontSize: 12),
+        selectedLabelStyle: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
         unselectedLabelStyle: const TextStyle(fontSize: 12),
         onTap: (index) => setState(() => _selectedIndex = index),
         items: [
           BottomNavigationBarItem(
             icon: SvgPicture.asset(
               _selectedIndex == 0
-                  ? 'assets/icons/market.svg'
-                  : 'assets/icons/market_outline.svg',
+                  ? 'assets/market_fill.svg'
+                  : 'assets/market_outline.svg',
               width: 24,
               height: 24,
-              colorFilter: const ColorFilter.mode(
-                Colors.white,
-                BlendMode.srcIn,
-              ),
             ),
-            label: 'Home',
+            label: 'Market',
           ),
           BottomNavigationBarItem(
             icon: SvgPicture.asset(
               _selectedIndex == 1
-                  ? 'assets/icons/news.svg'
-                  : 'assets/icons/news_outline.svg',
+                  ? 'assets/news_fill.svg'
+                  : 'assets/news_outline.svg',
               width: 24,
               height: 24,
-              colorFilter: const ColorFilter.mode(
-                Colors.white,
-                BlendMode.srcIn,
-              ),
             ),
             label: 'News',
           ),
           BottomNavigationBarItem(
             icon: SvgPicture.asset(
               _selectedIndex == 2
-                  ? 'assets/icons/airdrop.svg'
-                  : 'assets/icons/airdrop_outline.svg',
+                  ? 'assets/airdrop_fill.svg'
+                  : 'assets/airdrop_outline.svg',
               width: 24,
               height: 24,
-              colorFilter: const ColorFilter.mode(
-                Colors.white,
-                BlendMode.srcIn,
-              ),
             ),
             label: 'Airdrop',
           ),
           BottomNavigationBarItem(
             icon: SvgPicture.asset(
               _selectedIndex == 3
-                  ? 'assets/icons/portfolio.svg'
-                  : 'assets/icons/portfolio_outline.svg',
+                  ? 'assets/portfolio_fill.svg'
+                  : 'assets/portfolio_outline.svg',
               width: 24,
               height: 24,
-              colorFilter: const ColorFilter.mode(
-                Colors.white,
-                BlendMode.srcIn,
-              ),
             ),
             label: 'Portfolio',
           ),
           BottomNavigationBarItem(
             icon: SvgPicture.asset(
               _selectedIndex == 4
-                  ? 'assets/icons/chat.svg'
-                  : 'assets/icons/chat_filled.svg',
+                  ? 'assets/video_fill.svg'
+                  : 'assets/video_outline.svg',
               width: 24,
               height: 24,
-              colorFilter: const ColorFilter.mode(
-                Colors.white,
-                BlendMode.srcIn,
-              ),
             ),
-            label: 'Chat',
+            label: 'Video',
           ),
         ],
       ),
