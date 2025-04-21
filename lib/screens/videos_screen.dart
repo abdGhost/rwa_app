@@ -45,9 +45,9 @@ class VideosScreen extends StatelessWidget {
           backgroundColor: const Color(0xFF348F6C),
           shape: const CircleBorder(),
           child: SvgPicture.asset(
-            'assets/video_fill.svg',
-            width: 36,
-            height: 36,
+            'assets/bot_light.svg',
+            width: 40,
+            height: 40,
             fit: BoxFit.contain,
             colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
           ),
