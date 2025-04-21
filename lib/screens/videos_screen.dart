@@ -33,47 +33,64 @@ class VideosScreen extends StatelessWidget {
                   Icon(Icons.more_vert),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 4),
 
-              // Section: Educational Videos
+              // Educational Videos Section
               _sectionTitle("Educational Videos"),
               const SizedBox(height: 8),
-              GridView.count(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: .9,
-                children: [
-                  _videoCard(
-                    "assets/thumbnail1.png",
-                    "What Are Real World Assets (RWAs)?",
-                    "8:20",
-                  ),
-                  _videoCard(
-                    "assets/thumbnail2.png",
-                    "Why Invest in RWA Tokens?",
-                    "8:20",
-                  ),
-                  _videoCard(
-                    "assets/thumbnail2.png",
-                    "How Tokenization Works",
-                    "8:20",
-                  ),
-                  _videoCard(
-                    "assets/thumbnail2.png",
-                    "RWA vs DeFi: What's the Difference?",
-                    "8:20",
-                  ),
-                ],
+
+              // First scrollable row
+              SizedBox(
+                height: 160,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: 2,
+                  separatorBuilder:
+                      (context, index) => const SizedBox(width: 8),
+                  itemBuilder: (context, index) {
+                    final titles = [
+                      "What Are Real World Assets (RWAs)?",
+                      "Why Invest in RWA Tokens?",
+                    ];
+                    final images = [
+                      "assets/thumbnail1.png",
+                      "assets/thumbnail2.png",
+                    ];
+                    return SizedBox(
+                      width: 160,
+                      child: _videoCard(images[index], titles[index], "8:20"),
+                    );
+                  },
+                ),
               ),
 
-              const SizedBox(height: 24),
+              // Second scrollable row
+              SizedBox(
+                height: 160,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: 2,
+                  separatorBuilder:
+                      (context, index) => const SizedBox(width: 8),
+                  itemBuilder: (context, index) {
+                    final titles = [
+                      "How Tokenization Works",
+                      "RWA vs DeFi: What's the Difference?",
+                    ];
+                    final images = [
+                      "assets/thumbnail2.png",
+                      "assets/thumbnail2.png",
+                    ];
+                    return SizedBox(
+                      width: 160,
+                      child: _videoCard(images[index], titles[index], "8:20"),
+                    );
+                  },
+                ),
+              ),
 
-              // Section: Upcoming Interviews
+              // Upcoming Interviews
               _sectionTitle("Upcoming Interviews"),
-              const SizedBox(height: 4),
               _interviewTile(
                 "Chat with Condo CEO",
                 "April 21 at 5:00 PM",
@@ -85,11 +102,10 @@ class VideosScreen extends StatelessWidget {
                 "Scheduled",
               ),
 
-              const SizedBox(height: 24),
-
-              // Section: Recorded Interviews
-              _sectionTitle("Recorded Interviews"),
               const SizedBox(height: 8),
+
+              // Recorded Interviews
+              _sectionTitle("Recorded Interviews"),
               _recordedInterviewCard(
                 "Goldfinch: Driving Innovation in Real-World Lending",
                 "Guest: Mike Sall, Co-Founder of Goldfinch",
@@ -164,18 +180,20 @@ class VideosScreen extends StatelessWidget {
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: Color(0XFF000000),
+              color: Color(0xFF000000),
+              height: 1.2,
             ),
           ),
           const SizedBox(height: 2),
           Text(
-            title,
+            "Subtitle here", // Replace with actual subtitle if you have one
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w400,
-              color: Color(0XFF818181),
+              color: Color(0xFF818181),
+              height: 1.2,
             ),
           ),
         ],
@@ -185,18 +203,15 @@ class VideosScreen extends StatelessWidget {
 
   static Widget _interviewTile(String title, String time, String badge) {
     return Padding(
-      padding: const EdgeInsets.only(top: 10, bottom: 12),
+      padding: const EdgeInsets.only(top: 10, bottom: 2),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Profile Image
           const CircleAvatar(
             radius: 26,
             backgroundImage: AssetImage("assets/interview1.png"),
           ),
           const SizedBox(width: 10),
-
-          // Text Content
           Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -204,12 +219,12 @@ class VideosScreen extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  maxLines: 2, // ✅ Allow 2 lines max
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
-                    height: 1.2, // ✅ Adjust line height
+                    height: 1.2,
                     color: Color(0xFF000000),
                   ),
                 ),
@@ -228,15 +243,9 @@ class VideosScreen extends StatelessWidget {
               ],
             ),
           ),
-
-          // Badge Button
           Container(
             margin: const EdgeInsets.only(left: 8),
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            // constraints: const BoxConstraints(
-            //   minWidth: 70, // ✅ Ensures all badges are same width
-            //   minHeight: 26,
-            // ),
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: badge == "LIVE" ? Colors.red : Colors.grey,
