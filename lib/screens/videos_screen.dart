@@ -37,24 +37,31 @@ class VideosScreen extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: const Color(0xFF348F6C),
-        child: const Icon(Icons.chat),
+      floatingActionButton: SizedBox(
+        width: 56, // Size of the button
+        height: 56,
+        child: FloatingActionButton(
+          onPressed: () {},
+          backgroundColor: const Color(0xFF348F6C),
+          shape: const CircleBorder(),
+          child: SvgPicture.asset(
+            'assets/video_fill.svg',
+            width: 36,
+            height: 36,
+            fit: BoxFit.contain,
+            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+          ),
+        ),
       ),
+
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Title
-
-              // Educational Videos Section
               _sectionTitle("Educational Videos"),
               const SizedBox(height: 8),
-
-              // First scrollable row
               SizedBox(
                 height: 160,
                 child: ListView.separated(
@@ -78,8 +85,6 @@ class VideosScreen extends StatelessWidget {
                   },
                 ),
               ),
-
-              // Second scrollable row
               SizedBox(
                 height: 160,
                 child: ListView.separated(
@@ -103,8 +108,6 @@ class VideosScreen extends StatelessWidget {
                   },
                 ),
               ),
-
-              // Upcoming Interviews
               _sectionTitle("Upcoming Interviews"),
               _interviewTile(
                 "Chat with Condo CEO",
@@ -116,10 +119,7 @@ class VideosScreen extends StatelessWidget {
                 "April 27 at 5:00 PM",
                 "Scheduled",
               ),
-
               const SizedBox(height: 10),
-
-              // Recorded Interviews
               _sectionTitle("Recorded Interviews"),
               _recordedInterviewCard(
                 "Goldfinch: Driving Innovation in Real-World Lending",
@@ -201,7 +201,7 @@ class VideosScreen extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            "Subtitle here", // Replace with actual subtitle if you have one
+            "Subtitle here",
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
@@ -289,73 +289,79 @@ class VideosScreen extends StatelessWidget {
         "Exclusive discussion on unlocking credit for emerging markets through real-world lending protocols.",
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.only(top: 4, bottom: 4, right: 4, left: 4),
+      margin: const EdgeInsets.only(bottom: 8, top: 6),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: const Color.fromARGB(33, 236, 236, 236).withValues(),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
-              imagePath,
-              width: 120,
-              height: 90,
-              fit: BoxFit.cover,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(8),
+                bottomLeft: Radius.circular(8),
+                bottomRight: Radius.circular(8),
+                topRight: Radius.circular(8),
+              ),
+              child: Image.asset(imagePath, width: 120, fit: BoxFit.cover),
             ),
-          ),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: Color(0xFF000000),
-                    height: 1.3,
-                  ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        color: Color(0xFF000000),
+                        height: 1.3,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      guest,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF348f6c),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xFF818181),
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  guest,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF348f6c),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xFF818181),
-                    height: 1.3,
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
