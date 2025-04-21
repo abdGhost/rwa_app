@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart'; // ✅ Import for SVG
 import 'package:rwa_app/screens/airdrop_screen.dart';
-import 'package:rwa_app/screens/chat_screen.dart';
 import 'package:rwa_app/screens/home_screen.dart';
 import 'package:rwa_app/screens/news_screen.dart';
 import 'package:rwa_app/screens/portfolio_screen.dart';
+import 'package:rwa_app/screens/videos_screen.dart';
 
 class BottomNavScreen extends StatefulWidget {
   const BottomNavScreen({super.key});
@@ -21,7 +21,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     NewsScreen(),
     AirdropScreen(),
     PortfolioScreen(),
-    ChatScreen(),
+    VideosScreen(),
   ];
 
   @override
