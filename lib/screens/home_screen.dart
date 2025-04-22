@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rwa_app/data/coins_list.dart';
-import 'package:rwa_app/screens/coin_search_screen.dart';
+import 'package:rwa_app/screens/add_coin_screen.dart';
 import 'package:rwa_app/screens/coins_table_widget.dart';
 import 'package:rwa_app/widgets/stats_card_widget.dart';
 import 'package:rwa_app/widgets/tabbar_section_widget.dart';
@@ -81,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onTap: () async {
                 final result = await Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const CoinSearch()),
+                  MaterialPageRoute(builder: (_) => const CoinSearchScreen()),
                 );
                 if (result != null) {
                   setState(() => selectedCoin = result);
