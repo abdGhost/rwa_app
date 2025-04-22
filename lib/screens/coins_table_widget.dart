@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rwa_app/screens/coin_details_screen.dart';
 
 class CoinsTable extends StatelessWidget {
   final List<Map<String, Object>> coins;
@@ -27,7 +28,7 @@ class CoinsTable extends StatelessWidget {
         ),
         const Divider(
           height: 1,
-          thickness: .6,
+          thickness: 0.6,
           color: Color.fromARGB(255, 194, 194, 194),
         ),
         Expanded(
@@ -35,20 +36,15 @@ class CoinsTable extends StatelessWidget {
             itemCount: coins.length,
             itemBuilder: (context, index) {
               final coin = coins[index];
-              final priceRaw = (coin['price'] as String).replaceAll(
-                RegExp(r'[^\d.]'),
-                '',
-              );
-              final changeRaw = (coin['change'] as String).replaceAll(
-                RegExp(r'[^\d.]'),
-                '',
-              );
-              final isNegative = (coin['change'] as String)
-                  .toString()
-                  .startsWith('-');
-              final isPositive = (coin['change'] as String)
-                  .toString()
-                  .startsWith('+');
+
+              final price = (coin['price'] as String?) ?? "\$0.00";
+              final priceRaw = price.replaceAll(RegExp(r'[^\d.]'), '');
+
+              final change = (coin['change'] as String?) ?? "0.00";
+              final changeRaw = change.replaceAll(RegExp(r'[^\d.-]'), '');
+
+              final isNegative = change.startsWith("-");
+              final isPositive = change.startsWith("+");
 
               return InkWell(
                 onTap: () {
@@ -57,7 +53,14 @@ class CoinsTable extends StatelessWidget {
                     MaterialPageRoute(
                       builder:
                           (_) => CoinDetailScreen(
-                            coinName: coin['name'].toString(),
+                            coin: {
+                              "name": coin['name'] ?? "Unknown",
+                              "symbol": coin['symbol'] ?? "N/A",
+                              "logo": coin['icon'] ?? "assets/logo.png",
+                              "amount": price,
+                              "change": double.tryParse(changeRaw) ?? 0.0,
+                            },
+                            trend: [20, 22, 21, 25, 24, 28, 30], // dummy trend
                           ),
                     ),
                   );
@@ -79,15 +82,18 @@ class CoinsTable extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           Image.asset(
-                            coin['icon'] as String,
+                            coin['icon'] as String? ?? 'assets/logo.png',
                             width: 20,
                             height: 20,
+                            errorBuilder:
+                                (_, __, ___) =>
+                                    const Icon(Icons.error, size: 16),
                           ),
                           SizedBox(
                             width: 40,
                             child: Center(
                               child: Text(
-                                coin['name'] as String,
+                                coin['name'] as String? ?? "",
                                 style: _rowStyle,
                               ),
                             ),
@@ -97,7 +103,7 @@ class CoinsTable extends StatelessWidget {
                             width: 60,
                             child: Center(
                               child: Text(
-                                '\$${double.parse(priceRaw).toStringAsFixed(2)}',
+                                '\$${double.tryParse(priceRaw)?.toStringAsFixed(2) ?? '0.00'}',
                                 style: _rowStyle,
                               ),
                             ),
@@ -111,9 +117,12 @@ class CoinsTable extends StatelessWidget {
                                     ? '-'
                                     : isPositive
                                     ? '+'
-                                    : ''}${double.parse(changeRaw).toStringAsFixed(2)}%',
+                                    : ''}'
+                                '${double.tryParse(changeRaw)?.toStringAsFixed(2) ?? '0.00'}%',
                                 style: _rowStyle.copyWith(
-                                  color: coin['changeColor'] as Color,
+                                  color:
+                                      coin['changeColor'] as Color? ??
+                                      Colors.grey,
                                 ),
                               ),
                             ),
@@ -122,7 +131,7 @@ class CoinsTable extends StatelessWidget {
                           SizedBox(
                             width: 110,
                             child: Text(
-                              coin['marketCap'] as String,
+                              coin['marketCap'] as String? ?? "-",
                               textAlign: TextAlign.center,
                               style: _rowStyle,
                             ),
@@ -132,7 +141,7 @@ class CoinsTable extends StatelessWidget {
                     ),
                     const Divider(
                       height: 1,
-                      thickness: .6,
+                      thickness: 0.6,
                       color: Color.fromARGB(255, 194, 194, 194),
                     ),
                   ],
@@ -176,24 +185,6 @@ class CoinsTable extends StatelessWidget {
             child: Center(child: Text('Market Cap', style: _headerStyle)),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class CoinDetailScreen extends StatelessWidget {
-  final String coinName;
-  const CoinDetailScreen({super.key, required this.coinName});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('$coinName Details')),
-      body: Center(
-        child: Text(
-          'Details for $coinName',
-          style: const TextStyle(fontSize: 18),
-        ),
       ),
     );
   }
