@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:rwa_app/screens/add_coin_to_portfolio.dart';
 import 'package:rwa_app/screens/protfilio_coin_detail_screen.dart';
 
 class PortfolioScreen extends StatelessWidget {
@@ -11,16 +12,44 @@ class PortfolioScreen extends StatelessWidget {
       {
         "name": "Chainlink",
         "symbol": "LINK",
-        "amount": "\$1484.488",
+        "amount": "\$1,484.49",
         "change": 5.23,
         "icon": Icons.link,
       },
       {
         "name": "Maple Finance",
         "symbol": "MPL",
-        "amount": "\$2784.4",
+        "amount": "\$2,784.40",
         "change": -0.78,
         "icon": Icons.local_fire_department,
+      },
+      {
+        "name": "Avalanche",
+        "symbol": "AVAX",
+        "amount": "\$1,064.36",
+        "change": -1.59,
+        "icon": Icons.ac_unit, // snowflake-style icon
+      },
+      {
+        "name": "Bitcoin",
+        "symbol": "BTC",
+        "amount": "\$42,758.00",
+        "change": 3.87,
+        "icon": Icons.currency_bitcoin,
+      },
+      {
+        "name": "Ethereum",
+        "symbol": "ETH",
+        "amount": "\$2,320.91",
+        "change": 1.34,
+        "icon": Icons.auto_graph,
+      },
+      {
+        "name": "Solana",
+        "symbol": "SOL",
+        "amount": "\$165.48",
+        "change": -0.42,
+        "icon": Icons.flash_on, // bolt style
       },
     ];
 
@@ -145,7 +174,7 @@ class PortfolioScreen extends StatelessWidget {
           Container(
             margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(16),
-            height: 184,
+            height: 146,
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(15),
@@ -197,7 +226,7 @@ class PortfolioScreen extends StatelessWidget {
                     Expanded(
                       flex: 3,
                       child: SizedBox(
-                        height: 80,
+                        height: 60,
                         child: LineChart(
                           LineChartData(
                             borderData: FlBorderData(show: false),
@@ -226,14 +255,14 @@ class PortfolioScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 10),
 
                 // Profit Box
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
-                    vertical: 10,
+                    vertical: 12,
                   ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF7F7F7),
@@ -295,12 +324,12 @@ class PortfolioScreen extends StatelessWidget {
           ),
 
           // Portfolio Header
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                const Text(
                   "My Portfolio",
                   style: TextStyle(
                     color: Color(0xFF000000),
@@ -308,9 +337,21 @@ class PortfolioScreen extends StatelessWidget {
                     fontSize: 14,
                   ),
                 ),
-                Text(
-                  "+Add Coin",
-                  style: TextStyle(color: Color(0xFF348F6C), fontSize: 12),
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (_) =>
+                                const AddCoinToPortfolioScreen(), // ✅ correct usage
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    "+Add Coin",
+                    style: TextStyle(color: Color(0xFF348F6C), fontSize: 12),
+                  ),
                 ),
               ],
             ),
@@ -319,7 +360,7 @@ class PortfolioScreen extends StatelessWidget {
           // Coin Tiles
           ...coins.map((coin) => _buildCoinTile(context, coin)),
 
-          const SizedBox(height: 80),
+          const SizedBox(height: 20),
         ],
       ),
     );
@@ -339,81 +380,106 @@ class PortfolioScreen extends StatelessWidget {
             builder:
                 (_) => ProfilioCoinDetailScreen(
                   coin: coin,
-                  trend: [
-                    12.1,
-                    12.3,
-                    12.6,
-                    12.5,
-                    12.8,
-                    13.2,
-                    13.57,
-                  ], // sample trend data
+                  trend: [12.1, 12.3, 12.6, 12.5, 12.8, 13.2, 13.57],
                 ),
           ),
         );
       },
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.2),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              offset: const Offset(0, 1),
-              blurRadius: 2,
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            CircleAvatar(
-              backgroundColor: Colors.grey.shade100,
-              child: Icon(coin['icon'], color: Colors.black),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    coin['name'],
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  Text(
-                    coin['amount'],
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                ],
+      child: Stack(
+        children: [
+          // 🔲 Main Card
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.black.withOpacity(0.1),
+                width: 0.2,
               ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  coin['symbol'],
-                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  offset: const Offset(0, 1),
+                  blurRadius: 2,
                 ),
-                Row(
-                  children: [
-                    Icon(changeIcon, color: changeColor, size: 18),
-                    const SizedBox(width: 2),
-                    Text(
-                      "${change.abs().toStringAsFixed(2)}%",
-                      style: TextStyle(
-                        color: changeColor,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 12,
+              ],
+            ),
+            child: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Image.asset('assets/logo.png', width: 40, height: 40),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        coin['name'],
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
+                      Text(
+                        coin['amount'],
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      coin['symbol'],
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+                    Row(
+                      children: [
+                        Icon(changeIcon, color: changeColor, size: 18),
+                        const SizedBox(width: 2),
+                        Text(
+                          "${change.abs().toStringAsFixed(2)}%",
+                          style: TextStyle(
+                            color: changeColor,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+
+          // ➕ Floating + Icon (top-left)
+          Positioned(
+            top: 6,
+            left: 16,
+            child: Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                color: const Color(0xFF348F6C),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 2,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.add, size: 14, color: Colors.white),
+            ),
+          ),
+        ],
       ),
     );
   }
