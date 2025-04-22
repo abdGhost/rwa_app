@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:rwa_app/screens/add_coin_to_portfolio.dart';
 import 'package:rwa_app/screens/protfilio_coin_detail_screen.dart';
 
@@ -82,9 +83,13 @@ class PortfolioScreen extends StatelessWidget {
         ),
         centerTitle: !hasCoins,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.person, color: Colors.black),
-            onPressed: () {},
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: SvgPicture.asset(
+              'assets/profile_outline.svg',
+              width: 30,
+              height: 30,
+            ),
           ),
         ],
       ),
@@ -459,26 +464,26 @@ class PortfolioScreen extends StatelessWidget {
           ),
 
           // ➕ Floating + Icon (top-left)
-          Positioned(
-            top: 6,
-            left: 16,
-            child: Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                color: const Color(0xFF348F6C),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 2,
-                    offset: const Offset(0, 1),
-                  ),
-                ],
-              ),
-              child: const Icon(Icons.add, size: 14, color: Colors.white),
-            ),
-          ),
+          // Positioned(
+          //   top: 6,
+          //   left: 16,
+          //   child: Container(
+          //     width: 20,
+          //     height: 20,
+          //     decoration: BoxDecoration(
+          //       color: const Color(0xFF348F6C),
+          //       shape: BoxShape.circle,
+          //       boxShadow: [
+          //         BoxShadow(
+          //           color: Colors.black.withOpacity(0.1),
+          //           blurRadius: 2,
+          //           offset: const Offset(0, 1),
+          //         ),
+          //       ],
+          //     ),
+          //     child: const Icon(Icons.add, size: 14, color: Colors.white),
+          //   ),
+          // ),
         ],
       ),
     );

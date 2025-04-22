@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rwa_app/screens/add_portfolio_transaction_screen.dart';
 
 class AddCoinToPortfolioScreen extends StatefulWidget {
   const AddCoinToPortfolioScreen({super.key});
@@ -282,50 +283,112 @@ class _AddCoinToPortfolioScreenState extends State<AddCoinToPortfolioScreen> {
     final changeColor = isUp ? Color(0xFF16C784) : Color(0xFFFF3B30);
     final icon = isUp ? Icons.arrow_drop_up : Icons.arrow_drop_down;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Row(
-        children: [
-          Image.asset('assets/logo.png', width: 34, height: 34),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => AddPortfolioTransactionScreen(coin: coin),
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Row(
+          children: [
+            Image.asset(coin["logo"], width: 34, height: 34),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    coin["symbol"],
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                      color: Color(0xFF000000),
+                    ),
+                  ),
+                  Text(
+                    coin["name"],
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: Color(0xFF959595),
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Row(
               children: [
+                Icon(icon, size: 16, color: changeColor),
                 Text(
-                  coin["symbol"],
-                  style: const TextStyle(
+                  "${coin['change'].abs().toStringAsFixed(2)}%",
+                  style: TextStyle(
+                    color: changeColor,
                     fontWeight: FontWeight.w600,
                     fontSize: 12,
-                    color: Color(0xFF000000),
-                  ),
-                ),
-                Text(
-                  coin["name"],
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: Color(0xFF959595),
-                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ],
             ),
-          ),
-          Row(
-            children: [
-              Icon(icon, size: 16, color: changeColor),
-              Text(
-                "${coin['change'].abs().toStringAsFixed(2)}%",
-                style: TextStyle(
-                  color: changeColor,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
+
+  // Widget _buildCoinTile(Map<String, dynamic> coin) {
+  //   final isUp = coin["change"] >= 0;
+  //   final changeColor = isUp ? Color(0xFF16C784) : Color(0xFFFF3B30);
+  //   final icon = isUp ? Icons.arrow_drop_up : Icons.arrow_drop_down;
+
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(vertical: 12),
+  //     child: Row(
+  //       children: [
+  //         Image.asset('assets/logo.png', width: 34, height: 34),
+  //         const SizedBox(width: 12),
+  //         Expanded(
+  //           child: Column(
+  //             crossAxisAlignment: CrossAxisAlignment.start,
+  //             children: [
+  //               Text(
+  //                 coin["symbol"],
+  //                 style: const TextStyle(
+  //                   fontWeight: FontWeight.w600,
+  //                   fontSize: 12,
+  //                   color: Color(0xFF000000),
+  //                 ),
+  //               ),
+  //               Text(
+  //                 coin["name"],
+  //                 style: const TextStyle(
+  //                   fontSize: 10,
+  //                   color: Color(0xFF959595),
+  //                   fontWeight: FontWeight.w400,
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //         Row(
+  //           children: [
+  //             Icon(icon, size: 16, color: changeColor),
+  //             Text(
+  //               "${coin['change'].abs().toStringAsFixed(2)}%",
+  //               style: TextStyle(
+  //                 color: changeColor,
+  //                 fontWeight: FontWeight.w600,
+  //                 fontSize: 12,
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 }
