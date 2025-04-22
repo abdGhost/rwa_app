@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:rwa_app/data/coins_list.dart';
 import 'package:rwa_app/screens/add_coin_screen.dart';
 import 'package:rwa_app/screens/coins_table_widget.dart';
+import 'package:rwa_app/screens/profile_screen.dart';
 import 'package:rwa_app/widgets/stats_card_widget.dart';
 import 'package:rwa_app/widgets/tabbar_section_widget.dart';
 
@@ -99,10 +100,20 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(width: 8),
             Padding(
               padding: const EdgeInsets.only(right: 12),
-              child: SvgPicture.asset(
-                'assets/profile_outline.svg',
-                width: 30,
-                height: 30,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ProfileScreen(),
+                    ),
+                  );
+                },
+                child: SvgPicture.asset(
+                  'assets/profile_outline.svg',
+                  width: 30,
+                  height: 30,
+                ),
               ),
             ),
           ],
