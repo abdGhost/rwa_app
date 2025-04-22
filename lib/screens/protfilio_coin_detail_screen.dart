@@ -265,7 +265,11 @@ class _ProfilioCoinDetailScreenState extends State<ProfilioCoinDetailScreen> {
               children: const [
                 Text(
                   "Transactions",
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF000000),
+                  ),
                 ),
                 Text(
                   "+Add Transaction",
@@ -362,7 +366,10 @@ class _ProfilioCoinDetailScreenState extends State<ProfilioCoinDetailScreen> {
     return List.generate(transactions.length, (index) {
       final tx = transactions[index];
       final bool isBuy = tx["isBuy"];
-      final Color typeColor = isBuy ? Colors.black : Colors.red;
+      final Color typeColor =
+          isBuy ? const Color(0xFF348F6C) : const Color(0xFFFF3B30);
+      final Color qtyColor =
+          isBuy ? const Color(0xFF4CAF50) : const Color(0xFFFF3B30);
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -372,64 +379,67 @@ class _ProfilioCoinDetailScreenState extends State<ProfilioCoinDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 📅 Date and Edit Icon
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      tx["date"],
-                      style: const TextStyle(fontSize: 10, color: Colors.grey),
-                    ),
-                    const Icon(Icons.edit, color: Colors.grey, size: 16),
-                  ],
-                ),
-                const SizedBox(height: 4),
-
-                // Main Row: Left (Icon + Type) | Right (Qty + Amount)
+                // Main Row
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // 🪙 Coin Icon + Sell Text (Left-aligned group)
+                    // Left: Icon + Type + Date
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Image.asset('assets/logo.png', width: 18, height: 18),
-                        const SizedBox(width: 8),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 1),
-                          child: Text(
-                            tx["type"],
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: typeColor,
+                        Image.asset('assets/logo.png', width: 24, height: 24),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              tx["type"],
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: typeColor,
+                              ),
                             ),
-                          ),
+                            const SizedBox(height: 2),
+                            Text(
+                              tx["date"],
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
 
-                    // 📈 Qty + Amount Right-aligned
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                    // Right: Qty + Amount + Edit
+                    Row(
                       children: [
-                        Text(
-                          tx["qty"],
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF4CAF50),
-                            fontWeight: FontWeight.w500,
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              tx["qty"],
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: qtyColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Text(
+                              tx["amount"],
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF000000),
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          tx["amount"],
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF000000),
-                          ),
-                        ),
+                        const SizedBox(width: 10),
+                        Image.asset('assets/edit.png', width: 24, height: 24),
                       ],
                     ),
                   ],
@@ -438,9 +448,8 @@ class _ProfilioCoinDetailScreenState extends State<ProfilioCoinDetailScreen> {
             ),
           ),
 
-          // 🔻 Divider without padding
-          if (index != transactions.length - 1)
-            const Divider(color: Color(0xFFDDDDDD), height: 1, thickness: 0.8),
+          // ✅ Always show divider (including after the last item)
+          const Divider(color: Color(0xFFDDDDDD), height: 1, thickness: 0.8),
         ],
       );
     });
