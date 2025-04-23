@@ -2,6 +2,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:rwa_app/screens/add_coin_to_portfolio.dart';
+import 'package:rwa_app/screens/chat_screen.dart';
+import 'package:rwa_app/screens/profile_screen.dart';
 import 'package:rwa_app/screens/protfilio_coin_detail_screen.dart';
 
 class PortfolioScreen extends StatelessWidget {
@@ -85,10 +87,20 @@ class PortfolioScreen extends StatelessWidget {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),
-            child: SvgPicture.asset(
-              'assets/profile_outline.svg',
-              width: 30,
-              height: 30,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProfileScreen(),
+                  ),
+                );
+              },
+              child: SvgPicture.asset(
+                'assets/profile_outline.svg',
+                width: 30,
+                height: 30,
+              ),
             ),
           ),
         ],
@@ -97,10 +109,26 @@ class PortfolioScreen extends StatelessWidget {
           hasCoins
               ? _buildPortfolioContent(context, coins, walletTrend)
               : _buildEmptyState(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: Colors.green[700],
-        child: const Icon(Icons.chat),
+      floatingActionButton: SizedBox(
+        width: 56, // Size of the button
+        height: 56,
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ChatScreen()),
+            );
+          },
+          backgroundColor: const Color(0xFF348F6C),
+          shape: const CircleBorder(),
+          child: SvgPicture.asset(
+            'assets/bot_light.svg',
+            width: 40,
+            height: 40,
+            fit: BoxFit.contain,
+            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+          ),
+        ),
       ),
     );
   }

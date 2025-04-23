@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:rwa_app/screens/chat_screen.dart';
 
 class VideosScreen extends StatelessWidget {
   const VideosScreen({super.key});
@@ -41,7 +42,12 @@ class VideosScreen extends StatelessWidget {
         width: 56, // Size of the button
         height: 56,
         child: FloatingActionButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ChatScreen()),
+            );
+          },
           backgroundColor: const Color(0xFF348F6C),
           shape: const CircleBorder(),
           child: SvgPicture.asset(

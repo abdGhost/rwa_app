@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rwa_app/data/coins_list.dart';
 import 'package:rwa_app/screens/add_coin_screen.dart';
+import 'package:rwa_app/screens/chat_screen.dart';
 import 'package:rwa_app/screens/coins_table_widget.dart';
 import 'package:rwa_app/screens/profile_screen.dart';
 import 'package:rwa_app/widgets/stats_card_widget.dart';
@@ -238,6 +239,30 @@ class _HomeScreenState extends State<HomeScreen> {
                       : CoinsTable(coins: tabData[_selectedTabIndex]),
             ),
           ],
+        ),
+        floatingActionButton: SizedBox(
+          width: 56, // Size of the button
+          height: 56,
+          child: FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ChatScreen()),
+              );
+            },
+            backgroundColor: const Color(0xFF348F6C),
+            shape: const CircleBorder(),
+            child: SvgPicture.asset(
+              'assets/bot_light.svg',
+              width: 40,
+              height: 40,
+              fit: BoxFit.contain,
+              colorFilter: const ColorFilter.mode(
+                Colors.white,
+                BlendMode.srcIn,
+              ),
+            ),
+          ),
         ),
       ),
     );

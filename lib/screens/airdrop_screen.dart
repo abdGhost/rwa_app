@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:rwa_app/screens/chat_screen.dart';
 import 'package:rwa_app/widgets/airdrop/airdrop_card.dart';
 
 class AirdropScreen extends StatefulWidget {
@@ -148,6 +150,27 @@ class _AirdropScreenState extends State<AirdropScreen> {
               ),
             ),
           ],
+        ),
+      ),
+      floatingActionButton: SizedBox(
+        width: 56, // Size of the button
+        height: 56,
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ChatScreen()),
+            );
+          },
+          backgroundColor: const Color(0xFF348F6C),
+          shape: const CircleBorder(),
+          child: SvgPicture.asset(
+            'assets/bot_light.svg',
+            width: 40,
+            height: 40,
+            fit: BoxFit.contain,
+            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+          ),
         ),
       ),
     );

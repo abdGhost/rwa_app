@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rwa_app/screens/botttom_nav_screen.dart';
 import 'package:rwa_app/screens/signup_screen.dart';
 import 'package:rwa_app/widgets/auth_divider_widget.dart';
 import 'package:rwa_app/widgets/back_title_appbar_widget.dart';
@@ -102,7 +103,14 @@ class LoginScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(5),
                     ),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const BottomNavScreen(),
+                      ),
+                    );
+                  },
                   child: const Text(
                     'Log In',
                     style: TextStyle(
