@@ -54,14 +54,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return DefaultTabController(
       length: 5,
       initialIndex: _selectedTabIndex,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF7F7F7),
+        backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 1,
+          backgroundColor: theme.appBarTheme.backgroundColor,
+          elevation: theme.appBarTheme.elevation,
           automaticallyImplyLeading: false,
           toolbarHeight: 60,
           title: Row(
@@ -70,10 +73,8 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(width: 8),
               Text(
                 'RWA CAMP',
-                style: GoogleFonts.inter(
-                  color: Colors.black,
+                style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  fontSize: 18,
                 ),
               ),
             ],
@@ -95,6 +96,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   'assets/search_outline.svg',
                   width: 24,
                   height: 24,
+                  colorFilter: ColorFilter.mode(
+                    theme.iconTheme.color ?? Colors.black,
+                    BlendMode.srcIn,
+                  ),
                 ),
               ),
             ),
@@ -114,6 +119,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   'assets/profile_outline.svg',
                   width: 30,
                   height: 30,
+                  colorFilter: ColorFilter.mode(
+                    theme.iconTheme.color ?? Colors.black,
+                    BlendMode.srcIn,
+                  ),
                 ),
               ),
             ),
@@ -129,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     title: 'Market Cap',
                     value: '\$2.79 T',
                     change: '5.78%',
-                    changeColor: const Color.fromARGB(255, 109, 247, 114),
+                    changeColor: Colors.green,
                     width: (MediaQuery.of(context).size.width - 24 - 6) / 4,
                     isFirst: true,
                   ),
@@ -138,7 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     title: 'Volume',
                     value: '\$3.48 T',
                     change: '8.59%',
-                    changeColor: const Color.fromARGB(255, 109, 247, 114),
+                    changeColor: Colors.green,
                     width: (MediaQuery.of(context).size.width - 24 - 6) / 4,
                   ),
                   const SizedBox(width: 2),
@@ -171,12 +180,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   ElevatedButton(
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromRGBO(238, 241, 246, 1),
-                      foregroundColor: Colors.black,
+                      backgroundColor:
+                          isDark ? Colors.grey[800] : const Color(0xFFEFEFEF),
+                      foregroundColor: theme.textTheme.bodyMedium?.color,
                       elevation: 0,
-                      side: const BorderSide(
-                        color: Color.fromRGBO(238, 241, 246, 1),
-                      ),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
                         vertical: 4,
@@ -196,15 +203,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(width: 8),
                   ElevatedButton.icon(
                     onPressed: () {},
-                    icon: const Icon(Icons.tune, size: 14),
+                    icon: Icon(
+                      Icons.tune,
+                      size: 14,
+                      color: theme.iconTheme.color,
+                    ),
                     label: const Text('Customize'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromRGBO(238, 241, 246, 1),
-                      foregroundColor: Colors.black,
+                      backgroundColor:
+                          isDark ? Colors.grey[800] : const Color(0xFFEFEFEF),
+                      foregroundColor: theme.textTheme.bodyMedium?.color,
                       elevation: 0,
-                      side: const BorderSide(
-                        color: Color.fromRGBO(238, 241, 246, 1),
-                      ),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
                         vertical: 4,
@@ -241,7 +250,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         floatingActionButton: SizedBox(
-          width: 56, // Size of the button
+          width: 56,
           height: 56,
           child: FloatingActionButton(
             onPressed: () {

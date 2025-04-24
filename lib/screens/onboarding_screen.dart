@@ -12,7 +12,6 @@ class OnboardingScreen extends StatelessWidget {
     final textColor =
         Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
     final primaryColor = Theme.of(context).primaryColor;
-    final cardColor = Theme.of(context).cardColor;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,

@@ -36,6 +36,8 @@ class StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final int indexValue =
         int.tryParse(value.replaceAll(RegExp(r'\D'), '')) ?? 0;
 
@@ -44,7 +46,10 @@ class StatCard extends StatelessWidget {
       height: 90,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 63, 167, 127),
+        color:
+            isDark
+                ? const Color(0xFF1E1E1E) // Dark card color
+                : const Color.fromARGB(255, 63, 167, 127), // Light mode green
         borderRadius: BorderRadius.horizontal(
           left: isFirst ? const Radius.circular(12) : Radius.zero,
           right: isLast ? const Radius.circular(12) : Radius.zero,

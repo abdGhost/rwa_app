@@ -8,6 +8,9 @@ class TabBarSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: TabBar(
@@ -15,17 +18,17 @@ class TabBarSection extends StatelessWidget {
         isScrollable: true,
         tabAlignment: TabAlignment.start,
         labelPadding: const EdgeInsets.only(right: 12),
-        indicator: const UnderlineTabIndicator(
-          borderSide: BorderSide(
+        indicator: UnderlineTabIndicator(
+          borderSide: const BorderSide(
             color: Color.fromARGB(255, 63, 167, 127),
             width: 2,
           ),
-          insets: EdgeInsets.only(bottom: 10),
+          insets: const EdgeInsets.only(bottom: 10),
         ),
         indicatorSize: TabBarIndicatorSize.label,
         dividerColor: Colors.transparent,
-        labelColor: Colors.black,
-        unselectedLabelColor: Colors.grey,
+        labelColor: isDark ? Colors.white : Colors.black,
+        unselectedLabelColor: theme.textTheme.bodySmall?.color ?? Colors.grey,
         labelStyle: GoogleFonts.inter(
           fontWeight: FontWeight.bold,
           fontSize: 13,

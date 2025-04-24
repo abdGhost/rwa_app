@@ -23,7 +23,6 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     final brightness = Theme.of(context).brightness;
-    final textTheme = Theme.of(context).textTheme;
     final isDark = brightness == Brightness.dark;
 
     return Scaffold(
