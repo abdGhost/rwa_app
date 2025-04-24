@@ -13,12 +13,15 @@ class CoinDetailScreen extends StatefulWidget {
 
 class _CoinDetailScreenState extends State<CoinDetailScreen> {
   int selectedIndex = 1;
+  bool isFavorite = false;
   final List<String> filters = ["1H", "24H", "7D", "1M", "1Y", "All"];
   final List<String> trendLabels = ["24H", "7D", "14D", "30D", "60D", "1Y"];
   final List<double> trendValues = [1.0, 7.3, 2.1, 3.9, -11.6, 30.0];
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final chartData = List.generate(
       widget.trend.length,
       (i) => FlSpot(i.toDouble(), widget.trend[i]),
@@ -31,11 +34,11 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
         isProfit ? Icons.arrow_drop_up : Icons.arrow_drop_down;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F7),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF7F7F7),
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
+        iconTheme: theme.iconTheme,
         titleSpacing: 0,
         title: Row(
           children: [
@@ -46,39 +49,45 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
               children: [
                 Text(
                   widget.coin['symbol'],
-                  style: const TextStyle(
-                    fontSize: 14,
+                  style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF111111),
                   ),
                 ),
-                Text(
-                  widget.coin['name'],
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xFF666666),
-                  ),
-                ),
+                Text(widget.coin['name'], style: theme.textTheme.bodySmall),
               ],
             ),
           ],
         ),
         actions: [
           Padding(
-            padding: EdgeInsets.only(right: 0),
-            child: Image.asset('assets/share.png', width: 40, height: 40),
+            padding: const EdgeInsets.only(right: 4),
+            child: Image.asset(
+              'assets/share.png',
+              width: 36,
+              height: 36,
+              color: isDark ? Colors.white : null,
+            ),
           ),
           Padding(
-            padding: EdgeInsets.only(right: 0),
-            child: Image.asset('assets/like.png', width: 40, height: 40),
+            padding: const EdgeInsets.only(right: 8),
+            child: GestureDetector(
+              onTap: () => setState(() => isFavorite = !isFavorite),
+              child: Image.asset(
+                'assets/like.png',
+                width: 36,
+                height: 36,
+                color:
+                    isFavorite
+                        ? const Color(0xFF16C784)
+                        : (isDark ? Colors.white : null),
+              ),
+            ),
           ),
         ],
       ),
       body: ListView(
         padding: const EdgeInsets.only(top: 16),
         children: [
-          // Price
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
@@ -86,10 +95,8 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
               children: [
                 Text(
                   widget.coin['amount'] ?? "\$0.00",
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF111111),
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(width: 6),
@@ -109,10 +116,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
               ],
             ),
           ),
-
           const SizedBox(height: 12),
-
-          // Chart
           SizedBox(
             height: 200,
             child: Padding(
@@ -131,21 +135,12 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                         getTitlesWidget:
                             (value, _) => Text(
                               "\$${value.toStringAsFixed(0)}",
-                              style: const TextStyle(
-                                fontSize: 10,
-                                color: Color(0xFF8C8C8C),
-                              ),
+                              style: theme.textTheme.bodySmall,
                             ),
                       ),
                     ),
                     bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 28,
-                        getTitlesWidget:
-                            (_, __) =>
-                                const Text("", style: TextStyle(fontSize: 10)),
-                      ),
+                      sideTitles: SideTitles(showTitles: false),
                     ),
                     topTitles: AxisTitles(
                       sideTitles: SideTitles(showTitles: false),
@@ -171,17 +166,14 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
               ),
             ),
           ),
-
           const SizedBox(height: 12),
-
-          // Time Filters
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(6),
-                color: const Color(0xFFEFF2F5),
+                color: theme.cardColor,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -198,7 +190,10 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: selected ? Colors.white : Colors.transparent,
+                            color:
+                                selected
+                                    ? theme.scaffoldBackgroundColor
+                                    : Colors.transparent,
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -208,7 +203,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                               fontWeight: FontWeight.w500,
                               color:
                                   selected
-                                      ? const Color(0xFF111111)
+                                      ? theme.textTheme.bodyLarge?.color
                                       : Colors.grey,
                             ),
                           ),
@@ -218,17 +213,17 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
               ),
             ),
           ),
-
           const SizedBox(height: 12),
-
-          // Trend Stats
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: theme.cardColor,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFE0E0E0), width: 0.4),
+                border: Border.all(
+                  color: Colors.grey.withOpacity(0.2),
+                  width: 0.4,
+                ),
               ),
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Row(
@@ -243,25 +238,20 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                       children: [
                         Text(
                           label,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF111111),
-                            fontWeight: FontWeight.w400,
-                          ),
+                          style: theme.textTheme.bodySmall,
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 8),
                         Container(
-                          width: double.infinity,
                           height: 0.5,
-                          color: const Color(0xFFE0E0E0),
+                          width: double.infinity,
+                          color: Colors.grey.withOpacity(0.3),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           "${isUp ? '+' : ''}${value.toStringAsFixed(1)}%",
                           style: TextStyle(
                             fontSize: 12,
-                            fontWeight: FontWeight.w400,
                             color:
                                 isUp
                                     ? const Color(0xFF16C784)
@@ -276,18 +266,17 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
               ),
             ),
           ),
-
           const SizedBox(height: 16),
-
-          // Overview
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: const Text(
+            child: Text(
               "Overview",
-              style: TextStyle(
-                fontSize: 14,
+              style: theme.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF111111),
+                color:
+                    theme.brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black,
               ),
             ),
           ),
@@ -296,9 +285,12 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: theme.cardColor,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFE0E0E0), width: 0.5),
+                border: Border.all(
+                  color: Colors.grey.withOpacity(0.2),
+                  width: 0.5,
+                ),
               ),
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -357,6 +349,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
   }
 
   Widget _buildOverviewItem(String title, String value) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -366,25 +359,19 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
             Flexible(
               child: Text(
                 title,
-                softWrap: false,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF888888),
-                  fontWeight: FontWeight.w400,
-                ),
+                style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
               ),
             ),
             const SizedBox(width: 4),
             GestureDetector(
               onTap: () {
-                // ✅ Use ScaffoldMessenger correctly
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    backgroundColor: Color(0xFFF7F7F7),
+                    backgroundColor: theme.cardColor,
                     content: Text(
                       "Info about $title",
-                      style: TextStyle(fontSize: 12, color: Color(0xFF000000)),
+                      style: theme.textTheme.bodySmall,
                     ),
                     duration: const Duration(seconds: 2),
                     behavior: SnackBarBehavior.floating,
@@ -398,7 +385,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
               child: const Icon(
                 Icons.info_outline,
                 size: 12,
-                color: Color(0xFFBBBBBB),
+                color: Colors.grey,
               ),
             ),
           ],
@@ -406,10 +393,8 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 13,
+          style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w600,
-            color: Color(0xFF111111),
           ),
         ),
       ],
