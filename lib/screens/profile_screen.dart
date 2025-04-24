@@ -1,41 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:rwa_app/provider/settings_provider.dart';
 import 'package:rwa_app/screens/my_account_screen.dart';
 import 'package:rwa_app/screens/select_language_screen.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final isDarkMode = ref.watch(themeModeProvider) == ThemeMode.dark;
+    final selectedCurrency = ref.watch(currencyProvider);
+    final selectedLanguage = ref.watch(languageProvider);
 
-class _ProfileScreenState extends State<ProfileScreen> {
-  bool isDarkMode = false;
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F7),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 1,
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        elevation: theme.appBarTheme.elevation,
+        automaticallyImplyLeading: false,
         toolbarHeight: 60,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: theme.iconTheme.color),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Profile',
           style: GoogleFonts.inter(
-            color: Colors.black,
+            color: theme.textTheme.titleLarge?.color,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
         ),
       ),
-
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -44,22 +45,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 24),
-                const Text(
+                Text(
                   "Hi, Ghost",
-                  style: TextStyle(
-                    fontSize: 16,
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: Colors.black,
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
+                Text(
                   "Login to track your favorite coins easily.",
-                  style: TextStyle(fontSize: 12, color: Colors.black54),
+                  style: theme.textTheme.bodySmall,
                 ),
                 const SizedBox(height: 8),
-
-                // Login + Logout buttons
                 Row(
                   children: [
                     Expanded(
@@ -76,9 +73,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           backgroundColor: const Color(0xFF348F6C),
                           foregroundColor: Colors.white,
                           elevation: 0,
-                          minimumSize: const Size.fromHeight(
-                            44,
-                          ), // ✅ consistent height
+                          minimumSize: const Size.fromHeight(44),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),
                           ),
@@ -94,12 +89,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: OutlinedButton(
                         onPressed: () {},
                         style: OutlinedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          minimumSize: const Size.fromHeight(
-                            46,
-                          ), // ✅ consistent height
-                          side: const BorderSide(color: Colors.grey),
+                          backgroundColor: theme.cardColor,
+                          foregroundColor: theme.textTheme.bodyLarge?.color,
+                          minimumSize: const Size.fromHeight(46),
+                          side: BorderSide(color: theme.dividerColor),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),
                           ),
@@ -112,24 +105,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ],
                 ),
-
-                SizedBox(height: 8),
-                const Text(
+                const SizedBox(height: 8),
+                Text(
                   "Preferences",
-                  style: TextStyle(
-                    fontSize: 14,
+                  style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w500,
-                    color: Colors.black87,
                   ),
                 ),
                 const SizedBox(height: 6),
-
-                // Preferences
                 Container(
-                  decoration: boxDecoration(),
+                  decoration: boxDecoration(theme),
                   child: Column(
                     children: [
                       settingTile(
+                        context,
                         title: "Dark Mode",
                         trailing: FlutterSwitch(
                           width: 40,
@@ -140,21 +129,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           inactiveColor: const Color.fromRGBO(91, 91, 91, 1),
                           toggleColor: Colors.white,
                           onToggle: (val) {
-                            setState(() {
-                              isDarkMode = val;
-                            });
+                            ref.read(themeModeProvider.notifier).toggle(val);
                           },
                         ),
                       ),
-                      divider(),
+                      divider(theme),
                       settingTile(
+                        context,
                         title: "Currency",
-                        trailing: const Text(
-                          "USD",
-                          style: TextStyle(color: Colors.black54, fontSize: 13),
-                        ),
+                        trailing: Text("USD", style: theme.textTheme.bodySmall),
                       ),
-                      divider(),
+                      divider(theme),
                       InkWell(
                         onTap: () {
                           Navigator.push(
@@ -165,65 +150,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           );
                         },
                         child: settingTile(
+                          context,
                           title: "Language",
-                          trailing: const Text(
+                          trailing: Text(
                             "English",
-                            style: TextStyle(
-                              color: Colors.black54,
-                              fontSize: 13,
-                            ),
+                            style: theme.textTheme.bodySmall,
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 10),
-
-                const Text(
+                Text(
                   "Others",
-                  style: TextStyle(
-                    fontSize: 14,
+                  style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w500,
-                    color: Colors.black87,
                   ),
                 ),
                 const SizedBox(height: 10),
-
-                // Others
                 Container(
-                  decoration: boxDecoration(),
+                  decoration: boxDecoration(theme),
                   child: Column(
                     children: [
-                      othersTile(title: "Privacy Policy"),
-                      divider(),
-                      othersTile(title: "Cookie Preference"),
-                      divider(),
-                      othersTile(title: "Terms of Service"),
-                      divider(),
-                      othersTile(title: "Disclaimer"),
-                      divider(),
-                      othersTile(title: "Rate the RWA App"),
-                      divider(),
-                      othersTile(title: "Share the RWA App"),
+                      othersTile(title: "Privacy Policy", theme: theme),
+                      divider(theme),
+                      othersTile(title: "Cookie Preference", theme: theme),
+                      divider(theme),
+                      othersTile(title: "Terms of Service", theme: theme),
+                      divider(theme),
+                      othersTile(title: "Disclaimer", theme: theme),
+                      divider(theme),
+                      othersTile(title: "Rate the RWA App", theme: theme),
+                      divider(theme),
+                      othersTile(title: "Share the RWA App", theme: theme),
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 10),
-
-                // Social icons row
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children:
                       List.generate(
                           4,
-                          (_) => _socialIcon(),
+                          (_) => _socialIcon(theme),
                         ).expand((e) => [e, const SizedBox(width: 8)]).toList()
                         ..removeLast(),
                 ),
-
                 const SizedBox(height: 16),
               ],
             ),
@@ -233,17 +206,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget settingTile({required String title, required Widget trailing}) {
+  Widget settingTile(
+    BuildContext context, {
+    required String title,
+    required Widget trailing,
+  }) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
         children: [
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 13,
+            style: theme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w500,
-              color: Colors.black,
             ),
           ),
           const Spacer(),
@@ -253,35 +229,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget othersTile({required String title}) {
+  Widget othersTile({required String title, required ThemeData theme}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Row(
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w300,
-              color: Colors.black,
-            ),
-          ),
-        ],
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(title, style: theme.textTheme.bodySmall),
       ),
     );
   }
 
-  Widget divider() {
-    return const Divider(
-      height: 0,
-      thickness: 0.4,
-      color: Color.fromRGBO(70, 85, 104, 0.3),
-    );
+  Widget divider(ThemeData theme) {
+    return Divider(height: 0, thickness: 0.2, color: theme.dividerColor);
   }
 
-  BoxDecoration boxDecoration() {
+  BoxDecoration boxDecoration(ThemeData theme) {
     return BoxDecoration(
-      color: Colors.white,
+      color: theme.cardColor,
       borderRadius: BorderRadius.circular(5),
       boxShadow: [
         BoxShadow(
@@ -293,9 +257,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _socialIcon() {
+  Widget _socialIcon(ThemeData theme) {
     return Container(
-      decoration: boxDecoration(),
+      decoration: boxDecoration(theme),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Image.asset('assets/logo.png', width: 18, height: 18),

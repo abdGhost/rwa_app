@@ -13,26 +13,28 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F7),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.appBarTheme.backgroundColor ?? theme.cardColor,
         elevation: 1,
         toolbarHeight: 60,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: theme.iconTheme.color),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'My Account',
           style: GoogleFonts.inter(
-            color: Colors.black,
+            color: theme.textTheme.titleLarge?.color ?? Colors.black,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
         ),
       ),
-
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -41,22 +43,30 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 24),
-                const Text(
+                Text(
                   "Hi, Ghost",
-                  style: TextStyle(
-                    fontSize: 16,
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: Colors.black,
+                    color:
+                        isDark
+                            ? Colors.white
+                            : Colors
+                                .black, // Ensuring text visibility in dark mode
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
+                Text(
                   "Login to track your favorite coins easily.",
-                  style: TextStyle(fontSize: 12, color: Colors.black54),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color:
+                        isDark
+                            ? Colors.white70
+                            : Colors
+                                .black54, // Text color adjustment for dark mode
+                  ),
                 ),
                 const SizedBox(height: 8),
-
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 const Text(
                   "Settings",
                   style: TextStyle(
@@ -66,48 +76,43 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                   ),
                 ),
                 const SizedBox(height: 6),
-
                 // Preferences
                 Container(
-                  decoration: boxDecoration(),
+                  decoration: boxDecoration(theme),
                   child: Column(
                     children: [
                       settingTile(
                         title: "Email",
-                        trailing: const Text(
+                        trailing: Text(
                           "ghost@gmail.com",
-                          style: TextStyle(color: Colors.black54, fontSize: 13),
+                          style: TextStyle(
+                            color: theme.textTheme.bodySmall?.color,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
-                      divider(),
+                      divider(theme),
                       settingTile(
-                        title: "Email",
-                        trailing: const Text(
-                          "ghost@gmail.com",
-                          style: TextStyle(color: Colors.black54, fontSize: 13),
-                        ),
-                      ),
-                      divider(),
-                      settingTile(
-                        title: "Subcription",
-                        trailing: const Text(
+                        title: "Subscription",
+                        trailing: Text(
                           "Free",
-                          style: TextStyle(color: Colors.black54, fontSize: 13),
+                          style: TextStyle(
+                            color: theme.textTheme.bodySmall?.color,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
-                      divider(),
+                      divider(theme),
                       settingTile(
                         title: "Delete Account",
-                        trailing: const Text(
+                        trailing: Text(
                           "Delete",
                           style: TextStyle(color: Colors.red, fontSize: 13),
                         ),
                       ),
-                      divider(),
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 16),
               ],
             ),
@@ -118,16 +123,18 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
   }
 
   Widget settingTile({required String title, required Widget trailing}) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
         children: [
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 13,
+            style: theme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w500,
-              color: Colors.black,
+              color:
+                  theme.textTheme.bodyMedium?.color ??
+                  Colors.black, // Ensure text is visible in both modes
             ),
           ),
           const Spacer(),
@@ -137,35 +144,31 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
     );
   }
 
-  Widget othersTile({required String title}) {
+  Widget othersTile({required String title, required ThemeData theme}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      child: Row(
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w300,
-              color: Colors.black,
-            ),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          title,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color:
+                theme.textTheme.bodySmall?.color ??
+                Colors
+                    .black, // Ensure left-aligned text is visible in dark mode
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget divider() {
-    return const Divider(
-      height: 0,
-      thickness: 0.4,
-      color: Color.fromRGBO(70, 85, 104, 0.3),
-    );
+  Widget divider(ThemeData theme) {
+    return Divider(height: 0, thickness: 0.2, color: theme.dividerColor);
   }
 
-  BoxDecoration boxDecoration() {
+  BoxDecoration boxDecoration(ThemeData theme) {
     return BoxDecoration(
-      color: Colors.white,
+      color: theme.cardColor,
       borderRadius: BorderRadius.circular(5),
       boxShadow: [
         BoxShadow(
