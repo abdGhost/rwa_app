@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart'; // ✅ Import for SVG
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rwa_app/screens/airdrop_screen.dart';
 import 'package:rwa_app/screens/home_screen.dart';
 import 'package:rwa_app/screens/news_screen.dart';
@@ -26,14 +26,19 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        selectedItemColor: Color(0xFF348F6C),
-        unselectedItemColor: Color(0xFF818181),
+        selectedItemColor: theme.primaryColor,
+        unselectedItemColor: isDark ? Colors.white60 : const Color(0xFF818181),
+        backgroundColor:
+            theme.bottomNavigationBarTheme.backgroundColor ??
+            theme.scaffoldBackgroundColor,
         showUnselectedLabels: true,
-        backgroundColor: const Color(0xFFFFFFFF),
         type: BottomNavigationBarType.fixed,
         selectedLabelStyle: const TextStyle(
           fontSize: 12,
@@ -49,6 +54,12 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
                   : 'assets/market_outline.svg',
               width: 24,
               height: 24,
+              colorFilter: ColorFilter.mode(
+                _selectedIndex == 0
+                    ? theme.primaryColor
+                    : (isDark ? Colors.white60 : const Color(0xFF818181)),
+                BlendMode.srcIn,
+              ),
             ),
             label: 'Market',
           ),
@@ -59,6 +70,12 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
                   : 'assets/news_outline.svg',
               width: 24,
               height: 24,
+              colorFilter: ColorFilter.mode(
+                _selectedIndex == 1
+                    ? theme.primaryColor
+                    : (isDark ? Colors.white60 : const Color(0xFF818181)),
+                BlendMode.srcIn,
+              ),
             ),
             label: 'News',
           ),
@@ -69,6 +86,12 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
                   : 'assets/airdrop_outline.svg',
               width: 24,
               height: 24,
+              colorFilter: ColorFilter.mode(
+                _selectedIndex == 2
+                    ? theme.primaryColor
+                    : (isDark ? Colors.white60 : const Color(0xFF818181)),
+                BlendMode.srcIn,
+              ),
             ),
             label: 'Airdrop',
           ),
@@ -79,6 +102,12 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
                   : 'assets/portfolio_outline.svg',
               width: 24,
               height: 24,
+              colorFilter: ColorFilter.mode(
+                _selectedIndex == 3
+                    ? theme.primaryColor
+                    : (isDark ? Colors.white60 : const Color(0xFF818181)),
+                BlendMode.srcIn,
+              ),
             ),
             label: 'Portfolio',
           ),
@@ -89,6 +118,12 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
                   : 'assets/video_outline.svg',
               width: 24,
               height: 24,
+              colorFilter: ColorFilter.mode(
+                _selectedIndex == 4
+                    ? theme.primaryColor
+                    : (isDark ? Colors.white60 : const Color(0xFF818181)),
+                BlendMode.srcIn,
+              ),
             ),
             label: 'Video',
           ),
