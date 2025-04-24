@@ -3,37 +3,41 @@ import 'package:flutter/material.dart';
 class SocialAuthButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
-  final Color backgroundColor;
+  final Color? backgroundColor;
   final Color? borderColor;
-  final Color textColor;
+  final Color? textColor;
   final String? iconPath;
 
   const SocialAuthButton({
     super.key,
     required this.label,
     required this.onPressed,
-    this.backgroundColor = Colors.white,
+    this.backgroundColor,
     this.borderColor,
-    this.textColor = Colors.black,
+    this.textColor,
     this.iconPath,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final bg = backgroundColor ?? (isDark ? theme.cardColor : Colors.white);
+    final border = borderColor ?? theme.dividerColor.withOpacity(0.2);
+    final text = textColor ?? theme.textTheme.bodyLarge?.color ?? Colors.black;
+
     return SizedBox(
       width: double.infinity,
       child: Container(
         decoration: BoxDecoration(
-          color: backgroundColor,
-          border: Border.all(
-            color: borderColor ?? const Color.fromRGBO(129, 129, 129, 0.1),
-          ),
+          color: bg,
+          border: Border.all(color: border),
           boxShadow: [
             BoxShadow(
-              color: Colors.black12,
-              offset: Offset(0, 4), // Only bottom shadow
+              color: isDark ? Colors.black26 : Colors.black12,
+              offset: const Offset(0, 4),
               blurRadius: 6,
-              spreadRadius: 0,
             ),
           ],
           borderRadius: BorderRadius.circular(5),
@@ -41,25 +45,32 @@ class SocialAuthButton extends StatelessWidget {
         child: OutlinedButton(
           onPressed: onPressed,
           style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 14),
             backgroundColor: Colors.transparent,
-            shadowColor: Colors.transparent,
-            side: BorderSide.none,
+            padding: const EdgeInsets.symmetric(vertical: 14),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(5),
             ),
+            side: BorderSide.none,
+            shadowColor: Colors.transparent,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (iconPath != null) ...[
-                Image.asset(iconPath!, height: 20),
+                Image.asset(
+                  iconPath!,
+                  height: 20,
+                  color:
+                      iconPath!.contains('apple')
+                          ? (isDark ? Colors.white : Colors.black)
+                          : null,
+                ),
                 const SizedBox(width: 8),
               ],
               Text(
                 label,
                 style: TextStyle(
-                  color: textColor,
+                  color: text,
                   fontWeight: FontWeight.w600,
                   fontSize: 12,
                 ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rwa_app/screens/login_screen.dart';
+import 'package:rwa_app/theme/theme.dart';
 import 'package:rwa_app/widgets/social_auth_widget.dart';
 
 class OnboardingScreen extends StatelessWidget {
@@ -7,8 +8,14 @@ class OnboardingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor =
+        Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+    final primaryColor = Theme.of(context).primaryColor;
+    final cardColor = Theme.of(context).cardColor;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Stack(
           children: [
@@ -18,13 +25,16 @@ class OnboardingScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset('assets/onboarding.png', width: 240),
+                  Image.asset(
+                    isDark ? 'assets/onboarding.png' : 'assets/onboarding.png',
+                    width: 240,
+                  ),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'The most Trusted app for\nReal World Assets',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Color.fromARGB(129, 129, 129, 70),
+                      color: textColor.withOpacity(0.7),
                       fontSize: 14,
                       letterSpacing: 0.3,
                       fontWeight: FontWeight.w400,
@@ -38,14 +48,11 @@ class OnboardingScreen extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
-                        ),
+                        MaterialPageRoute(builder: (_) => const LoginScreen()),
                       );
                     },
-                    backgroundColor: const Color(0xFF348F6C),
+                    backgroundColor: AppColors.primaryDark,
                     textColor: Colors.white,
-                    iconPath: null,
                   ),
 
                   const SizedBox(height: 20),
@@ -53,32 +60,20 @@ class OnboardingScreen extends StatelessWidget {
                   // Divider
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      SizedBox(
-                        width: 40,
-                        child: Divider(
-                          color: Color.fromRGBO(0, 0, 0, .2),
-                          thickness: .5,
-                        ),
-                      ),
+                    children: [
+                      const SizedBox(width: 40, child: Divider(thickness: 0.5)),
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
                         child: Text(
                           "OR",
                           style: TextStyle(
-                            color: Color.fromRGBO(0, 0, 0, .2),
+                            color: textColor.withOpacity(0.3),
                             fontSize: 12,
                             fontWeight: FontWeight.w400,
                           ),
                         ),
                       ),
-                      SizedBox(
-                        width: 40,
-                        child: Divider(
-                          color: Color.fromRGBO(0, 0, 0, .2),
-                          thickness: .5,
-                        ),
-                      ),
+                      const SizedBox(width: 40, child: Divider(thickness: 0.5)),
                     ],
                   ),
 
@@ -89,7 +84,7 @@ class OnboardingScreen extends StatelessWidget {
                     label: 'Continue with Google',
                     iconPath: 'assets/google-icon.png',
                     onPressed: () {},
-                    textColor: Color.fromRGBO(29, 29, 29, 1),
+                    textColor: textColor,
                   ),
 
                   const SizedBox(height: 12),
@@ -99,37 +94,34 @@ class OnboardingScreen extends StatelessWidget {
                     label: 'Continue with Apple',
                     iconPath: 'assets/apple-icon.png',
                     onPressed: () {},
-                    textColor: Color.fromRGBO(29, 29, 29, 1),
+                    textColor: textColor,
                   ),
 
                   const SizedBox(height: 20),
 
                   // Terms and Privacy
-                  const Text.rich(
+                  Text.rich(
                     TextSpan(
                       text: 'By proceeding, you agree to RWA CAMP’s ',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: Color.fromRGBO(29, 29, 29, 1),
-                      ),
+                      style: TextStyle(fontSize: 10, color: textColor),
                       children: [
                         TextSpan(
                           text: 'Terms of Service',
                           style: TextStyle(
                             decoration: TextDecoration.underline,
-                            decorationColor: Color(0xFF348F6C),
+                            decorationColor: primaryColor,
                             decorationThickness: 1.5,
-                            color: Color(0xFF348F6C),
+                            color: primaryColor,
                           ),
                         ),
-                        TextSpan(text: ' and '),
+                        const TextSpan(text: ' and '),
                         TextSpan(
                           text: 'Privacy Policy',
                           style: TextStyle(
                             decoration: TextDecoration.underline,
-                            decorationColor: Color(0xFF348F6C),
+                            decorationColor: primaryColor,
                             decorationThickness: 1.5,
-                            color: Color(0xFF348F6C),
+                            color: primaryColor,
                           ),
                         ),
                       ],
@@ -154,20 +146,19 @@ class OnboardingScreen extends StatelessWidget {
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
+                  children: [
                     Text(
                       'Skip',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Color.fromRGBO(29, 29, 29, 0.6),
+                        color: textColor.withOpacity(0.6),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-
                     Icon(
                       Icons.arrow_forward_ios_rounded,
                       size: 16,
-                      color: Color.fromRGBO(29, 29, 29, 0.6),
+                      color: textColor.withOpacity(0.6),
                     ),
                   ],
                 ),

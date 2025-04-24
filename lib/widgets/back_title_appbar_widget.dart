@@ -11,21 +11,26 @@ class BackTitleAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black;
+    final backgroundColor = isDark ? Colors.black : Colors.white;
+
     return AppBar(
-      backgroundColor: Colors.white,
-      elevation: 0,
+      backgroundColor: backgroundColor,
+      elevation: isDark ? 0 : 1,
       automaticallyImplyLeading: false,
       title: GestureDetector(
         onTap: onBack ?? () => Navigator.pop(context),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.arrow_back_ios, color: Colors.black, size: 18),
+            Icon(Icons.arrow_back_ios, color: textColor, size: 18),
             const SizedBox(width: 4),
             Text(
               title,
-              style: const TextStyle(
-                color: Colors.black,
+              style: TextStyle(
+                color: textColor,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
