@@ -12,57 +12,53 @@ class SearchAppBarField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Row(
       children: [
         Expanded(
           child: Container(
-            height: 48,
+            height: 44,
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.grey.shade400, width: 0.4),
+              color: theme.cardColor,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: const Color(0xFF16C784), width: 0.8),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Row(
-              children: [
-                const Icon(
+            alignment: Alignment.center,
+            child: TextField(
+              controller: controller,
+              autofocus: true,
+              cursorColor: const Color(0xFF16C784),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: const Color(0xFF16C784),
+              ),
+              decoration: InputDecoration(
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                hintText: "Search...",
+                hintStyle: TextStyle(
+                  fontSize: 14,
+                  color: isDark ? Colors.grey[400] : Colors.grey[600],
+                ),
+                prefixIcon: const Icon(
                   Icons.search,
-                  color: Color.fromRGBO(149, 149, 149, 1),
-                  size: 24,
+                  size: 20,
+                  color: Colors.grey,
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    controller: controller,
-                    autofocus: true,
-                    cursorColor: Colors.green,
-                    style: const TextStyle(fontSize: 16, color: Colors.green),
-                    decoration: const InputDecoration(
-                      hintText: 'Search for Articles',
-                      hintStyle: TextStyle(
-                        color: Color.fromRGBO(149, 149, 149, 1),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                      ),
-                      border: InputBorder.none,
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(vertical: 10),
-                    ),
-                  ),
-                ),
-              ],
+                border: InputBorder.none,
+              ),
             ),
           ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 8),
         GestureDetector(
           onTap: onCancel,
-          child: const Text(
+          child: Text(
             'Cancel',
-            style: TextStyle(
-              color: Colors.green,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: const Color(0xFF16C784),
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),

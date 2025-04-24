@@ -8,19 +8,26 @@ class NewsCardSide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final hasSubtitle =
         item['subtitle'] != null && item['subtitle'].toString().isNotEmpty;
     final image = item['image']?.toString();
     final imageHeight = hasSubtitle ? 80.0 : 70.0;
+
+    final titleColor = theme.textTheme.bodyLarge?.color ?? Colors.black;
+    final subtitleColor =
+        theme.textTheme.bodySmall?.color?.withOpacity(0.7) ?? Colors.grey;
+    final borderColor = theme.dividerColor.withOpacity(0.15);
+    final highlightColor = const Color(0xFF1CB379);
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 4),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(4),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: borderColor),
         ),
         child: Padding(
           padding: const EdgeInsets.all(10),
@@ -46,11 +53,11 @@ class NewsCardSide extends StatelessWidget {
                       item['title'] ?? '',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 13.5,
+                      style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: Colors.black,
+                        fontSize: 13.5,
                         height: 1.25,
+                        color: titleColor,
                       ),
                     ),
                     if (hasSubtitle) ...[
@@ -59,9 +66,9 @@ class NewsCardSide extends StatelessWidget {
                         item['subtitle'],
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: theme.textTheme.bodySmall?.copyWith(
                           fontSize: 10,
-                          color: Colors.grey,
+                          color: subtitleColor,
                         ),
                       ),
                     ],
@@ -70,24 +77,21 @@ class NewsCardSide extends StatelessWidget {
                       children: [
                         Text(
                           item['source'] ?? '',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: Color.fromRGBO(28, 179, 121, 1),
+                            color: highlightColor,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                         const SizedBox(width: 6),
-                        const Text(
+                        Text(
                           '·',
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                          style: TextStyle(fontSize: 12, color: subtitleColor),
                         ),
                         const SizedBox(width: 6),
                         Text(
                           item['time'] ?? '',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
+                          style: TextStyle(fontSize: 12, color: subtitleColor),
                         ),
                       ],
                     ),

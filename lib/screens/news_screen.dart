@@ -24,12 +24,14 @@ class _NewsScreenState extends State<NewsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(247, 247, 247, 1),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
-        elevation: 1,
+        backgroundColor: theme.appBarTheme.backgroundColor ?? theme.cardColor,
+        elevation: theme.appBarTheme.elevation ?? 1,
         toolbarHeight: 60,
         titleSpacing: 0,
         title: Padding(
@@ -63,12 +65,15 @@ class _NewsScreenState extends State<NewsScreen> {
           ),
           const SizedBox(height: 6),
           Expanded(
-            child: _selectedTab == 0 ? _buildNewsList() : _buildBlogsList(),
+            child:
+                _selectedTab == 0
+                    ? _buildNewsList(theme)
+                    : _buildBlogsList(theme),
           ),
         ],
       ),
       floatingActionButton: SizedBox(
-        width: 56, // Size of the button
+        width: 56,
         height: 56,
         child: FloatingActionButton(
           onPressed: () {
@@ -91,7 +96,7 @@ class _NewsScreenState extends State<NewsScreen> {
     );
   }
 
-  Widget _buildNewsList() {
+  Widget _buildNewsList(ThemeData theme) {
     final newsItems = [
       {
         'image': 'assets/news_blogs/news_1.png',
@@ -158,7 +163,7 @@ HashKey will provide custody and compliance.''',
     );
   }
 
-  Widget _buildBlogsList() {
+  Widget _buildBlogsList(ThemeData theme) {
     final blogs = [
       {
         'title': 'The Hidden Risks in RWA Protocols You Need to Know',
@@ -192,19 +197,21 @@ Analysts warn that investor protection is lacking.''',
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       children:
-          blogs.map((blog) {
-            return BlogCard(
-              blog: blog,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => BlogDetailScreen(blog: blog),
-                  ),
-                );
-              },
-            );
-          }).toList(),
+          blogs
+              .map(
+                (blog) => BlogCard(
+                  blog: blog,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BlogDetailScreen(blog: blog),
+                      ),
+                    );
+                  },
+                ),
+              )
+              .toList(),
     );
   }
 }

@@ -7,6 +7,9 @@ class NewsDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final String? image = news['image'];
     final String? title = news['title'];
     final String? source = news['source'];
@@ -18,13 +21,18 @@ class NewsDetailScreen extends StatelessWidget {
     );
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F7),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         elevation: 0.5,
-        backgroundColor: Colors.white,
-        leading: const BackButton(color: Colors.black),
-        title: const Text("News", style: TextStyle(color: Colors.black)),
-        centerTitle: true,
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        leading: BackButton(color: theme.iconTheme.color),
+        title: Text(
+          "News",
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        // centerTitle: true,
       ),
       body: ListView(
         children: [
@@ -32,8 +40,8 @@ class NewsDetailScreen extends StatelessWidget {
             Image.asset(
               image,
               width: double.infinity,
-              fit: BoxFit.cover,
               height: 200,
+              fit: BoxFit.cover,
             ),
           Padding(
             padding: const EdgeInsets.all(16),
@@ -42,11 +50,8 @@ class NewsDetailScreen extends StatelessWidget {
               children: [
                 Text(
                   title ?? '',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    height: 1.3,
-                    color: Color(0xFF17140F),
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -55,8 +60,8 @@ class NewsDetailScreen extends StatelessWidget {
                     if (source != null)
                       Text(
                         source.toUpperCase(),
-                        style: const TextStyle(
-                          color: Color(0xFF1CB379),
+                        style: TextStyle(
+                          color: const Color(0xFF1CB379),
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
@@ -69,16 +74,16 @@ class NewsDetailScreen extends StatelessWidget {
                     if (time != null)
                       Text(
                         time,
-                        style: const TextStyle(
+                        style: theme.textTheme.bodySmall?.copyWith(
                           fontSize: 12,
                           color: Colors.grey,
                         ),
                       ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
 
-                // ⬇ Render paragraphs with tighter spacing
+                // Content
                 if (content != null && content.isNotEmpty)
                   ...content
                       .trim()
@@ -88,32 +93,31 @@ class NewsDetailScreen extends StatelessWidget {
                           padding: const EdgeInsets.only(bottom: 6),
                           child: Text(
                             para.trim(),
-                            style: const TextStyle(
-                              fontSize: 14,
+                            style: theme.textTheme.bodyMedium?.copyWith(
                               height: 1.5,
-                              color: Color(0xFF17140F),
                             ),
                           ),
                         ),
                       ),
 
-                // ⬇ Quote block
+                // Quote block
                 if (quote != null && quote.isNotEmpty) ...[
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
+                      color:
+                          isDark ? Colors.grey.shade900 : Colors.grey.shade100,
                       border: Border(
                         left: BorderSide(
-                          color: Colors.green.shade400,
+                          color: const Color(0xFF1CB379),
                           width: 4,
                         ),
                       ),
                     ),
                     child: Text(
                       quote,
-                      style: const TextStyle(
+                      style: theme.textTheme.bodyMedium?.copyWith(
                         fontStyle: FontStyle.italic,
                         fontWeight: FontWeight.w600,
                       ),
@@ -121,12 +125,14 @@ class NewsDetailScreen extends StatelessWidget {
                   ),
                 ],
 
-                // ⬇ Bullet Points
+                // Bullet Points
                 if (bulletPoints.isNotEmpty) ...[
                   const SizedBox(height: 20),
-                  const Text(
+                  Text(
                     "Key Takeaways:",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   ...bulletPoints.map(
@@ -142,7 +148,9 @@ class NewsDetailScreen extends StatelessWidget {
                           Expanded(
                             child: Text(
                               point,
-                              style: const TextStyle(fontSize: 14, height: 1.5),
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                height: 1.5,
+                              ),
                             ),
                           ),
                         ],

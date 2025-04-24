@@ -7,6 +7,9 @@ class BlogDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final String? image = blog['image'];
     final String? title = blog['title'];
     final String? subtitle = blog['subtitle'];
@@ -19,13 +22,12 @@ class BlogDetailScreen extends StatelessWidget {
     );
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F7),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         elevation: 0.5,
-        backgroundColor: Colors.white,
-        leading: const BackButton(color: Colors.black),
-        title: const Text("Blog", style: TextStyle(color: Colors.black)),
-        centerTitle: true,
+        backgroundColor: theme.appBarTheme.backgroundColor ?? theme.cardColor,
+        leading: BackButton(color: theme.iconTheme.color),
+        title: Text("Blog", style: theme.textTheme.titleMedium),
       ),
       body: ListView(
         children: [
@@ -43,33 +45,30 @@ class BlogDetailScreen extends StatelessWidget {
               children: [
                 Text(
                   title ?? '',
-                  style: const TextStyle(
-                    fontSize: 20,
+                  style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w700,
                     height: 1.3,
-                    color: Color(0xFF17140F),
                   ),
                 ),
                 const SizedBox(height: 6),
                 if (subtitle != null && subtitle.isNotEmpty)
                   Text(
                     subtitle,
-                    style: const TextStyle(
-                      fontSize: 14,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.textTheme.bodySmall?.color,
                       height: 1.5,
-                      color: Colors.grey,
                     ),
                   ),
                 const SizedBox(height: 12),
                 RichText(
                   text: TextSpan(
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    style: theme.textTheme.bodySmall,
                     children: [
                       const TextSpan(text: 'Written by - '),
                       TextSpan(
                         text: author ?? '',
                         style: const TextStyle(
-                          color: Color(0xFF1CB379), // ✅ Only author in green
+                          color: Color(0xFF1CB379),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -79,7 +78,6 @@ class BlogDetailScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                // 🟢 Reduced spacing between paragraphs
                 if (content != null && content.isNotEmpty)
                   ...content
                       .trim()
@@ -89,10 +87,8 @@ class BlogDetailScreen extends StatelessWidget {
                           padding: const EdgeInsets.only(bottom: 6),
                           child: Text(
                             para.trim(),
-                            style: const TextStyle(
-                              fontSize: 14,
+                            style: theme.textTheme.bodyMedium?.copyWith(
                               height: 1.5,
-                              color: Color(0xFF17140F),
                             ),
                           ),
                         ),
@@ -103,25 +99,32 @@ class BlogDetailScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
+                      color:
+                          isDark ? Colors.grey.shade900 : Colors.grey.shade100,
                       border: Border(
-                        left: BorderSide(color: Colors.green, width: 4),
+                        left: BorderSide(
+                          color: const Color(0xFF1CB379),
+                          width: 4,
+                        ),
                       ),
                     ),
                     child: Text(
                       quote,
-                      style: const TextStyle(
+                      style: theme.textTheme.bodyMedium?.copyWith(
                         fontStyle: FontStyle.italic,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
                 ],
+
                 if (bulletPoints.isNotEmpty) ...[
                   const SizedBox(height: 20),
-                  const Text(
+                  Text(
                     "Key Insights:",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   ...bulletPoints.map(
@@ -130,14 +133,13 @@ class BlogDetailScreen extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            "• ",
-                            style: TextStyle(fontSize: 14, height: 1.5),
-                          ),
+                          const Text("• "),
                           Expanded(
                             child: Text(
                               point,
-                              style: const TextStyle(fontSize: 14, height: 1.5),
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                height: 1.5,
+                              ),
                             ),
                           ),
                         ],

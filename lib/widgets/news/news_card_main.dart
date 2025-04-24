@@ -8,6 +8,11 @@ class NewsCardMain extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyLarge?.color ?? Colors.black;
+    final subtitleColor =
+        theme.textTheme.bodySmall?.color?.withOpacity(0.6) ?? Colors.grey;
+    final highlightColor = const Color(0xFF1CB379);
     final bool hasSubtitle =
         item['subtitle'] != null && item['subtitle'].toString().isNotEmpty;
 
@@ -34,11 +39,11 @@ class NewsCardMain extends StatelessWidget {
                   item['title'],
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     height: 1.3,
-                    color: Colors.black,
+                    color: textColor,
                   ),
                 ),
                 if (hasSubtitle) ...[
@@ -47,10 +52,10 @@ class NewsCardMain extends StatelessWidget {
                     item['subtitle'],
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: theme.textTheme.bodySmall?.copyWith(
                       fontSize: 10,
+                      color: subtitleColor,
                       fontWeight: FontWeight.w400,
-                      color: Colors.grey,
                     ),
                   ),
                 ],
@@ -59,27 +64,21 @@ class NewsCardMain extends StatelessWidget {
                   children: [
                     Text(
                       item['source'],
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: Color.fromRGBO(28, 179, 121, 1),
+                        color: highlightColor,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(width: 6),
-                    const Text(
+                    Text(
                       '·',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Color.fromRGBO(28, 179, 121, 1),
-                      ),
+                      style: TextStyle(fontSize: 12, color: highlightColor),
                     ),
                     const SizedBox(width: 6),
                     Text(
                       item['time'],
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color.fromRGBO(28, 179, 121, 1),
-                      ),
+                      style: TextStyle(fontSize: 12, color: highlightColor),
                     ),
                   ],
                 ),

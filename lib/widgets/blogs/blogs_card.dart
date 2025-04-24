@@ -8,6 +8,9 @@ class BlogCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final bool hasImage =
         blog['image'] != null && blog['image'].toString().isNotEmpty;
     final bool hasSubtitle =
@@ -18,7 +21,7 @@ class BlogCard extends StatelessWidget {
       child: Card(
         elevation: 0,
         margin: const EdgeInsets.only(bottom: 12),
-        color: Colors.white,
+        color: theme.cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -44,11 +47,9 @@ class BlogCard extends StatelessWidget {
                         blog['title'] ?? '',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
-                          fontSize: 14,
                           height: 1.3,
-                          color: Color.fromRGBO(23, 20, 15, 1),
                         ),
                       ),
                     ),
@@ -59,11 +60,9 @@ class BlogCard extends StatelessWidget {
                   blog['title'] ?? '',
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    fontSize: 14,
                     height: 1.3,
-                    color: Color.fromRGBO(23, 20, 15, 1),
                   ),
                 ),
               if (hasSubtitle) ...[
@@ -72,7 +71,10 @@ class BlogCard extends StatelessWidget {
                   blog['subtitle'],
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: isDark ? Colors.grey[400] : Colors.grey[700],
+                    fontSize: 11,
+                  ),
                 ),
               ],
               const SizedBox(height: 4),
@@ -82,24 +84,21 @@ class BlogCard extends StatelessWidget {
                     blog['author'] ?? '',
                     style: const TextStyle(
                       fontSize: 10,
-                      color: Color.fromRGBO(28, 179, 121, 1),
+                      color: Color(0xFF1CB379),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(width: 6),
                   const Text(
                     '·',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Color.fromRGBO(28, 179, 121, 1),
-                    ),
+                    style: TextStyle(fontSize: 10, color: Color(0xFF1CB379)),
                   ),
                   const SizedBox(width: 6),
                   Text(
                     blog['time'] ?? '',
                     style: const TextStyle(
                       fontSize: 10,
-                      color: Color.fromRGBO(28, 179, 121, 1),
+                      color: Color(0xFF1CB379),
                     ),
                   ),
                 ],
