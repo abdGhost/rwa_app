@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rwa_app/provider/settings_provider.dart';
 import 'package:rwa_app/screens/my_account_screen.dart';
 import 'package:rwa_app/screens/select_language_screen.dart';
+import 'package:rwa_app/screens/login_screen.dart'; // 👈 Import LoginScreen to redirect
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -46,7 +48,7 @@ class ProfileScreen extends ConsumerWidget {
               children: [
                 const SizedBox(height: 24),
                 Text(
-                  "Hi, Ghost",
+                  "Hi, Ghost", // (optionally replace with actual user name)
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -87,7 +89,7 @@ class ProfileScreen extends ConsumerWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () {},
+                        onPressed: () => _logout(context),
                         style: OutlinedButton.styleFrom(
                           backgroundColor: theme.cardColor,
                           foregroundColor: theme.textTheme.bodyLarge?.color,
@@ -137,7 +139,10 @@ class ProfileScreen extends ConsumerWidget {
                       settingTile(
                         context,
                         title: "Currency",
-                        trailing: Text("USD", style: theme.textTheme.bodySmall),
+                        trailing: Text(
+                          selectedCurrency,
+                          style: theme.textTheme.bodySmall,
+                        ),
                       ),
                       divider(theme),
                       InkWell(
@@ -153,7 +158,7 @@ class ProfileScreen extends ConsumerWidget {
                           context,
                           title: "Language",
                           trailing: Text(
-                            "English",
+                            selectedLanguage,
                             style: theme.textTheme.bodySmall,
                           ),
                         ),
@@ -203,6 +208,17 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _logout(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // ✅ Clear all saved user data
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
     );
   }
 

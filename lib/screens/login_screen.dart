@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:rwa_app/controllers/signin_controller.dart';
 import 'package:rwa_app/screens/botttom_nav_screen.dart';
 import 'package:rwa_app/screens/signup_screen.dart';
 import 'package:rwa_app/theme/theme.dart';
@@ -14,7 +16,10 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +49,6 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// Google
               SocialAuthButton(
                 label: 'Continue with Google',
                 iconPath: 'assets/google-icon.png',
@@ -52,15 +56,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 textColor: isDark ? Colors.white : const Color(0xFF1D1D1D),
               ),
               const SizedBox(height: 12),
-
-              /// Apple
               SocialAuthButton(
                 label: 'Continue with Apple',
                 iconPath: 'assets/apple-icon.png',
                 onPressed: () {},
                 textColor: isDark ? Colors.white : const Color(0xFF1D1D1D),
               ),
-
               const SizedBox(height: 20),
               const AuthDivider(),
               const SizedBox(height: 20),
@@ -73,6 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 2),
               CustomTextField(
+                controller: _emailController,
                 hint: 'example@gmail.com',
                 borderColor: isDark ? Colors.white : Colors.black12,
                 borderWidth: 0.6,
@@ -87,6 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 2),
               CustomTextField(
+                controller: _passwordController,
                 hint: 'Enter your password',
                 obscure: _obscurePassword,
                 borderColor: isDark ? Colors.white : Colors.black12,
@@ -138,15 +141,18 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                   ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const BottomNavScreen(),
-                      ),
-                    );
-                  },
-                  child: const Text('Log In'),
+                  onPressed: _isLoading ? null : _onLoginPressed,
+                  child:
+                      _isLoading
+                          ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                          : const Text('Log In'),
                 ),
               ),
 
@@ -178,5 +184,67 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _onLoginPressed() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      _showSnackBar("Please fill in all fields");
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final result = await SigninController().handleSignin(
+        context,
+        email: email,
+        password: password,
+      );
+
+      if (result.status) {
+        _showSnackBar(result.message); // "Login successfully!"
+
+        // 🔥 Save token, email, name, userId to local storage
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', result.token ?? '');
+        await prefs.setString('email', result.email ?? '');
+        await prefs.setString('userId', result.userId ?? '');
+        await prefs.setString('name', result.name ?? '');
+
+        // ✅ Navigate to home after saving
+        Future.delayed(const Duration(seconds: 1), () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const BottomNavScreen()),
+          );
+        });
+      } else {
+        _showSnackBar(result.message); // "Invalid email or password!"
+      }
+    } catch (e) {
+      final errorMessage = _extractErrorMessage(e.toString());
+      _showSnackBar(errorMessage);
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  String _extractErrorMessage(String error) {
+    try {
+      final match = RegExp(r'"message"\s*:\s*"([^"]+)"').firstMatch(error);
+      if (match != null) {
+        return match.group(1) ?? "Something went wrong";
+      }
+    } catch (_) {}
+    return "Something went wrong";
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 }

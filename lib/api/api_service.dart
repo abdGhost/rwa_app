@@ -32,4 +32,27 @@ class ApiService {
       throw Exception("Signup failed: ${response.body}");
     }
   }
+
+  Future<Map<String, dynamic>> signin({
+    required String email,
+    required String password,
+  }) async {
+    final url = Uri.parse(
+      "https://rwa-f1623a22e3ed.herokuapp.com/api/users/signin",
+    );
+
+    final body = {"email": email, "password": password};
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return jsonDecode(response.body);
+    } else {
+      throw response.body; // Throw so we can catch & show message
+    }
+  }
 }
