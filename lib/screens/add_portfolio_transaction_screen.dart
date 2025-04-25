@@ -24,11 +24,9 @@ class _AddPortfolioTransactionScreenState
       builder:
           (context, child) => Theme(
             data: Theme.of(context).copyWith(
-              colorScheme: const ColorScheme.light(
-                primary: Color(0xFF348F6C),
-                onPrimary: Colors.white,
-                onSurface: Colors.black,
-              ),
+              colorScheme: Theme.of(
+                context,
+              ).colorScheme.copyWith(primary: const Color(0xFF348F6C)),
             ),
             child: child!,
           ),
@@ -44,52 +42,37 @@ class _AddPortfolioTransactionScreenState
   @override
   Widget build(BuildContext context) {
     final coin = widget.coin;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF7F7F7),
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 1,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: theme.iconTheme.color),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Add Transaction',
-          style: TextStyle(color: Colors.black, fontSize: 16),
-        ),
+        title: Text('Add Transaction', style: theme.textTheme.titleMedium),
       ),
-      backgroundColor: const Color(0xFFF7F7F7),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Selected Coin",
-              style: TextStyle(fontWeight: FontWeight.w300, fontSize: 12),
-            ),
+            _label("Selected Coin", theme),
             const SizedBox(height: 4),
             Text(
               "${coin["name"]}/ ${coin["symbol"]}",
-              style: const TextStyle(
-                color: Color(0xFF111111),
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w500,
-                fontSize: 14,
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
-              "Total Spent",
-              style: TextStyle(fontWeight: FontWeight.w300, fontSize: 12),
-            ),
+            _label("Total Spent", theme),
             const SizedBox(height: 6),
-            TextField(
-              keyboardType: TextInputType.number,
-              style: const TextStyle(color: Colors.black),
-              cursorColor: Colors.black,
-              cursorWidth: 1,
-              decoration: _inputDecoration(),
-            ),
+            _inputField(theme),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -97,21 +80,9 @@ class _AddPortfolioTransactionScreenState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        "Quantity",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w300,
-                          fontSize: 12,
-                        ),
-                      ),
+                      _label("Quantity", theme),
                       const SizedBox(height: 6),
-                      TextField(
-                        keyboardType: TextInputType.number,
-                        style: const TextStyle(color: Colors.black),
-                        cursorColor: Colors.black,
-                        cursorWidth: 1,
-                        decoration: _inputDecoration(),
-                      ),
+                      _inputField(theme),
                     ],
                   ),
                 ),
@@ -120,81 +91,52 @@ class _AddPortfolioTransactionScreenState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        "Price per Token",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w300,
-                          fontSize: 12,
-                        ),
-                      ),
+                      _label("Price per Token", theme),
                       const SizedBox(height: 6),
-                      TextField(
-                        keyboardType: TextInputType.number,
-                        style: const TextStyle(color: Colors.black),
-                        cursorColor: Colors.black,
-                        cursorWidth: 1,
-                        decoration: _inputDecoration(),
-                      ),
+                      _inputField(theme),
                     ],
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            const Text(
-              "Date",
-              style: TextStyle(fontWeight: FontWeight.w300, fontSize: 12),
-            ),
+            _label("Date", theme),
             const SizedBox(height: 6),
             TextField(
               controller: _dateController,
               readOnly: true,
               onTap: () => _pickDate(context),
-              style: const TextStyle(color: Colors.black),
-              cursorColor: Colors.black,
-              cursorWidth: 1,
-              decoration: _inputDecoration().copyWith(
+              style: theme.textTheme.bodyMedium,
+              cursorColor: theme.primaryColor,
+              decoration: _inputDecoration(theme).copyWith(
                 hintText: "dd/mm/yyyy",
-                suffixIcon: const Icon(Icons.calendar_today),
+                suffixIcon: Icon(
+                  Icons.calendar_today,
+                  color: theme.iconTheme.color,
+                ),
               ),
             ),
             const Spacer(),
             Center(
-              child: Container(
-                width: 372,
+              child: SizedBox(
+                width: double.infinity,
                 height: 46,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF348F6C),
-                  borderRadius: BorderRadius.circular(6),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF1A4937).withOpacity(0.2),
-                      offset: const Offset(0, 3),
-                      blurRadius: 1,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF348F6C),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                    BoxShadow(
-                      color: const Color(0xFF1A4937).withOpacity(0.5),
-                      offset: const Offset(0, 2),
-                      blurRadius: 1,
-                    ),
-                  ],
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(6),
-                    onTap: () {
-                      // Handle transaction submission
-                    },
-                    child: const Center(
-                      child: Text(
-                        "Add Transaction",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                  ),
+                  onPressed: () {
+                    // Handle transaction submission
+                  },
+                  child: const Text(
+                    "Add Transaction",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -206,22 +148,38 @@ class _AddPortfolioTransactionScreenState
     );
   }
 
-  InputDecoration _inputDecoration() {
+  Widget _label(String text, ThemeData theme) {
+    return Text(
+      text,
+      style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w300),
+    );
+  }
+
+  TextField _inputField(ThemeData theme) {
+    return TextField(
+      keyboardType: TextInputType.number,
+      style: theme.textTheme.bodyMedium,
+      cursorColor: theme.primaryColor,
+      decoration: _inputDecoration(theme),
+    );
+  }
+
+  InputDecoration _inputDecoration(ThemeData theme) {
     return InputDecoration(
       filled: true,
-      fillColor: Colors.white,
+      fillColor: theme.cardColor,
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(6),
-        borderSide: const BorderSide(color: Colors.grey, width: 0.4),
+        borderSide: BorderSide(color: Colors.grey.shade400, width: 0.4),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(6),
-        borderSide: const BorderSide(color: Colors.grey, width: 0.4),
+        borderSide: BorderSide(color: Colors.grey.shade400, width: 0.4),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(6),
-        borderSide: const BorderSide(color: Colors.grey, width: 0.4),
+        borderSide: BorderSide(color: Colors.grey.shade600, width: 0.6),
       ),
     );
   }

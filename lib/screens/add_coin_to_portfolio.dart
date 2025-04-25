@@ -92,6 +92,9 @@ class _AddCoinToPortfolioScreenState extends State<AddCoinToPortfolioScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final filteredCoins =
         _isSearching && _searchController.text.isNotEmpty
             ? coins.where((coin) {
@@ -111,9 +114,9 @@ class _AddCoinToPortfolioScreenState extends State<AddCoinToPortfolioScreen> {
         filteredCoins.where((coin) => !recentlyAdded.contains(coin)).toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F7),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF7F7F7),
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         automaticallyImplyLeading: false,
         toolbarHeight: 80,
@@ -121,35 +124,30 @@ class _AddCoinToPortfolioScreenState extends State<AddCoinToPortfolioScreen> {
         title: Row(
           children: [
             IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black),
+              icon: Icon(Icons.arrow_back, color: theme.iconTheme.color),
               onPressed: () => Navigator.pop(context),
             ),
             Expanded(
               child: Container(
                 height: 48,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFFFFF),
+                  color: theme.cardColor,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 alignment: Alignment.center,
                 child: TextField(
                   controller: _searchController,
-                  onChanged: (value) {
-                    setState(() => _isSearching = value.isNotEmpty);
-                  },
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF16C784), // ✅ Green text color
+                  onChanged:
+                      (value) =>
+                          setState(() => _isSearching = value.isNotEmpty),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: const Color(0xFF16C784),
                   ),
-                  cursorColor: Color(0xFF16C784), // ✅ Green cursor
+                  cursorColor: const Color(0xFF16C784),
                   decoration: InputDecoration(
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                    prefixIcon: const Icon(
-                      Icons.search,
-                      size: 20,
-                      color: Colors.grey,
-                    ),
+                    prefixIcon: const Icon(Icons.search, size: 20),
                     suffixIcon:
                         _isSearching
                             ? GestureDetector(
@@ -157,16 +155,11 @@ class _AddCoinToPortfolioScreenState extends State<AddCoinToPortfolioScreen> {
                                 _searchController.clear();
                                 setState(() => _isSearching = false);
                               },
-                              child: const Icon(
-                                Icons.close,
-                                size: 18,
-                                color: Colors.grey,
-                              ),
+                              child: const Icon(Icons.close, size: 18),
                             )
                             : null,
                     hintText: "Search for coin",
-                    hintStyle: const TextStyle(
-                      fontSize: 14,
+                    hintStyle: theme.textTheme.bodySmall?.copyWith(
                       color: Colors.grey,
                     ),
                     border: InputBorder.none,
@@ -184,15 +177,11 @@ class _AddCoinToPortfolioScreenState extends State<AddCoinToPortfolioScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (recentlyAdded.isNotEmpty) ...[
-              const Padding(
-                padding: EdgeInsets.fromLTRB(16, 12, 16, 8),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                 child: Text(
                   "Recently Added",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1D1D1D),
-                  ),
+                  style: theme.textTheme.titleSmall,
                 ),
               ),
               SizedBox(
@@ -207,7 +196,8 @@ class _AddCoinToPortfolioScreenState extends State<AddCoinToPortfolioScreen> {
                     return Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFEEF1F6),
+                        color:
+                            isDark ? Colors.white10 : const Color(0xFFEEF1F6),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Row(
@@ -216,11 +206,7 @@ class _AddCoinToPortfolioScreenState extends State<AddCoinToPortfolioScreen> {
                           const SizedBox(width: 6),
                           Text(
                             coin["symbol"],
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                              color: Color(0xFF4D4D4D),
-                            ),
+                            style: theme.textTheme.bodySmall,
                           ),
                         ],
                       ),
@@ -230,24 +216,17 @@ class _AddCoinToPortfolioScreenState extends State<AddCoinToPortfolioScreen> {
               ),
             ],
             if (others.isNotEmpty) ...[
-              const Padding(
-                padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: Text(
-                  "All Coins",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1D1D1D),
-                  ),
-                ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Text("All Coins", style: theme.textTheme.titleSmall),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: theme.cardColor,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Color(0xFFF7F7F7)),
+                    // border: Border.all(color: theme.dividerColor),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.01),
@@ -257,17 +236,17 @@ class _AddCoinToPortfolioScreenState extends State<AddCoinToPortfolioScreen> {
                     ],
                   ),
                   child: ListView.separated(
-                    padding: const EdgeInsets.only(left: 12, right: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: others.length,
                     separatorBuilder:
-                        (_, __) => const Divider(
-                          height: 0.5,
-                          color: Color(0xFF000000),
+                        (_, __) => Divider(
+                          color: isDark ? Colors.grey.shade800 : Colors.black12,
                           thickness: 0.1,
+                          height: 0.5,
                         ),
-                    itemBuilder: (_, i) => _buildCoinTile(others[i]),
+                    itemBuilder: (_, i) => _buildCoinTile(context, others[i]),
                   ),
                 ),
               ),
@@ -278,10 +257,12 @@ class _AddCoinToPortfolioScreenState extends State<AddCoinToPortfolioScreen> {
     );
   }
 
-  Widget _buildCoinTile(Map<String, dynamic> coin) {
+  Widget _buildCoinTile(BuildContext context, Map<String, dynamic> coin) {
     final isUp = coin["change"] >= 0;
-    final changeColor = isUp ? Color(0xFF16C784) : Color(0xFFFF3B30);
+    final changeColor =
+        isUp ? const Color(0xFF16C784) : const Color(0xFFFF3B30);
     final icon = isUp ? Icons.arrow_drop_up : Icons.arrow_drop_down;
+    final theme = Theme.of(context);
 
     return InkWell(
       onTap: () {
@@ -304,18 +285,14 @@ class _AddCoinToPortfolioScreenState extends State<AddCoinToPortfolioScreen> {
                 children: [
                   Text(
                     coin["symbol"],
-                    style: const TextStyle(
+                    style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                      color: Color(0xFF000000),
                     ),
                   ),
                   Text(
                     coin["name"],
-                    style: const TextStyle(
-                      fontSize: 10,
-                      color: Color(0xFF959595),
-                      fontWeight: FontWeight.w400,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.grey,
                     ),
                   ),
                 ],
@@ -339,56 +316,4 @@ class _AddCoinToPortfolioScreenState extends State<AddCoinToPortfolioScreen> {
       ),
     );
   }
-
-  // Widget _buildCoinTile(Map<String, dynamic> coin) {
-  //   final isUp = coin["change"] >= 0;
-  //   final changeColor = isUp ? Color(0xFF16C784) : Color(0xFFFF3B30);
-  //   final icon = isUp ? Icons.arrow_drop_up : Icons.arrow_drop_down;
-
-  //   return Padding(
-  //     padding: const EdgeInsets.symmetric(vertical: 12),
-  //     child: Row(
-  //       children: [
-  //         Image.asset('assets/logo.png', width: 34, height: 34),
-  //         const SizedBox(width: 12),
-  //         Expanded(
-  //           child: Column(
-  //             crossAxisAlignment: CrossAxisAlignment.start,
-  //             children: [
-  //               Text(
-  //                 coin["symbol"],
-  //                 style: const TextStyle(
-  //                   fontWeight: FontWeight.w600,
-  //                   fontSize: 12,
-  //                   color: Color(0xFF000000),
-  //                 ),
-  //               ),
-  //               Text(
-  //                 coin["name"],
-  //                 style: const TextStyle(
-  //                   fontSize: 10,
-  //                   color: Color(0xFF959595),
-  //                   fontWeight: FontWeight.w400,
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //         Row(
-  //           children: [
-  //             Icon(icon, size: 16, color: changeColor),
-  //             Text(
-  //               "${coin['change'].abs().toStringAsFixed(2)}%",
-  //               style: TextStyle(
-  //                 color: changeColor,
-  //                 fontWeight: FontWeight.w600,
-  //                 fontSize: 12,
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 }
