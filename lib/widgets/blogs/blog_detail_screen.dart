@@ -1,9 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'package:intl/intl.dart';
 
 class BlogDetailScreen extends StatelessWidget {
   final Map<String, dynamic> blog;
 
   const BlogDetailScreen({super.key, required this.blog});
+
+  String formatTime(String rawTime) {
+    try {
+      final cleanTime = rawTime.split(' GMT')[0];
+      final formatter = DateFormat('EEE MMM dd yyyy HH:mm:ss');
+      final parsedDate = formatter.parse(cleanTime);
+      return DateFormat('MMM d, yyyy').format(parsedDate);
+    } catch (e) {
+      return rawTime;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,11 +28,13 @@ class BlogDetailScreen extends StatelessWidget {
     final String? subtitle = blog['subtitle'];
     final String? author = blog['author'];
     final String? time = blog['time'];
-    final String? content = blog['content'];
-    final String? quote = blog['quote'];
+    final String? content = blog['content']; // HTML content
+    final Map<String, dynamic>? blockQuote = blog['blockQuote'];
     final List<String> bulletPoints = List<String>.from(
       blog['bulletPoints'] ?? [],
     );
+
+    final formattedTime = time != null ? formatTime(time) : '';
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -27,17 +42,24 @@ class BlogDetailScreen extends StatelessWidget {
         elevation: 0.5,
         backgroundColor: theme.appBarTheme.backgroundColor ?? theme.cardColor,
         leading: BackButton(color: theme.iconTheme.color),
-        title: Text("Blog", style: theme.textTheme.titleMedium),
+        title: Text("Blog", style: theme.textTheme.bodyLarge),
       ),
       body: ListView(
         children: [
           if (image != null && image.isNotEmpty)
-            Image.asset(
-              image,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              height: 200,
-            ),
+            image.startsWith('http')
+                ? Image.network(
+                  image,
+                  width: double.infinity,
+                  height: 200,
+                  fit: BoxFit.cover,
+                )
+                : Image.asset(
+                  image,
+                  width: double.infinity,
+                  height: 200,
+                  fit: BoxFit.cover,
+                ),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -59,7 +81,6 @@ class BlogDetailScreen extends StatelessWidget {
                       height: 1.5,
                     ),
                   ),
-                const SizedBox(height: 12),
                 RichText(
                   text: TextSpan(
                     style: theme.textTheme.bodySmall,
@@ -72,32 +93,15 @@ class BlogDetailScreen extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      TextSpan(text: ' · ${time ?? ''}'),
+                      TextSpan(text: ' · $formattedTime'),
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 12),
 
-                if (content != null && content.isNotEmpty)
-                  ...content
-                      .trim()
-                      .split('\n\n')
-                      .map(
-                        (para) => Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
-                          child: Text(
-                            para.trim(),
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              height: 1.5,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                if (quote != null && quote.isNotEmpty) ...[
-                  const SizedBox(height: 20),
+                if (blockQuote != null && blockQuote.isNotEmpty) ...[
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.only(left: 12, right: 12),
                     decoration: BoxDecoration(
                       color:
                           isDark ? Colors.grey.shade900 : Colors.grey.shade100,
@@ -109,12 +113,36 @@ class BlogDetailScreen extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      quote,
+                      blockQuote['text'] ?? '',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontStyle: FontStyle.italic,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
+                  ),
+                ],
+
+                // Render HTML content
+                if (content != null && content.isNotEmpty) ...[
+                  Html(
+                    data: content,
+                    style: {
+                      'p': Style(
+                        margin: Margins.only(bottom: 12),
+                        fontSize: FontSize(12),
+                        lineHeight: LineHeight(1.5),
+                        color: theme.textTheme.bodyMedium?.color,
+                      ),
+                      'h2': Style(
+                        fontSize: FontSize(20),
+                        fontWeight: FontWeight.bold,
+                        margin: Margins.only(bottom: 12),
+                      ),
+                      'li': Style(
+                        fontSize: FontSize(16),
+                        lineHeight: LineHeight(1.5),
+                      ),
+                    },
                   ),
                 ],
 

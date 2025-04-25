@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:rwa_app/screens/chat_screen.dart';
 import 'package:rwa_app/widgets/blogs/blog_detail_screen.dart';
@@ -11,6 +11,7 @@ import 'package:rwa_app/widgets/news/news_card_side.dart';
 import 'package:rwa_app/widgets/news/news_detail_screen.dart';
 import 'package:rwa_app/widgets/news/news_tab_buttons.dart';
 import 'package:rwa_app/widgets/search_appbar_field_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NewsScreen extends StatefulWidget {
   const NewsScreen({super.key});
@@ -25,12 +26,18 @@ class _NewsScreenState extends State<NewsScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   List<Map<String, dynamic>> newsItems = [];
+  List<Map<String, dynamic>> blogItems = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    fetchNews();
+    fetchAllData();
+  }
+
+  Future<void> fetchAllData() async {
+    await Future.wait([fetchNews(), fetchBlogs()]);
+    setState(() => _isLoading = false);
   }
 
   Future<void> fetchNews() async {
@@ -42,28 +49,69 @@ class _NewsScreenState extends State<NewsScreen> {
         final data = jsonDecode(response.body);
         final List newsList = data['news'];
 
-        setState(() {
-          newsItems =
-              newsList.map<Map<String, dynamic>>((news) {
-                return {
-                  'image': news['thumbnail'],
-                  'title': news['title'],
-                  'subtitle': news['subTitle'],
-                  'source': news['author'],
-                  'time': news['publishDate'],
-                  'content': news['content'],
-                  'quote': null,
-                  'bulletPoints': [],
-                };
-              }).toList();
-          _isLoading = false;
-        });
-      } else {
-        throw Exception('Failed to load news');
+        newsItems =
+            newsList.map<Map<String, dynamic>>((news) {
+              return {
+                'image': news['thumbnail'],
+                'title': news['title'],
+                'subtitle': news['subTitle'],
+                'source': news['author'],
+                'time': news['publishDate'],
+                'content': news['content'],
+                'quote': null,
+                'bulletPoints': [],
+              };
+            }).toList();
       }
     } catch (e) {
       print('❌ Error fetching news: $e');
-      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> fetchBlogs() async {
+    const url =
+        'https://rwa-f1623a22e3ed.herokuapp.com/api/currencies/rwa/blog';
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+
+      if (token.isEmpty) {
+        print('❌ Token not found!');
+        return;
+      }
+
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $token', // 👈 Attach the token here
+        },
+      );
+
+      print('Blogs API Response: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final List blogsList = data['blog'];
+
+        blogItems =
+            blogsList.map<Map<String, dynamic>>((blog) {
+              return {
+                'image': blog['thumbnail'],
+                'title': blog['title'],
+                'subtitle': blog['subTitle'],
+                'author': blog['author'],
+                'time': blog['publishDate'],
+                'category': blog['category'],
+                'content': blog['sections'], // HTML content
+                'blockQuote': blog['blockQuote'],
+              };
+            }).toList();
+      } else {
+        print('Failed to load blogs: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('❌ Error fetching blogs: $e');
     }
   }
 
@@ -111,9 +159,13 @@ class _NewsScreenState extends State<NewsScreen> {
           const SizedBox(height: 6),
           Expanded(
             child:
-                _selectedTab == 0
-                    ? _buildNewsList(theme)
-                    : _buildBlogsList(theme),
+                _isLoading
+                    ? const Center(
+                      child: CircularProgressIndicator(color: Colors.green),
+                    )
+                    : _selectedTab == 0
+                    ? _buildNewsList()
+                    : _buildBlogsList(),
           ),
         ],
       ),
@@ -141,90 +193,53 @@ class _NewsScreenState extends State<NewsScreen> {
     );
   }
 
-  Widget _buildNewsList(ThemeData theme) {
-    if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: Colors.green),
-      );
-    }
-
-    if (newsItems.isEmpty) {
-      return const Center(
-        child: Text(
-          'No news available.',
-          style: TextStyle(fontSize: 16, color: Colors.grey),
-        ),
-      );
-    }
-
+  Widget _buildNewsList() {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       children: [
-        GestureDetector(
-          onTap:
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => NewsDetailScreen(news: newsItems.first),
+        if (newsItems.isNotEmpty) ...[
+          GestureDetector(
+            onTap:
+                () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => NewsDetailScreen(news: newsItems.first),
+                  ),
+                ),
+            child: NewsCardMain(item: newsItems.first),
+          ),
+          const SizedBox(height: 10),
+          ...newsItems
+              .skip(1)
+              .map(
+                (item) => NewsCardSide(
+                  item: item,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => NewsDetailScreen(news: item),
+                      ),
+                    );
+                  },
                 ),
               ),
-          child: NewsCardMain(item: newsItems.first),
-        ),
-        const SizedBox(height: 10),
-        ...newsItems
-            .skip(1)
-            .map(
-              (item) => NewsCardSide(
-                item: item,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => NewsDetailScreen(news: item),
-                    ),
-                  );
-                },
-              ),
+        ] else
+          const Center(
+            child: Text(
+              'No news available.',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
+          ),
       ],
     );
   }
 
-  Widget _buildBlogsList(ThemeData theme) {
-    final blogs = [
-      {
-        'title': 'The Hidden Risks in RWA Protocols You Need to Know',
-        'subtitle': 'RWAs promise stability and yield...',
-        'author': 'Alex Foster',
-        'time': '7 Minutes read',
-        'image': 'assets/news_blogs/news_1.png',
-        'content':
-            '''RWAs bring stability but off-chain enforcement is still weak.
-
-Analysts warn that investor protection is lacking.''',
-        'quote': 'RWAs are only as strong as their legal enforcement.',
-        'bulletPoints': [
-          'Legal clarity is lacking.',
-          'Insurance coverage is inconsistent.',
-        ],
-      },
-      {
-        'title': 'RWA Airdrops: The Next Big Opportunity in DeFi?',
-        'subtitle': 'Token airdrops are becoming a powerful tool...',
-        'author': 'Vanessa Liu',
-        'time': '4 Minutes read',
-        'image': '',
-        'content':
-            '''Major RWA protocols are planning token airdrops to boost participation.''',
-        'quote': null,
-        'bulletPoints': [],
-      },
-    ];
-
+  Widget _buildBlogsList() {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       children:
-          blogs
+          blogItems
               .map(
                 (blog) => BlogCard(
                   blog: blog,

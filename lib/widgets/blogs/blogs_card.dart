@@ -1,10 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class BlogCard extends StatelessWidget {
   final Map<String, dynamic> blog;
   final VoidCallback? onTap;
 
   const BlogCard({super.key, required this.blog, this.onTap});
+
+  String formatTime(String rawTime) {
+    try {
+      final cleanedTime = rawTime.split(' GMT')[0]; // Remove ' GMT+...' part
+      final formatter = DateFormat('EEE MMM dd yyyy HH:mm:ss');
+      final parsedDate = formatter.parse(cleanedTime);
+      return DateFormat(
+        'MMM d, yyyy',
+      ).format(parsedDate); // Output: Oct 30, 2024
+    } catch (e) {
+      print('Error parsing date: $e');
+      return rawTime; // fallback if error
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,6 +30,9 @@ class BlogCard extends StatelessWidget {
         blog['image'] != null && blog['image'].toString().isNotEmpty;
     final bool hasSubtitle =
         blog['subtitle'] != null && blog['subtitle'].toString().isNotEmpty;
+    final String imageUrl = blog['image'] ?? '';
+    final String formattedTime =
+        blog['time'] != null ? formatTime(blog['time']) : '';
 
     return GestureDetector(
       onTap: onTap,
@@ -34,12 +52,30 @@ class BlogCard extends StatelessWidget {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(6),
-                      child: Image.asset(
-                        blog['image'],
-                        width: 90,
-                        height: 60,
-                        fit: BoxFit.cover,
-                      ),
+                      child:
+                          imageUrl.startsWith('http')
+                              ? Image.network(
+                                imageUrl,
+                                width: 90,
+                                height: 60,
+                                fit: BoxFit.cover,
+                                errorBuilder:
+                                    (context, error, stackTrace) => Container(
+                                      width: 90,
+                                      height: 60,
+                                      color: Colors.grey.shade300,
+                                      child: const Icon(
+                                        Icons.broken_image,
+                                        size: 24,
+                                      ),
+                                    ),
+                              )
+                              : Container(
+                                width: 90,
+                                height: 60,
+                                color: Colors.grey.shade300,
+                                child: const Icon(Icons.image, size: 24),
+                              ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -95,7 +131,7 @@ class BlogCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    blog['time'] ?? '',
+                    formattedTime,
                     style: const TextStyle(
                       fontSize: 10,
                       color: Color(0xFF1CB379),
