@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:rwa_app/models/coin_model.dart';
 
 class ApiService {
   static const String _baseUrl = "https://rwa-f1623a22e3ed.herokuapp.com/api";
@@ -53,6 +54,19 @@ class ApiService {
       return jsonDecode(response.body);
     } else {
       throw response.body; // Throw so we can catch & show message
+    }
+  }
+
+  Future<List<Coin>> fetchCoins({int page = 1, int size = 25}) async {
+    final uri = Uri.parse("$_baseUrl/currencies?page=$page&size=$size");
+    final response = await http.get(uri);
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      final List data = json['currency'];
+      return data.map((e) => Coin.fromJson(e)).toList();
+    } else {
+      throw Exception("Failed to load coins");
     }
   }
 }

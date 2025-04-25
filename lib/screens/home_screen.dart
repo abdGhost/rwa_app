@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:rwa_app/data/coins_list.dart';
+import 'package:rwa_app/api/api_service.dart';
+import 'package:rwa_app/models/coin_model.dart';
 import 'package:rwa_app/screens/add_coin_screen.dart';
 import 'package:rwa_app/screens/chat_screen.dart';
 import 'package:rwa_app/screens/coins_table_widget.dart';
@@ -20,36 +21,44 @@ class _HomeScreenState extends State<HomeScreen> {
   String selectedCoin = 'None';
   bool _isLoading = false;
   int _selectedTabIndex = 0;
-
-  final List<List<Map<String, Object>>> tabData = [
-    allCoins,
-    topCoins,
-    watchlistCoins,
-    trendingCoins,
-    topGainers,
-  ];
+  final ApiService _apiService = ApiService();
+  List<Map<String, Object>> coins = [];
 
   @override
   void initState() {
     super.initState();
-    _simulateInitialLoading();
+    fetchCoins();
   }
 
-  void _simulateInitialLoading() async {
+  Future<void> fetchCoins() async {
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 800));
+    try {
+      final coinList = await _apiService.fetchCoins();
+      coins =
+          coinList
+              .map(
+                (c) => {
+                  "name": c.name,
+                  "symbol": c.symbol,
+                  "image": c.image,
+                  "current_price": c.currentPrice,
+                  "market_cap": c.marketCap,
+                  "market_cap_rank": c.marketCapRank,
+                  "price_change_percentage_24h": c.priceChange24h,
+                  "sparkline_in_7d": {"price": c.sparkline},
+                },
+              )
+              .toList();
+      print(coins);
+    } catch (e) {
+      print('❌ Error fetching coins: $e');
+    }
     setState(() => _isLoading = false);
   }
 
   void _onTabChanged(int index) async {
     if (_selectedTabIndex == index) return;
-
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 400));
-    setState(() {
-      _selectedTabIndex = index;
-      _isLoading = false;
-    });
+    setState(() => _selectedTabIndex = index);
   }
 
   @override
@@ -80,49 +89,28 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           actions: [
-            GestureDetector(
-              onTap: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const CoinSearchScreen()),
-                );
-                if (result != null) {
-                  setState(() => selectedCoin = result);
-                }
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: SvgPicture.asset(
-                  'assets/search_outline.svg',
-                  width: 24,
-                  height: 24,
-                  colorFilter: ColorFilter.mode(
-                    theme.iconTheme.color ?? Colors.black,
-                    BlendMode.srcIn,
-                  ),
-                ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: SvgPicture.asset(
+                'assets/search_outline.svg',
+                width: 24,
+                height: 24,
+                color: theme.iconTheme.color,
               ),
             ),
-            const SizedBox(width: 8),
             Padding(
               padding: const EdgeInsets.only(right: 12),
               child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ProfileScreen(),
+                onTap:
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ProfileScreen()),
                     ),
-                  );
-                },
                 child: SvgPicture.asset(
                   'assets/profile_outline.svg',
                   width: 30,
                   height: 30,
-                  colorFilter: ColorFilter.mode(
-                    theme.iconTheme.color ?? Colors.black,
-                    BlendMode.srcIn,
-                  ),
+                  color: theme.iconTheme.color,
                 ),
               ),
             ),
@@ -172,7 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 2),
             TabBarSection(onTap: _onTabChanged),
-            const SizedBox(height: 0),
+            const SizedBox(height: 4),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Row(
@@ -238,14 +226,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       ? const Center(
                         child: CircularProgressIndicator(color: Colors.green),
                       )
-                      : tabData[_selectedTabIndex].isEmpty
+                      : coins.isEmpty
                       ? const Center(
                         child: Text(
                           'No data available',
                           style: TextStyle(fontSize: 16, color: Colors.grey),
                         ),
                       )
-                      : CoinsTable(coins: tabData[_selectedTabIndex]),
+                      : CoinsTable(coins: coins),
             ),
           ],
         ),
@@ -253,12 +241,11 @@ class _HomeScreenState extends State<HomeScreen> {
           width: 56,
           height: 56,
           child: FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ChatScreen()),
-              );
-            },
+            onPressed:
+                () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ChatScreen()),
+                ),
             backgroundColor: const Color(0xFF348F6C),
             shape: const CircleBorder(),
             child: SvgPicture.asset(

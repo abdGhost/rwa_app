@@ -9,12 +9,12 @@ class CoinsTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final headerStyle = TextStyle(
-      fontWeight: FontWeight.w600,
+      fontWeight: FontWeight.bold,
       fontSize: 12,
       color: theme.textTheme.bodySmall?.color ?? Colors.grey,
     );
     final rowStyle = TextStyle(
-      fontWeight: FontWeight.normal,
+      fontWeight: FontWeight.w500,
       fontSize: 12,
       color: theme.textTheme.bodyLarge?.color ?? Colors.black,
     );
@@ -37,14 +37,26 @@ class CoinsTable extends StatelessWidget {
             itemBuilder: (context, index) {
               final coin = coins[index];
 
-              final price = (coin['price'] as String?) ?? "\$0.00";
-              final priceRaw = price.replaceAll(RegExp(r'[^\d.]'), '');
+              final name = coin['name']?.toString() ?? "Unknown";
+              final symbol = coin['symbol']?.toString().toUpperCase() ?? "N/A";
+              final icon = coin['image']?.toString() ?? 'assets/logo.png';
+              final price = coin['current_price'];
+              final change =
+                  coin['price_change_percentage_24h']?.toString() ?? "0";
+              final rank = coin['market_cap_rank']?.toString() ?? "-";
+              final marketCap = coin['market_cap']?.toString() ?? "-";
 
-              final change = (coin['change'] as String?) ?? "0.00";
+              print(price);
               final changeRaw = change.replaceAll(RegExp(r'[^\d.-]'), '');
-
               final isNegative = change.startsWith("-");
-              final isPositive = change.startsWith("+");
+              final isPositive =
+                  change.startsWith("+") ||
+                  double.tryParse(change) != null && double.parse(change) > 0;
+
+              // ** NEW ** format price to 6 decimals
+              final priceValue =
+                  (coin['current_price'] as num?)?.toDouble() ?? 0.0;
+              final priceText = priceValue.toStringAsFixed(2);
 
               return InkWell(
                 onTap: () {
@@ -54,10 +66,10 @@ class CoinsTable extends StatelessWidget {
                       builder:
                           (_) => CoinDetailScreen(
                             coin: {
-                              "name": coin['name'] ?? "Unknown",
-                              "symbol": coin['symbol'] ?? "N/A",
-                              "logo": coin['icon'] ?? "assets/logo.png",
-                              "amount": price,
+                              "name": name,
+                              "symbol": symbol,
+                              "logo": icon,
+                              "amount": "\$$price",
                               "change": double.tryParse(changeRaw) ?? 0.0,
                             },
                             trend: [20, 22, 21, 25, 24, 28, 30],
@@ -75,40 +87,23 @@ class CoinsTable extends StatelessWidget {
                       child: Row(
                         children: [
                           SizedBox(
-                            width: 20,
-                            child: Center(
-                              child: Text('${coin['rank']}', style: rowStyle),
-                            ),
+                            width: 24,
+                            child: Center(child: Text(rank, style: rowStyle)),
                           ),
-                          const SizedBox(width: 8),
-                          Image.asset(
-                            coin['icon'] as String? ?? 'assets/logo.png',
-                            width: 20,
-                            height: 20,
-                            errorBuilder:
-                                (_, __, ___) =>
-                                    const Icon(Icons.error, size: 16),
-                          ),
+                          const SizedBox(width: 14),
+                          _buildCoinIcon(icon),
                           SizedBox(
                             width: 40,
-                            child: Center(
-                              child: Text(
-                                coin['name'] as String? ?? "",
-                                style: rowStyle,
-                              ),
-                            ),
+                            child: Center(child: Text(symbol, style: rowStyle)),
                           ),
                           const SizedBox(width: 10),
                           SizedBox(
                             width: 60,
                             child: Center(
-                              child: Text(
-                                '\$${double.tryParse(priceRaw)?.toStringAsFixed(2) ?? '0.00'}',
-                                style: rowStyle,
-                              ),
+                              child: Text('\$$priceText', style: rowStyle),
                             ),
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 5),
                           SizedBox(
                             width: 48,
                             child: Center(
@@ -121,23 +116,23 @@ class CoinsTable extends StatelessWidget {
                                 '${double.tryParse(changeRaw)?.toStringAsFixed(2) ?? '0.00'}%',
                                 style: rowStyle.copyWith(
                                   color:
-                                      coin['changeColor'] as Color? ??
-                                      (isNegative
+                                      isNegative
                                           ? Colors.red
                                           : isPositive
                                           ? Colors.green
-                                          : theme.textTheme.bodyLarge?.color),
+                                          : theme.textTheme.bodyLarge?.color,
                                 ),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 5),
                           SizedBox(
                             width: 110,
                             child: Text(
-                              coin['marketCap'] as String? ?? "-",
+                              marketCap,
                               textAlign: TextAlign.center,
                               style: rowStyle,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
@@ -168,19 +163,23 @@ class CoinsTable extends StatelessWidget {
             child: Center(
               child: Text(
                 '#',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  color: Colors.black,
+                ),
               ),
             ),
           ),
           const SizedBox(width: 8),
           const SizedBox(width: 20),
           SizedBox(width: 40, child: Center(child: Text('Coin', style: style))),
-          const SizedBox(width: 10),
+          const SizedBox(width: 20),
           SizedBox(
             width: 50,
             child: Center(child: Text('Price', style: style)),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           SizedBox(width: 50, child: Center(child: Text('24H', style: style))),
           const SizedBox(width: 10),
           SizedBox(
@@ -189,6 +188,23 @@ class CoinsTable extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildCoinIcon(String icon) {
+    if (icon.startsWith('http')) {
+      return Image.network(
+        icon,
+        width: 20,
+        height: 20,
+        errorBuilder: (_, __, ___) => const Icon(Icons.error, size: 14),
+      );
+    }
+    return Image.asset(
+      icon,
+      width: 20,
+      height: 20,
+      errorBuilder: (_, __, ___) => const Icon(Icons.error, size: 14),
     );
   }
 }
