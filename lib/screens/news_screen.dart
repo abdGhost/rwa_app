@@ -1,13 +1,15 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:http/http.dart' as http;
 import 'package:rwa_app/screens/chat_screen.dart';
 import 'package:rwa_app/widgets/blogs/blog_detail_screen.dart';
 import 'package:rwa_app/widgets/blogs/blogs_card.dart';
 import 'package:rwa_app/widgets/news/news_appbar_title_row.dart';
-import 'package:rwa_app/widgets/news/news_detail_screen.dart';
-import 'package:rwa_app/widgets/news/news_tab_buttons.dart';
 import 'package:rwa_app/widgets/news/news_card_main.dart';
 import 'package:rwa_app/widgets/news/news_card_side.dart';
+import 'package:rwa_app/widgets/news/news_detail_screen.dart';
+import 'package:rwa_app/widgets/news/news_tab_buttons.dart';
 import 'package:rwa_app/widgets/search_appbar_field_widget.dart';
 
 class NewsScreen extends StatefulWidget {
@@ -21,6 +23,49 @@ class _NewsScreenState extends State<NewsScreen> {
   bool _isSearching = false;
   int _selectedTab = 0;
   final TextEditingController _searchController = TextEditingController();
+
+  List<Map<String, dynamic>> newsItems = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchNews();
+  }
+
+  Future<void> fetchNews() async {
+    const url =
+        'https://rwa-f1623a22e3ed.herokuapp.com/api/currencies/rwa/news';
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final List newsList = data['news'];
+
+        setState(() {
+          newsItems =
+              newsList.map<Map<String, dynamic>>((news) {
+                return {
+                  'image': news['thumbnail'],
+                  'title': news['title'],
+                  'subtitle': news['subTitle'],
+                  'source': news['author'],
+                  'time': news['publishDate'],
+                  'content': news['content'],
+                  'quote': null,
+                  'bulletPoints': [],
+                };
+              }).toList();
+          _isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load news');
+      }
+    } catch (e) {
+      print('❌ Error fetching news: $e');
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,38 +142,20 @@ class _NewsScreenState extends State<NewsScreen> {
   }
 
   Widget _buildNewsList(ThemeData theme) {
-    final newsItems = [
-      {
-        'image': 'assets/news_blogs/news_1.png',
-        'title': 'RWA Protocols Cross \$10B in Total Value Locked...',
-        'subtitle': 'Concerns rise over regulatory risks...',
-        'source': 'CryptoSlate',
-        'time': 'April 27, 2025 10:12 PM',
-        'content':
-            '''The total value locked (TVL) in RWA protocols has crossed the \$10B milestone...
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: Colors.green),
+      );
+    }
 
-"Tokenized RWAs are now a foundational layer in DeFi," said James Walton.''',
-        'quote': 'Tokenized RWAs are now a foundational layer in DeFi.',
-        'bulletPoints': [
-          'Regulatory risks are rising.',
-          'Liquidity concerns are real.',
-          'Some platforms lack investor protection.',
-        ],
-      },
-      {
-        'image': 'assets/news_blogs/news_2.png',
-        'title': 'China’s CPIC Launches \$100M Tokenized RWA Fund...',
-        'subtitle': 'CPIC and HashKey bring institutional capital...',
-        'source': 'CoinDesk',
-        'time': 'April 12, 2025 10:12 PM',
-        'content':
-            '''The \$100M fund will tokenize assets like real estate, bonds, and infrastructure...
-
-HashKey will provide custody and compliance.''',
-        'quote': 'Tokenization is the future of financial assets.',
-        'bulletPoints': [],
-      },
-    ];
+    if (newsItems.isEmpty) {
+      return const Center(
+        child: Text(
+          'No news available.',
+          style: TextStyle(fontSize: 16, color: Colors.grey),
+        ),
+      );
+    }
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 12),

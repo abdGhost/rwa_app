@@ -1,10 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // For time formatting
 
 class NewsCardSide extends StatelessWidget {
   final Map<String, dynamic> item;
   final VoidCallback? onTap;
 
   const NewsCardSide({super.key, required this.item, this.onTap});
+
+  String formatTime(String time) {
+    try {
+      // Fix weird "GMT" string manually
+      String cleanTime = time.split(' GMT').first;
+      final dateTime = DateFormat('EEE MMM dd yyyy HH:mm:ss').parse(cleanTime);
+      return DateFormat('MMM d, yyyy').format(dateTime); // Ex: Apr 26, 2025
+    } catch (e) {
+      print('❌ Error parsing date: $e');
+      return time; // fallback
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +32,9 @@ class NewsCardSide extends StatelessWidget {
         theme.textTheme.bodySmall?.color?.withOpacity(0.7) ?? Colors.grey;
     final borderColor = theme.dividerColor.withOpacity(0.15);
     final highlightColor = const Color(0xFF1CB379);
+
+    final String rawTime = item['time'] ?? '';
+    final String formattedTime = rawTime.isNotEmpty ? formatTime(rawTime) : '';
 
     return GestureDetector(
       onTap: onTap,
@@ -37,14 +53,26 @@ class NewsCardSide extends StatelessWidget {
               if (image != null && image.isNotEmpty)
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4),
-                  child: Image.asset(
+                  child: Image.network(
                     image,
                     width: 70,
                     height: imageHeight,
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        width: 70,
+                        height: imageHeight,
+                        color: Colors.grey.shade300,
+                        child: const Icon(
+                          Icons.broken_image,
+                          size: 30,
+                          color: Colors.grey,
+                        ),
+                      );
+                    },
                   ),
                 ),
-              const SizedBox(width: 12),
+              if (image != null && image.isNotEmpty) const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,7 +118,7 @@ class NewsCardSide extends StatelessWidget {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          item['time'] ?? '',
+                          formattedTime,
                           style: TextStyle(fontSize: 12, color: subtitleColor),
                         ),
                       ],

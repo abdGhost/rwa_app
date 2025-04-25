@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:rwa_app/models/coin_model.dart';
+import 'package:rwa_app/models/news_model.dart';
 
 class ApiService {
   static const String _baseUrl = "https://rwa-f1623a22e3ed.herokuapp.com/api";
@@ -64,6 +65,22 @@ class ApiService {
       return parsed.currencies;
     } else {
       throw Exception("Failed to load coins: ${response.body}");
+    }
+  }
+
+  Future<List<News>> fetchNews() async {
+    final response = await http.get(
+      Uri.parse(
+        'https://rwa-f1623a22e3ed.herokuapp.com/api/currencies/rwa/news',
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      final jsonBody = json.decode(response.body);
+      final List<dynamic> newsList = jsonBody['news'];
+      return newsList.map((newsJson) => News.fromJson(newsJson)).toList();
+    } else {
+      throw Exception('Failed to load news');
     }
   }
 }
