@@ -22,7 +22,7 @@ class CoinsTable extends StatelessWidget {
 
     return Column(
       children: [
-        const SizedBox(height: 8),
+        // const SizedBox(height: 8),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: _buildHeaderRow(headerStyle),

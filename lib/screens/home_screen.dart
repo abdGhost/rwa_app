@@ -3,7 +3,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rwa_app/api/api_service.dart';
 import 'package:rwa_app/models/coin_model.dart';
-import 'package:rwa_app/screens/add_coin_screen.dart';
 import 'package:rwa_app/screens/chat_screen.dart';
 import 'package:rwa_app/screens/coins_table_widget.dart';
 import 'package:rwa_app/screens/profile_screen.dart';
@@ -44,7 +43,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onTabChanged(int index) async {
     if (_selectedTabIndex == index) return;
-    setState(() => _selectedTabIndex = index);
+
+    setState(() {
+      _isLoading = true;
+      _selectedTabIndex = index;
+    });
+
+    // Optional: simulate a small delay to show loading spinner (even if using same coins)
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
@@ -146,66 +156,67 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 2),
             TabBarSection(onTap: _onTabChanged),
-            const SizedBox(height: 4),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Row(
-                children: [
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          isDark ? Colors.grey[800] : const Color(0xFFEFEFEF),
-                      foregroundColor: theme.textTheme.bodyMedium?.color,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      textStyle: GoogleFonts.inter(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 12,
-                      ),
-                      minimumSize: const Size(0, 28),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: const Text('USD'),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton.icon(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.tune,
-                      size: 14,
-                      color: theme.iconTheme.color,
-                    ),
-                    label: const Text('Customize'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          isDark ? Colors.grey[800] : const Color(0xFFEFEFEF),
-                      foregroundColor: theme.textTheme.bodyMedium?.color,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      textStyle: GoogleFonts.inter(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 12,
-                      ),
-                      minimumSize: const Size(0, 28),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            // const SizedBox(height: 4),
+
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(horizontal: 12),
+            //   child: Row(
+            //     children: [
+            //       ElevatedButton(
+            //         onPressed: () {},
+            //         style: ElevatedButton.styleFrom(
+            //           backgroundColor:
+            //               isDark ? Colors.grey[800] : const Color(0xFFEFEFEF),
+            //           foregroundColor: theme.textTheme.bodyMedium?.color,
+            //           elevation: 0,
+            //           padding: const EdgeInsets.symmetric(
+            //             horizontal: 10,
+            //             vertical: 4,
+            //           ),
+            //           shape: RoundedRectangleBorder(
+            //             borderRadius: BorderRadius.circular(6),
+            //           ),
+            //           textStyle: GoogleFonts.inter(
+            //             fontWeight: FontWeight.w500,
+            //             fontSize: 12,
+            //           ),
+            //           minimumSize: const Size(0, 28),
+            //           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            //         ),
+            //         child: const Text('USD'),
+            //       ),
+            //       const SizedBox(width: 8),
+            //       ElevatedButton.icon(
+            //         onPressed: () {},
+            //         icon: Icon(
+            //           Icons.tune,
+            //           size: 14,
+            //           color: theme.iconTheme.color,
+            //         ),
+            //         label: const Text('Customize'),
+            //         style: ElevatedButton.styleFrom(
+            //           backgroundColor:
+            //               isDark ? Colors.grey[800] : const Color(0xFFEFEFEF),
+            //           foregroundColor: theme.textTheme.bodyMedium?.color,
+            //           elevation: 0,
+            //           padding: const EdgeInsets.symmetric(
+            //             horizontal: 10,
+            //             vertical: 4,
+            //           ),
+            //           shape: RoundedRectangleBorder(
+            //             borderRadius: BorderRadius.circular(6),
+            //           ),
+            //           textStyle: GoogleFonts.inter(
+            //             fontWeight: FontWeight.w500,
+            //             fontSize: 12,
+            //           ),
+            //           minimumSize: const Size(0, 28),
+            //           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
             Expanded(
               child:
                   _isLoading
