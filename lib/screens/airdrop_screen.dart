@@ -67,118 +67,126 @@ class _AirdropScreenState extends State<AirdropScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? Colors.black : const Color(0xFFF7F7F7),
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 12),
-            Center(
-              child: Image.asset(
-                'assets/airdrop.gif',
-                width: 200,
-                height: 200,
-                fit: BoxFit.cover,
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // Scrollable Filter Tabs
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Row(
-                children:
-                    tabs.map((tab) {
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: FilterTab(
-                          text: tab,
-                          isActive: _selectedTab == tab,
-                          onTap: () {
-                            setState(() {
-                              _selectedTab = tab;
-                            });
-                          },
-                          isDarkMode: isDark, // Pass dark mode flag
-                        ),
-                      );
-                    }).toList(),
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
-            // Scrollable Card Section
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child:
-                    filteredAirdrops.isEmpty
-                        ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(Icons.air, size: 40, color: Colors.grey),
-                              SizedBox(height: 10),
-                              Text(
-                                'No airdrop available',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                        : ListView.builder(
-                          itemCount: filteredAirdrops.length,
-                          itemBuilder: (context, index) {
-                            final airdrop = filteredAirdrops[index];
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 8),
-                              child: AirdropCard(
-                                project: airdrop['project']!,
-                                token: airdrop['token']!,
-                                chain: airdrop['chain']!,
-                                reward: airdrop['reward']!,
-                                date: airdrop['date']!,
-                                eligibility: airdrop['eligibility']!,
-                                status: airdrop['status']!,
-                                isDarkMode: isDark, // Pass dark mode flag
-                              ),
-                            );
-                          },
-                        ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: SizedBox(
-        width: 56, // Size of the button
-        height: 56,
-        child: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const ChatScreen()),
-            );
-          },
-          backgroundColor: const Color(0xFF348F6C),
-          shape: const CircleBorder(),
-          child: SvgPicture.asset(
-            'assets/bot_light.svg',
-            width: 40,
-            height: 40,
-            fit: BoxFit.contain,
-            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-          ),
+      body: Center(
+        child: Text(
+          'Coming Soon',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
         ),
       ),
     );
+    // return Scaffold(
+    //   backgroundColor: isDark ? Colors.black : const Color(0xFFF7F7F7),
+    //   body: SafeArea(
+    //     child: Column(
+    //       crossAxisAlignment: CrossAxisAlignment.start,
+    //       children: [
+    //         const SizedBox(height: 12),
+    //         Center(
+    //           child: Image.asset(
+    //             'assets/airdrop.gif',
+    //             width: 200,
+    //             height: 200,
+    //             fit: BoxFit.cover,
+    //           ),
+    //         ),
+    //         const SizedBox(height: 12),
+
+    //         // Scrollable Filter Tabs
+    //         SingleChildScrollView(
+    //           scrollDirection: Axis.horizontal,
+    //           padding: const EdgeInsets.symmetric(horizontal: 12),
+    //           child: Row(
+    //             children:
+    //                 tabs.map((tab) {
+    //                   return Padding(
+    //                     padding: const EdgeInsets.only(right: 8),
+    //                     child: FilterTab(
+    //                       text: tab,
+    //                       isActive: _selectedTab == tab,
+    //                       onTap: () {
+    //                         setState(() {
+    //                           _selectedTab = tab;
+    //                         });
+    //                       },
+    //                       isDarkMode: isDark, // Pass dark mode flag
+    //                     ),
+    //                   );
+    //                 }).toList(),
+    //           ),
+    //         ),
+
+    //         const SizedBox(height: 10),
+
+    //         // Scrollable Card Section
+    //         Expanded(
+    //           child: Padding(
+    //             padding: const EdgeInsets.symmetric(horizontal: 12),
+    //             child:
+    //                 filteredAirdrops.isEmpty
+    //                     ? Center(
+    //                       child: Column(
+    //                         mainAxisAlignment: MainAxisAlignment.center,
+    //                         children: const [
+    //                           Icon(Icons.air, size: 40, color: Colors.grey),
+    //                           SizedBox(height: 10),
+    //                           Text(
+    //                             'No airdrop available',
+    //                             textAlign: TextAlign.center,
+    //                             style: TextStyle(
+    //                               fontSize: 14,
+    //                               color: Colors.grey,
+    //                               fontWeight: FontWeight.w500,
+    //                             ),
+    //                           ),
+    //                         ],
+    //                       ),
+    //                     )
+    //                     : ListView.builder(
+    //                       itemCount: filteredAirdrops.length,
+    //                       itemBuilder: (context, index) {
+    //                         final airdrop = filteredAirdrops[index];
+    //                         return Padding(
+    //                           padding: const EdgeInsets.only(bottom: 8),
+    //                           child: AirdropCard(
+    //                             project: airdrop['project']!,
+    //                             token: airdrop['token']!,
+    //                             chain: airdrop['chain']!,
+    //                             reward: airdrop['reward']!,
+    //                             date: airdrop['date']!,
+    //                             eligibility: airdrop['eligibility']!,
+    //                             status: airdrop['status']!,
+    //                             isDarkMode: isDark, // Pass dark mode flag
+    //                           ),
+    //                         );
+    //                       },
+    //                     ),
+    //           ),
+    //         ),
+    //       ],
+    //     ),
+    //   ),
+    //   floatingActionButton: SizedBox(
+    //     width: 56, // Size of the button
+    //     height: 56,
+    //     child: FloatingActionButton(
+    //       onPressed: () {
+    //         Navigator.push(
+    //           context,
+    //           MaterialPageRoute(builder: (context) => const ChatScreen()),
+    //         );
+    //       },
+    //       backgroundColor: const Color(0xFF348F6C),
+    //       shape: const CircleBorder(),
+    //       child: SvgPicture.asset(
+    //         'assets/bot_light.svg',
+    //         width: 40,
+    //         height: 40,
+    //         fit: BoxFit.contain,
+    //         colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+    //       ),
+    //     ),
+    //   ),
+    // );
   }
 }
 
