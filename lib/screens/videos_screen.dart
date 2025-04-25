@@ -18,146 +18,155 @@ class VideosScreen extends StatelessWidget {
     final cardWidth = screenWidth * 0.4;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: isDark ? Colors.black : theme.scaffoldBackgroundColor,
-        elevation: 1,
-        automaticallyImplyLeading: false,
-        toolbarHeight: 40,
-        title: Row(
-          children: [
-            Text(
-              'Video',
-              style: GoogleFonts.inter(
-                color: theme.textTheme.titleLarge?.color ?? Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ProfileScreen()),
-              );
-            },
-            child: Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: SvgPicture.asset(
-                'assets/profile_outline.svg',
-                width: 30,
-                height: 30,
-                colorFilter: ColorFilter.mode(
-                  theme.iconTheme.color ?? Colors.black,
-                  BlendMode.srcIn,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-
-      floatingActionButton: SizedBox(
-        width: 56,
-        height: 56,
-        child: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const ChatScreen()),
-            );
-          },
-          backgroundColor: const Color(0xFF348F6C),
-          shape: const CircleBorder(),
-          child: SvgPicture.asset(
-            'assets/bot_light.svg',
-            width: 40,
-            height: 40,
-            fit: BoxFit.contain,
-            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-          ),
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _sectionTitle(context, "Educational Videos", () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const EducationalVideosScreen(),
-                  ),
-                );
-              }),
-              const SizedBox(height: 8),
-              _videoSlider(context, cardWidth, [
-                {
-                  "title": "What Are Real World Assets (RWAs)?",
-                  "image": "assets/thumbnail1.png",
-                },
-                {
-                  "title": "Why Invest in RWA Tokens?",
-                  "image": "assets/thumbnail2.png",
-                },
-              ]),
-              _videoSlider(context, cardWidth, [
-                {
-                  "title": "How Tokenization Works",
-                  "image": "assets/thumbnail2.png",
-                },
-                {
-                  "title": "RWA vs DeFi: What's the Difference?",
-                  "image": "assets/thumbnail2.png",
-                },
-              ]),
-              const SizedBox(height: 8),
-
-              _sectionTitle(context, "Upcoming Interviews", () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const UpcomingInterviewsScreen(),
-                  ),
-                );
-              }),
-              _interviewTile(
-                context,
-                "Chat with Condo CEO",
-                "April 21 at 5:00 PM",
-                "LIVE",
-              ),
-              _interviewTile(
-                context,
-                "How RealT Fractionalizes Real Estate",
-                "April 27 at 5:00 PM",
-                "Scheduled",
-              ),
-              const SizedBox(height: 10),
-              _sectionTitle(context, "Recorded Interviews", () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const RecordedInterviewsScreen(),
-                  ),
-                );
-              }),
-              _recordedInterviewCard(
-                context,
-                "Goldfinch: Driving Innovation in Real-World Lending",
-                "Guest: Mike Sall, Co-Founder of Goldfinch",
-                "assets/thumbnail1.png",
-              ),
-            ],
-          ),
+      body: Center(
+        child: Text(
+          'Coming Soon',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
         ),
       ),
     );
+
+    // return Scaffold(
+    //   backgroundColor: theme.scaffoldBackgroundColor,
+    //   appBar: AppBar(
+    //     backgroundColor: isDark ? Colors.black : theme.scaffoldBackgroundColor,
+    //     elevation: 1,
+    //     automaticallyImplyLeading: false,
+    //     toolbarHeight: 40,
+    //     title: Row(
+    //       children: [
+    //         Text(
+    //           'Video',
+    //           style: GoogleFonts.inter(
+    //             color: theme.textTheme.titleLarge?.color ?? Colors.black,
+    //             fontWeight: FontWeight.bold,
+    //             fontSize: 18,
+    //           ),
+    //         ),
+    //       ],
+    //     ),
+    //     actions: [
+    //       InkWell(
+    //         onTap: () {
+    //           Navigator.push(
+    //             context,
+    //             MaterialPageRoute(builder: (context) => const ProfileScreen()),
+    //           );
+    //         },
+    //         child: Padding(
+    //           padding: const EdgeInsets.only(right: 12),
+    //           child: SvgPicture.asset(
+    //             'assets/profile_outline.svg',
+    //             width: 30,
+    //             height: 30,
+    //             colorFilter: ColorFilter.mode(
+    //               theme.iconTheme.color ?? Colors.black,
+    //               BlendMode.srcIn,
+    //             ),
+    //           ),
+    //         ),
+    //       ),
+    //     ],
+    //   ),
+
+    //   floatingActionButton: SizedBox(
+    //     width: 56,
+    //     height: 56,
+    //     child: FloatingActionButton(
+    //       onPressed: () {
+    //         Navigator.push(
+    //           context,
+    //           MaterialPageRoute(builder: (context) => const ChatScreen()),
+    //         );
+    //       },
+    //       backgroundColor: const Color(0xFF348F6C),
+    //       shape: const CircleBorder(),
+    //       child: SvgPicture.asset(
+    //         'assets/bot_light.svg',
+    //         width: 40,
+    //         height: 40,
+    //         fit: BoxFit.contain,
+    //         colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+    //       ),
+    //     ),
+    //   ),
+    //   body: SafeArea(
+    //     child: SingleChildScrollView(
+    //       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+    //       child: Column(
+    //         crossAxisAlignment: CrossAxisAlignment.start,
+    //         children: [
+    //           _sectionTitle(context, "Educational Videos", () {
+    //             Navigator.push(
+    //               context,
+    //               MaterialPageRoute(
+    //                 builder: (_) => const EducationalVideosScreen(),
+    //               ),
+    //             );
+    //           }),
+    //           const SizedBox(height: 8),
+    //           _videoSlider(context, cardWidth, [
+    //             {
+    //               "title": "What Are Real World Assets (RWAs)?",
+    //               "image": "assets/thumbnail1.png",
+    //             },
+    //             {
+    //               "title": "Why Invest in RWA Tokens?",
+    //               "image": "assets/thumbnail2.png",
+    //             },
+    //           ]),
+    //           _videoSlider(context, cardWidth, [
+    //             {
+    //               "title": "How Tokenization Works",
+    //               "image": "assets/thumbnail2.png",
+    //             },
+    //             {
+    //               "title": "RWA vs DeFi: What's the Difference?",
+    //               "image": "assets/thumbnail2.png",
+    //             },
+    //           ]),
+    //           const SizedBox(height: 8),
+
+    //           _sectionTitle(context, "Upcoming Interviews", () {
+    //             Navigator.push(
+    //               context,
+    //               MaterialPageRoute(
+    //                 builder: (_) => const UpcomingInterviewsScreen(),
+    //               ),
+    //             );
+    //           }),
+    //           _interviewTile(
+    //             context,
+    //             "Chat with Condo CEO",
+    //             "April 21 at 5:00 PM",
+    //             "LIVE",
+    //           ),
+    //           _interviewTile(
+    //             context,
+    //             "How RealT Fractionalizes Real Estate",
+    //             "April 27 at 5:00 PM",
+    //             "Scheduled",
+    //           ),
+    //           const SizedBox(height: 10),
+    //           _sectionTitle(context, "Recorded Interviews", () {
+    //             Navigator.push(
+    //               context,
+    //               MaterialPageRoute(
+    //                 builder: (_) => const RecordedInterviewsScreen(),
+    //               ),
+    //             );
+    //           }),
+    //           _recordedInterviewCard(
+    //             context,
+    //             "Goldfinch: Driving Innovation in Real-World Lending",
+    //             "Guest: Mike Sall, Co-Founder of Goldfinch",
+    //             "assets/thumbnail1.png",
+    //           ),
+    //         ],
+    //       ),
+    //     ),
+    //   ),
+    // );
   }
 
   Widget _sectionTitle(

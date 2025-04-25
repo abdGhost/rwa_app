@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:rwa_app/models/coin_model.dart';
 import 'package:rwa_app/models/news_model.dart';
+import 'package:rwa_app/models/portfolioToken_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
   static const String _baseUrl = "https://rwa-f1623a22e3ed.herokuapp.com/api";
@@ -81,6 +83,29 @@ class ApiService {
       return newsList.map((newsJson) => News.fromJson(newsJson)).toList();
     } else {
       throw Exception('Failed to load news');
+    }
+  }
+
+  Future<List<PortfolioToken>> fetchPortfolio() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token') ?? '';
+
+    final response = await http.get(
+      Uri.parse(
+        'https://rwa-f1623a22e3ed.herokuapp.com/api/user/token/portfolio',
+      ),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      final List portfolioList = json['portfolioToken'];
+
+      return portfolioList
+          .map((item) => PortfolioToken.fromJson(item))
+          .toList();
+    } else {
+      throw Exception('Failed to fetch portfolio');
     }
   }
 }

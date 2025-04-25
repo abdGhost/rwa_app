@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddPortfolioTransactionScreen extends StatefulWidget {
   final Map<String, dynamic> coin;
@@ -13,6 +16,9 @@ class AddPortfolioTransactionScreen extends StatefulWidget {
 
 class _AddPortfolioTransactionScreenState
     extends State<AddPortfolioTransactionScreen> {
+  final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _quantityController = TextEditingController();
+  final TextEditingController _priceController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
 
   Future<void> _pickDate(BuildContext context) async {
@@ -39,11 +45,43 @@ class _AddPortfolioTransactionScreenState
     }
   }
 
+  Future<void> _submitTransaction() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token') ?? '';
+
+    final id = widget.coin["tokenId"] ?? widget.coin["id"];
+
+    final response = await http.post(
+      Uri.parse(
+        'https://rwa-f1623a22e3ed.herokuapp.com/api/user/token/portfolio/$id',
+      ),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        "id": id,
+        "amount": _amountController.text,
+        "quantity": _quantityController.text,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      Navigator.pop(context, true); // ✅ Return true after successful add
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Transaction added successfully!')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to add transaction.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final coin = widget.coin;
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -64,7 +102,7 @@ class _AddPortfolioTransactionScreenState
             _label("Selected Coin", theme),
             const SizedBox(height: 4),
             Text(
-              "${coin["name"]}/ ${coin["symbol"]}",
+              "${coin["name"]} / ${coin["symbol"].toString().toUpperCase()}",
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w500,
               ),
@@ -72,7 +110,7 @@ class _AddPortfolioTransactionScreenState
             const SizedBox(height: 24),
             _label("Total Spent", theme),
             const SizedBox(height: 6),
-            _inputField(theme),
+            _inputField(theme, _amountController),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -82,7 +120,7 @@ class _AddPortfolioTransactionScreenState
                     children: [
                       _label("Quantity", theme),
                       const SizedBox(height: 6),
-                      _inputField(theme),
+                      _inputField(theme, _quantityController),
                     ],
                   ),
                 ),
@@ -93,7 +131,7 @@ class _AddPortfolioTransactionScreenState
                     children: [
                       _label("Price per Token", theme),
                       const SizedBox(height: 6),
-                      _inputField(theme),
+                      _inputField(theme, _priceController),
                     ],
                   ),
                 ),
@@ -117,27 +155,23 @@ class _AddPortfolioTransactionScreenState
               ),
             ),
             const Spacer(),
-            Center(
-              child: SizedBox(
-                width: double.infinity,
-                height: 46,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF348F6C),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
-                    ),
+            SizedBox(
+              width: double.infinity,
+              height: 46,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF348F6C),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
                   ),
-                  onPressed: () {
-                    // Handle transaction submission
-                  },
-                  child: const Text(
-                    "Add Transaction",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                ),
+                onPressed: _submitTransaction,
+                child: const Text(
+                  "Add Transaction",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -155,8 +189,9 @@ class _AddPortfolioTransactionScreenState
     );
   }
 
-  TextField _inputField(ThemeData theme) {
+  TextField _inputField(ThemeData theme, TextEditingController controller) {
     return TextField(
+      controller: controller,
       keyboardType: TextInputType.number,
       style: theme.textTheme.bodyMedium,
       cursorColor: theme.primaryColor,
