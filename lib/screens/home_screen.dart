@@ -22,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoading = false;
   int _selectedTabIndex = 0;
   final ApiService _apiService = ApiService();
-  List<Map<String, Object>> coins = [];
+  List<Coin> coins = [];
 
   @override
   void initState() {
@@ -34,21 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _isLoading = true);
     try {
       final coinList = await _apiService.fetchCoins();
-      coins =
-          coinList
-              .map(
-                (c) => {
-                  "name": c.name,
-                  "symbol": c.symbol,
-                  "image": c.image,
-                  "current_price": c.currentPrice,
-                  "market_cap": c.marketCap,
-                  "market_cap_rank": c.marketCapRank,
-                  "price_change_percentage_24h": c.priceChange24h,
-                  "sparkline_in_7d": {"price": c.sparkline},
-                },
-              )
-              .toList();
+      coins = coinList;
       print(coins);
     } catch (e) {
       print('❌ Error fetching coins: $e');

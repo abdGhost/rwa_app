@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:rwa_app/models/coin_model.dart';
 import 'package:rwa_app/screens/coin_details_screen.dart';
 
 class CoinsTable extends StatelessWidget {
-  final List<Map<String, Object>> coins;
+  final List<Coin> coins;
   const CoinsTable({super.key, required this.coins});
 
   @override
@@ -37,43 +38,26 @@ class CoinsTable extends StatelessWidget {
             itemBuilder: (context, index) {
               final coin = coins[index];
 
-              final name = coin['name']?.toString() ?? "Unknown";
-              final symbol = coin['symbol']?.toString().toUpperCase() ?? "N/A";
-              final icon = coin['image']?.toString() ?? 'assets/logo.png';
-              final price = coin['current_price'];
-              final change =
-                  coin['price_change_percentage_24h']?.toString() ?? "0";
-              final rank = coin['market_cap_rank']?.toString() ?? "-";
-              final marketCap = coin['market_cap']?.toString() ?? "-";
+              print("Coin Name: ${coin.name}, ID: ${coin.id}");
 
-              print(price);
-              final changeRaw = change.replaceAll(RegExp(r'[^\d.-]'), '');
-              final isNegative = change.startsWith("-");
-              final isPositive =
-                  change.startsWith("+") ||
-                  double.tryParse(change) != null && double.parse(change) > 0;
+              final name = coin.name;
+              final id = coin.id;
+              final symbol = coin.symbol.toUpperCase();
+              final icon = coin.image;
+              final price = coin.currentPrice;
+              final change = coin.priceChange24h;
+              final rank = coin.marketCapRank.toString();
+              final marketCap = coin.marketCap.toString();
 
-              // ** NEW ** format price to 6 decimals
-              final priceValue =
-                  (coin['current_price'] as num?)?.toDouble() ?? 0.0;
-              final priceText = priceValue.toStringAsFixed(2);
+              final isNegative = change < 0;
+              final isPositive = change > 0;
 
               return InkWell(
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder:
-                          (_) => CoinDetailScreen(
-                            coin: {
-                              "name": name,
-                              "symbol": symbol,
-                              "logo": icon,
-                              "amount": "\$$price",
-                              "change": double.tryParse(changeRaw) ?? 0.0,
-                            },
-                            trend: [20, 22, 21, 25, 24, 28, 30],
-                          ),
+                      builder: (context) => CoinDetailScreen(coin: id),
                     ),
                   );
                 },
@@ -100,7 +84,10 @@ class CoinsTable extends StatelessWidget {
                           SizedBox(
                             width: 60,
                             child: Center(
-                              child: Text('\$$priceText', style: rowStyle),
+                              child: Text(
+                                '\$${price.toStringAsFixed(2)}',
+                                style: rowStyle,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 5),
@@ -112,8 +99,7 @@ class CoinsTable extends StatelessWidget {
                                     ? '-'
                                     : isPositive
                                     ? '+'
-                                    : ''}'
-                                '${double.tryParse(changeRaw)?.toStringAsFixed(2) ?? '0.00'}%',
+                                    : ''}${change.abs().toStringAsFixed(2)}%',
                                 style: rowStyle.copyWith(
                                   color:
                                       isNegative

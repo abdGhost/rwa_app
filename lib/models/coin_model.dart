@@ -39,3 +39,20 @@ class Coin {
     );
   }
 }
+
+class CurrenciesResponse {
+  final bool status;
+  final List<Coin> currencies;
+
+  CurrenciesResponse({required this.status, required this.currencies});
+
+  factory CurrenciesResponse.fromJson(Map<String, dynamic> json) {
+    return CurrenciesResponse(
+      status: json['status'] ?? false,
+      currencies:
+          (json['currency'] as List<dynamic>)
+              .map((item) => Coin.fromJson(item))
+              .toList(),
+    );
+  }
+}

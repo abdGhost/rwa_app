@@ -1,11 +1,13 @@
+import 'dart:convert';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CoinDetailScreen extends StatefulWidget {
-  final Map<String, dynamic> coin;
-  final List<double> trend;
+  final String coin; // coin ID like 'chainlink'
 
-  const CoinDetailScreen({super.key, required this.coin, required this.trend});
+  const CoinDetailScreen({super.key, required this.coin});
 
   @override
   State<CoinDetailScreen> createState() => _CoinDetailScreenState();
@@ -14,46 +16,99 @@ class CoinDetailScreen extends StatefulWidget {
 class _CoinDetailScreenState extends State<CoinDetailScreen> {
   int selectedIndex = 1;
   bool isFavorite = false;
-  final List<String> filters = ["1H", "24H", "7D", "1M", "1Y", "All"];
-  final List<String> trendLabels = ["24H", "7D", "14D", "30D", "60D", "1Y"];
-  final List<double> trendValues = [1.0, 7.3, 2.1, 3.9, -11.6, 30.0];
+  bool isLoading = true;
+  Map<String, dynamic>? coin;
+  List<double> trend = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCoinDetails();
+  }
+
+  Future<void> _fetchCoinDetails() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null || token.isEmpty) {
+      debugPrint('Token not found');
+      return;
+    }
+
+    final detailUrl = Uri.parse(
+      'https://rwa-f1623a22e3ed.herokuapp.com/api/currencies/rwa/coin/${widget.coin}',
+    );
+    final chartUrl = Uri.parse(
+      'https://rwa-f1623a22e3ed.herokuapp.com/api/currencies/rwa/graph/coinOHLC/${widget.coin}',
+    );
+
+    final detailRes = await http.get(
+      detailUrl,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+    final chartRes = await http.get(
+      chartUrl,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (detailRes.statusCode == 200 && chartRes.statusCode == 200) {
+      final coinData = json.decode(detailRes.body)['detail'];
+      final List<dynamic> chartRaw = json.decode(chartRes.body)['graphData'];
+      final List<double> closePrices =
+          chartRaw.map((e) => (e[4] as num).toDouble()).toList();
+
+      setState(() {
+        coin = coinData;
+        trend = closePrices;
+        isLoading = false;
+      });
+    } else {
+      debugPrint('Error fetching data');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final chartData = List.generate(
-      widget.trend.length,
-      (i) => FlSpot(i.toDouble(), widget.trend[i]),
+      trend.length,
+      (i) => FlSpot(i.toDouble(), trend[i]),
     );
-
-    final isProfit = widget.coin['change'] >= 0;
-    final Color changeColor =
-        isProfit ? const Color(0xFF16C784) : const Color(0xFFFF3B30);
-    final IconData changeIcon =
-        isProfit ? Icons.arrow_drop_up : Icons.arrow_drop_down;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
-        iconTheme: theme.iconTheme,
         titleSpacing: 0,
+        iconTheme: theme.iconTheme,
         title: Row(
           children: [
-            Image.asset(widget.coin['logo'], width: 24, height: 24),
+            if (coin != null && coin?['image']?['small'] != null)
+              Image.network(
+                coin?['image']['small'],
+                width: 24,
+                height: 24,
+                errorBuilder: (_, __, ___) => const Icon(Icons.error, size: 18),
+              ),
             const SizedBox(width: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.coin['symbol'],
+                  coin?['symbol']?.toUpperCase() ?? '',
                   style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                Text(widget.coin['name'], style: theme.textTheme.bodySmall),
+                Text(coin?['name'] ?? '', style: theme.textTheme.bodySmall),
               ],
             ),
           ],
@@ -85,246 +140,191 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.only(top: 16),
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  widget.coin['amount'] ?? "\$0.00",
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Row(
-                  children: [
-                    Icon(changeIcon, color: changeColor, size: 20),
-                    Text(
-                      "${widget.coin['change'].abs().toStringAsFixed(2)}%",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: changeColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 200,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: LineChart(
-                LineChartData(
-                  gridData: FlGridData(show: false),
-                  borderData: FlBorderData(show: false),
-                  minY: widget.trend.reduce((a, b) => a < b ? a : b) - 1,
-                  maxY: widget.trend.reduce((a, b) => a > b ? a : b) + 1,
-                  titlesData: FlTitlesData(
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 36,
-                        getTitlesWidget:
-                            (value, _) => Text(
-                              "\$${value.toStringAsFixed(0)}",
-                              style: theme.textTheme.bodySmall,
-                            ),
-                      ),
-                    ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    topTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    rightTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                  ),
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: chartData,
-                      isCurved: true,
-                      color: changeColor,
-                      barWidth: 2,
-                      dotData: FlDotData(show: false),
-                      belowBarData: BarAreaData(
-                        show: true,
-                        color: changeColor.withOpacity(0.1),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6),
-                color: theme.cardColor,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children:
-                    filters.asMap().entries.map((entry) {
-                      final idx = entry.key;
-                      final label = entry.value;
-                      final selected = idx == selectedIndex;
-                      return GestureDetector(
-                        onTap: () => setState(() => selectedIndex = idx),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color:
-                                selected
-                                    ? theme.scaffoldBackgroundColor
-                                    : Colors.transparent,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            label,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color:
-                                  selected
-                                      ? theme.textTheme.bodyLarge?.color
-                                      : Colors.grey,
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Container(
-              decoration: BoxDecoration(
-                color: theme.cardColor,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: Colors.grey.withOpacity(0.2),
-                  width: 0.4,
-                ),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(trendLabels.length, (index) {
-                  final label = trendLabels[index];
-                  final value = trendValues[index];
-                  final isUp = value >= 0;
-                  return Expanded(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          label,
-                          style: theme.textTheme.bodySmall,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          height: 0.5,
-                          width: double.infinity,
-                          color: Colors.grey.withOpacity(0.3),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          "${isUp ? '+' : ''}${value.toStringAsFixed(1)}%",
-                          style: TextStyle(
-                            fontSize: 12,
-                            color:
-                                isUp
-                                    ? const Color(0xFF16C784)
-                                    : const Color(0xFFFF3B30),
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  );
-                }),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              "Overview",
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color:
-                    theme.brightness == Brightness.dark
-                        ? Colors.white
-                        : Colors.black,
-              ),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Container(
-              decoration: BoxDecoration(
-                color: theme.cardColor,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: Colors.grey.withOpacity(0.2),
-                  width: 0.5,
-                ),
-              ),
-              padding: const EdgeInsets.all(16),
-              child: Column(
+      body:
+          isLoading
+              ? const Center(
+                child: CircularProgressIndicator(color: Colors.green),
+              )
+              : ListView(
+                padding: const EdgeInsets.only(top: 16),
                 children: [
-                  _buildOverviewRow(
-                    "Market Cap",
-                    "\$8.22B",
-                    "Fully Diluted Market Cap",
-                    "\$12.52B",
+                  _buildPriceSection(theme),
+                  const SizedBox(height: 12),
+                  _buildChartSection(theme, chartData),
+                  const SizedBox(height: 24),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: 16,
+                      top: 16,
+                      bottom: 12,
+                    ),
+                    child: Text(
+                      'Overview',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                        fontSize: 14,
+                      ),
+                    ),
                   ),
-                  _buildOverviewRow(
-                    "Volume 24H",
-                    "\$285.47M",
-                    "Circulating Supply",
-                    "657.09M LINK",
-                  ),
-                  _buildOverviewRow(
-                    "Max Supply",
-                    "--",
-                    "Total Supply",
-                    "1B LINK",
-                  ),
-                  _buildOverviewRow(
-                    "All Time High",
-                    "\$52.88",
-                    "All Time Low",
-                    "\$0.1263",
-                  ),
+                  _buildOverviewSection(theme),
+                  const SizedBox(height: 24),
                 ],
               ),
+    );
+  }
+
+  Widget _buildPriceSection(ThemeData theme) {
+    final price = coin?['market_data']['current_price']['usd'] ?? 0;
+    final change = coin?['market_data']['price_change_percentage_24h'] ?? 0;
+    final isUp = change >= 0;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            '\$${price.toStringAsFixed(2)}',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(width: 6),
+          Row(
+            children: [
+              Icon(
+                isUp ? Icons.arrow_drop_up : Icons.arrow_drop_down,
+                color: isUp ? Colors.green : Colors.red,
+                size: 20,
+              ),
+              Text(
+                '${change.toStringAsFixed(2)}%',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: isUp ? Colors.green : Colors.red,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildChartSection(ThemeData theme, List<FlSpot> chartData) {
+    final minPrice = trend.isEmpty ? 0 : trend.reduce((a, b) => a < b ? a : b);
+    final maxPrice = trend.isEmpty ? 0 : trend.reduce((a, b) => a > b ? a : b);
+
+    return SizedBox(
+      height: 220,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: LineChart(
+          LineChartData(
+            backgroundColor: Colors.transparent,
+            gridData: FlGridData(
+              show: true,
+              drawVerticalLine: false,
+              getDrawingHorizontalLine: (value) {
+                return FlLine(
+                  color: Colors.grey.withOpacity(0.2),
+                  strokeWidth: 1,
+                );
+              },
+            ),
+            borderData: FlBorderData(show: false),
+            titlesData: FlTitlesData(
+              leftTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  interval: ((maxPrice - minPrice) / 3).abs(),
+                  reservedSize: 60,
+                  getTitlesWidget:
+                      (value, meta) => Padding(
+                        padding: const EdgeInsets.only(left: 4),
+                        child: Text(
+                          "\$${value.toStringAsFixed(2)}",
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                ),
+              ),
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
+              topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              rightTitles: AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
+            ),
+            minY: minPrice * 0.98,
+            maxY: maxPrice * 1.02,
+            lineBarsData: [
+              LineChartBarData(
+                spots: chartData,
+                isCurved: true,
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF16C784), Color(0xFF30D987)],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                barWidth: 2,
+                dotData: FlDotData(show: false),
+                belowBarData: BarAreaData(
+                  show: true,
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFF16C784).withOpacity(0.25),
+                      Colors.transparent,
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOverviewSection(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.grey.withOpacity(0.2), width: 0.5),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            _buildOverviewRow(
+              "Market Cap",
+              "\$${coin?['market_data']['market_cap']['usd']}",
+              "Fully Diluted Value",
+              "\$${_abbreviateNumber(coin?['market_data']['fully_diluted_valuation']['usd'])}",
+            ),
+            _buildOverviewRow(
+              "Circulating Supply",
+              _abbreviateNumber(coin?['market_data']['circulating_supply']),
+              "Total Supply",
+              _abbreviateNumber(coin?['market_data']['total_supply']),
+            ),
+            _buildOverviewRow(
+              "ATH",
+              "\$${coin?['market_data']['ath']['usd']?.toStringAsFixed(2) ?? '--'}",
+              "ATL",
+              "\$${coin?['market_data']['atl']['usd']?.toStringAsFixed(2) ?? '--'}",
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -353,51 +353,38 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Flexible(
-              child: Text(
-                title,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
-              ),
-            ),
-            const SizedBox(width: 4),
-            GestureDetector(
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    backgroundColor: theme.cardColor,
-                    content: Text(
-                      "Info about $title",
-                      style: theme.textTheme.bodySmall,
-                    ),
-                    duration: const Duration(seconds: 2),
-                    behavior: SnackBarBehavior.floating,
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                  ),
-                );
-              },
-              child: const Icon(
-                Icons.info_outline,
-                size: 12,
-                color: Colors.grey,
-              ),
-            ),
-          ],
+        Text(
+          title,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: Colors.grey,
+            fontWeight: FontWeight.w400,
+            fontSize: 12,
+          ),
         ),
         const SizedBox(height: 4),
         Text(
           value,
           style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w600,
+            color: Colors.black,
+            fontSize: 14,
           ),
         ),
       ],
     );
+  }
+
+  String _abbreviateNumber(dynamic numVal, {String suffix = ""}) {
+    if (numVal == null) return "--";
+    final num number =
+        (numVal is int || numVal is double)
+            ? numVal
+            : double.tryParse(numVal.toString()) ?? 0;
+    if (number >= 1e12)
+      return (number / 1e12).toStringAsFixed(2) + "T" + suffix;
+    if (number >= 1e9) return (number / 1e9).toStringAsFixed(2) + "B" + suffix;
+    if (number >= 1e6) return (number / 1e6).toStringAsFixed(2) + "M" + suffix;
+    if (number >= 1e3) return (number / 1e3).toStringAsFixed(2) + "K" + suffix;
+    return number.toStringAsFixed(2) + suffix;
   }
 }

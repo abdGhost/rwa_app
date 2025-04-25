@@ -25,7 +25,6 @@ class ApiService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(body),
     );
-    print(response.body);
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       return jsonDecode(response.body);
@@ -38,9 +37,7 @@ class ApiService {
     required String email,
     required String password,
   }) async {
-    final url = Uri.parse(
-      "https://rwa-f1623a22e3ed.herokuapp.com/api/users/signin",
-    );
+    final url = Uri.parse("$_baseUrl/users/signin");
 
     final body = {"email": email, "password": password};
 
@@ -53,7 +50,7 @@ class ApiService {
     if (response.statusCode == 200 || response.statusCode == 201) {
       return jsonDecode(response.body);
     } else {
-      throw response.body; // Throw so we can catch & show message
+      throw Exception("Signin failed: ${response.body}");
     }
   }
 
@@ -63,10 +60,10 @@ class ApiService {
 
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
-      final List data = json['currency'];
-      return data.map((e) => Coin.fromJson(e)).toList();
+      final parsed = CurrenciesResponse.fromJson(json);
+      return parsed.currencies;
     } else {
-      throw Exception("Failed to load coins");
+      throw Exception("Failed to load coins: ${response.body}");
     }
   }
 }
