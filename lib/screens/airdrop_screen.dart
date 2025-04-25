@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rwa_app/screens/chat_screen.dart';
 import 'package:rwa_app/widgets/airdrop/airdrop_card.dart';
 
@@ -63,8 +63,11 @@ class _AirdropScreenState extends State<AirdropScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F7),
+      backgroundColor: isDark ? Colors.black : const Color(0xFFF7F7F7),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,6 +100,7 @@ class _AirdropScreenState extends State<AirdropScreen> {
                               _selectedTab = tab;
                             });
                           },
+                          isDarkMode: isDark, // Pass dark mode flag
                         ),
                       );
                     }).toList(),
@@ -143,6 +147,7 @@ class _AirdropScreenState extends State<AirdropScreen> {
                                 date: airdrop['date']!,
                                 eligibility: airdrop['eligibility']!,
                                 status: airdrop['status']!,
+                                isDarkMode: isDark, // Pass dark mode flag
                               ),
                             );
                           },
@@ -182,40 +187,61 @@ class FilterTab extends StatelessWidget {
   final String text;
   final bool isActive;
   final VoidCallback onTap;
+  final bool isDarkMode; // To handle dark mode
 
   const FilterTab({
     super.key,
     required this.text,
     required this.isActive,
     required this.onTap,
+    required this.isDarkMode, // Dark mode flag
   });
 
   @override
   Widget build(BuildContext context) {
+    final backgroundColor =
+        isDarkMode
+            ? (isActive
+                ? const Color(0xFF348F6C) // Dark mode active color
+                : const Color(0xFF2A2A2A)) // Dark mode inactive color
+            : (isActive
+                ? const Color(0xFF348F6C) // Light mode active color
+                : const Color(0xFFF1F1F1)); // Light mode inactive color
+
+    final textColor =
+        isDarkMode
+            ? (isActive
+                ? Colors
+                    .white // Dark mode active text
+                : Colors.grey[400]!) // Dark mode inactive text
+            : (isActive
+                ? const Color(0xFF1CB379) // Light mode active text
+                : const Color(0xFF888888)); // Light mode inactive text
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          // rgba(238, 241, 246, 1)
-          color:
-              isActive
-                  ? Color.fromRGBO(28, 179, 121, 0.3)
-                  : Color.fromRGBO(238, 241, 246, 1),
+          color: backgroundColor,
           borderRadius: BorderRadius.circular(6),
-          border:
-              isActive
-                  ? Border.all(color: Color.fromRGBO(52, 143, 108, 0.3))
-                  : Border.all(color: Color.fromRGBO(0, 0, 0, 0.1)),
+          border: Border.all(
+            color:
+                isActive
+                    ? const Color.fromRGBO(52, 143, 108, 0.3)
+                    : const Color.fromRGBO(
+                      0,
+                      0,
+                      0,
+                      0.1,
+                    ), // Thin border for unselected
+          ),
         ),
         child: Text(
           text,
           style: TextStyle(
             fontSize: 12,
-            color:
-                isActive
-                    ? Color.fromRGBO(34, 113, 82, 1)
-                    : Color.fromRGBO(77, 77, 77, 1),
+            color: textColor,
             fontWeight: FontWeight.w500,
           ),
         ),

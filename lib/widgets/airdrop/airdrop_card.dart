@@ -8,6 +8,7 @@ class AirdropCard extends StatelessWidget {
   final String date;
   final String eligibility;
   final String status;
+  final bool isDarkMode; // Add isDarkMode parameter
 
   const AirdropCard({
     super.key,
@@ -18,6 +19,7 @@ class AirdropCard extends StatelessWidget {
     required this.date,
     required this.eligibility,
     required this.status,
+    required this.isDarkMode, // Accept the isDarkMode flag here
   });
 
   @override
@@ -32,9 +34,11 @@ class AirdropCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDarkMode ? Color(0xFF2A2A2A) : Colors.white,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: const Color(0xFFF7F7F7)),
+            border: Border.all(
+              color: isDarkMode ? Color(0xFF2A2A2A) : const Color(0xFFF7F7F7),
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,10 +50,10 @@ class AirdropCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       project,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black,
+                        color: isDarkMode ? Colors.white : Colors.black,
                       ),
                     ),
                   ),
@@ -58,23 +62,29 @@ class AirdropCard extends StatelessWidget {
               const SizedBox(height: 10),
               Text(
                 "Token: $token  |  Chain: $chain",
-                style: const TextStyle(fontSize: 14, color: Colors.black),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: isDarkMode ? Colors.white70 : Colors.black,
+                ),
               ),
               const SizedBox(height: 4),
               Text.rich(
                 TextSpan(
                   children: [
-                    const TextSpan(
+                    TextSpan(
                       text: "🎁 Reward: ",
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black,
+                        color: isDarkMode ? Colors.white : Colors.black,
                       ),
                     ),
                     TextSpan(
                       text: reward,
-                      style: const TextStyle(fontSize: 14, color: Colors.black),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: isDarkMode ? Colors.white : Colors.black,
+                      ),
                     ),
                   ],
                 ),
@@ -82,26 +92,29 @@ class AirdropCard extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 "🗓️ $date",
-                style: const TextStyle(fontSize: 14, color: Colors.black),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: isDarkMode ? Colors.white70 : Colors.black,
+                ),
               ),
               const SizedBox(height: 4),
               Text.rich(
                 TextSpan(
                   children: [
-                    const TextSpan(
+                    TextSpan(
                       text: "✅ Eligibility: ",
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black,
+                        color: isDarkMode ? Colors.white : Colors.black,
                       ),
                     ),
                     TextSpan(
                       text: eligibility,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
-                        color: Colors.black,
+                        color: isDarkMode ? Colors.white70 : Colors.black,
                       ),
                     ),
                   ],
@@ -114,17 +127,23 @@ class AirdropCard extends StatelessWidget {
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
+                children: [
                   Text(
                     "🔍 View Details",
                     style: TextStyle(
                       fontSize: 14,
-                      color: Color.fromRGBO(48, 96, 184, 1),
+                      color:
+                          isDarkMode
+                              ? Colors.blue[200]
+                              : Color.fromRGBO(48, 96, 184, 1),
                     ),
                   ),
                   Text(
                     "⏰ Set Reminder",
-                    style: TextStyle(fontSize: 14, color: Colors.black),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                   ),
                 ],
               ),
@@ -144,9 +163,11 @@ class AirdropCard extends StatelessWidget {
             child: Container(
               color:
                   isLive
-                      ? const Color(0xFFDFFBEA)
+                      ? (isDarkMode
+                          ? Colors.green[800]
+                          : const Color(0xFFDFFBEA))
                       : isEnded
-                      ? const Color(0xFFFEE9E9)
+                      ? (isDarkMode ? Colors.red[600] : const Color(0xFFFEE9E9))
                       : Colors.grey.shade200,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               child: Row(
@@ -155,7 +176,12 @@ class AirdropCard extends StatelessWidget {
                   Icon(
                     isLive ? Icons.check_circle : Icons.cancel,
                     size: 14,
-                    color: isLive ? const Color(0xFF1CB379) : Colors.red,
+                    color:
+                        isLive
+                            ? (isDarkMode
+                                ? Colors.green[100]
+                                : const Color(0xFF1CB379))
+                            : Colors.red[100],
                   ),
                   const SizedBox(width: 4),
                   Text(
@@ -163,7 +189,12 @@ class AirdropCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
-                      color: isLive ? const Color(0xFF1CB379) : Colors.red,
+                      color:
+                          isLive
+                              ? (isDarkMode
+                                  ? Colors.green[100]
+                                  : const Color(0xFF1CB379))
+                              : Colors.red[100],
                     ),
                   ),
                 ],
