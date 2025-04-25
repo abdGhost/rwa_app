@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:rwa_app/screens/setting_screen.dart';
+import 'package:rwa_app/api/api_service.dart';
+import 'package:rwa_app/controllers/signup_controller.dart';
+import 'package:rwa_app/models/signup_response_model.dart';
 import 'package:rwa_app/theme/theme.dart';
 import 'package:rwa_app/widgets/auth_divider_widget.dart';
 import 'package:rwa_app/widgets/back_title_appbar_widget.dart';
@@ -14,15 +16,20 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
+  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final isDark = theme.brightness == Brightness.dark;
-
     final borderColor = isDark ? Colors.white : Colors.black12;
 
     return Scaffold(
@@ -43,8 +50,7 @@ class _SignupScreenState extends State<SignupScreen> {
               const SizedBox(height: 12),
               SocialAuthButton(
                 label: 'Continue with Apple',
-                iconPath:
-                    isDark ? 'assets/apple-icon.png' : 'assets/apple-icon.png',
+                iconPath: 'assets/apple-icon.png',
                 onPressed: () {},
                 textColor: isDark ? Colors.white : const Color(0xFF1D1D1D),
               ),
@@ -55,6 +61,7 @@ class _SignupScreenState extends State<SignupScreen> {
               _label("Email Address", textTheme),
               const SizedBox(height: 2),
               CustomTextField(
+                controller: _emailController,
                 hint: 'example@gmail.com',
                 borderColor: borderColor,
                 borderWidth: 0.6,
@@ -64,6 +71,7 @@ class _SignupScreenState extends State<SignupScreen> {
               _label("Username", textTheme),
               const SizedBox(height: 2),
               CustomTextField(
+                controller: _usernameController,
                 hint: 'Username',
                 borderColor: borderColor,
                 borderWidth: 0.6,
@@ -73,6 +81,7 @@ class _SignupScreenState extends State<SignupScreen> {
               _label("Password", textTheme),
               const SizedBox(height: 2),
               CustomTextField(
+                controller: _passwordController,
                 hint: 'Enter your password',
                 obscure: _obscurePassword,
                 borderColor: borderColor,
@@ -93,6 +102,7 @@ class _SignupScreenState extends State<SignupScreen> {
               _label("Confirm Password", textTheme),
               const SizedBox(height: 2),
               CustomTextField(
+                controller: _confirmPasswordController,
                 hint: 'Confirm Password',
                 obscure: _obscureConfirmPassword,
                 borderColor: borderColor,
@@ -115,7 +125,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
               const SizedBox(height: 30),
 
-              /// Sign Up Button
               SizedBox(
                 height: 48,
                 width: double.infinity,
@@ -127,13 +136,18 @@ class _SignupScreenState extends State<SignupScreen> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                   ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const SettingsScreen()),
-                    );
-                  },
-                  child: const Text('Sign Up'),
+                  onPressed: _isLoading ? null : _onSignupPressed,
+                  child:
+                      _isLoading
+                          ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                          : const Text('Sign Up'),
                 ),
               ),
 
@@ -168,5 +182,68 @@ class _SignupScreenState extends State<SignupScreen> {
       text,
       style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
     );
+  }
+
+  Future<void> _onSignupPressed() async {
+    final email = _emailController.text.trim();
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+
+    if (email.isEmpty ||
+        username.isEmpty ||
+        password.isEmpty ||
+        confirmPassword.isEmpty) {
+      _showSnackBar("Please fill in all fields");
+      return;
+    }
+
+    if (password != confirmPassword) {
+      _showSnackBar("Passwords do not match");
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final result = await SignupController().handleSignup(
+        context,
+        email: email,
+        username: username,
+        password: password,
+        confirmPassword: confirmPassword,
+      );
+
+      if (result.status) {
+        _showSnackBar(result.message); // Success message
+      } else {
+        _showSnackBar(
+          result.message,
+        ); // Backend error message (like "Email already exist!")
+      }
+    } catch (e) {
+      // Attempt to decode the error response if it's a server error
+      final errorMessage = _extractErrorMessage(e.toString());
+      _showSnackBar(errorMessage);
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  String _extractErrorMessage(String error) {
+    // Try to extract the backend message from Exception text
+    try {
+      final match = RegExp(r'"message"\s*:\s*"([^"]+)"').firstMatch(error);
+      if (match != null) {
+        return match.group(1) ?? "Something went wrong";
+      }
+    } catch (_) {}
+    return "Something went wrong";
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 }

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:rwa_app/theme/theme.dart'; // Ensure this import exists for AppColors
+import 'package:rwa_app/theme/theme.dart'; // For AppColors
 
 class CustomTextField extends StatelessWidget {
+  final TextEditingController? controller;
   final String hint;
   final bool obscure;
   final Widget? suffix;
@@ -10,6 +11,7 @@ class CustomTextField extends StatelessWidget {
 
   const CustomTextField({
     super.key,
+    this.controller,
     required this.hint,
     this.obscure = false,
     this.suffix,
@@ -25,6 +27,7 @@ class CustomTextField extends StatelessWidget {
     return SizedBox(
       height: 48,
       child: TextField(
+        controller: controller,
         obscureText: obscure,
         cursorColor: AppColors.primaryLight,
         cursorHeight: 20,
