@@ -6,6 +6,9 @@ class EducationalVideosScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     final titles = [
       "What Are Real World Assets (RWAs)?",
       "Why Invest in RWA Tokens?",
@@ -29,21 +32,21 @@ class EducationalVideosScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF7F7F7),
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         toolbarHeight: 50,
         automaticallyImplyLeading: true,
-        iconTheme: const IconThemeData(color: Colors.black),
+        iconTheme: theme.iconTheme,
         title: Text(
           'Educational Videos',
           style: GoogleFonts.inter(
-            color: Colors.black,
+            color: theme.textTheme.titleLarge?.color,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
         ),
       ),
-      backgroundColor: const Color(0xFFF7F7F7),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         itemCount: titles.length,
@@ -93,11 +96,9 @@ class EducationalVideosScreen extends StatelessWidget {
                               titles[index],
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 14,
+                              style: theme.textTheme.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.w600,
                                 height: 1.1,
-                                color: Color(0xFF000000),
                               ),
                             ),
                           ),
@@ -105,7 +106,7 @@ class EducationalVideosScreen extends StatelessWidget {
                           Icon(
                             Icons.more_vert,
                             size: 20,
-                            color: Colors.grey[700],
+                            color: theme.iconTheme.color?.withOpacity(0.7),
                           ),
                         ],
                       ),
@@ -114,40 +115,39 @@ class EducationalVideosScreen extends StatelessWidget {
                         subtitles[index],
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 10,
+                        style: theme.textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w400,
-                          color: Color(0xFF818181),
+                          color: theme.hintColor,
                           height: 1.3,
                         ),
                       ),
                       const SizedBox(height: 2),
-                      const Text(
+                      Text(
                         "CryptoHub",
-                        style: TextStyle(
-                          fontSize: 12,
+                        style: theme.textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF818181),
+                          color:
+                              isDark
+                                  ? Colors.grey[400]
+                                  : const Color(0xFF818181),
                         ),
                       ),
                       const SizedBox(height: 2),
                       Row(
-                        children: const [
+                        children: [
                           Text(
                             "563 Views",
-                            style: TextStyle(
+                            style: theme.textTheme.bodySmall?.copyWith(
                               fontSize: 10,
-                              fontWeight: FontWeight.w400,
-                              color: Color(0xFF818181),
+                              color: theme.hintColor,
                             ),
                           ),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Text(
                             "2 days ago",
-                            style: TextStyle(
+                            style: theme.textTheme.bodySmall?.copyWith(
                               fontSize: 10,
-                              fontWeight: FontWeight.w400,
-                              color: Color(0xFF818181),
+                              color: theme.hintColor,
                             ),
                           ),
                         ],

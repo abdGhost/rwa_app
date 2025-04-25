@@ -3,6 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rwa_app/screens/chat_screen.dart';
 import 'package:rwa_app/screens/educational_videos_screen.dart';
+import 'package:rwa_app/screens/profile_screen.dart';
 import 'package:rwa_app/screens/upcoming_interviews_screen.dart';
 import 'package:rwa_app/screens/recorded_interviews_screen.dart';
 
@@ -11,13 +12,15 @@ class VideosScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = screenWidth * 0.4;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F7),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? Colors.black : theme.scaffoldBackgroundColor,
         elevation: 1,
         automaticallyImplyLeading: false,
         toolbarHeight: 40,
@@ -26,7 +29,7 @@ class VideosScreen extends StatelessWidget {
             Text(
               'Video',
               style: GoogleFonts.inter(
-                color: Colors.black,
+                color: theme.textTheme.titleLarge?.color ?? Colors.black,
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),
@@ -34,12 +37,24 @@ class VideosScreen extends StatelessWidget {
           ],
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: SvgPicture.asset(
-              'assets/profile_outline.svg',
-              width: 30,
-              height: 30,
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfileScreen()),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: SvgPicture.asset(
+                'assets/profile_outline.svg',
+                width: 30,
+                height: 30,
+                colorFilter: ColorFilter.mode(
+                  theme.iconTheme.color ?? Colors.black,
+                  BlendMode.srcIn,
+                ),
+              ),
             ),
           ),
         ],
@@ -72,7 +87,7 @@ class VideosScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _sectionTitle("Educational Videos", () {
+              _sectionTitle(context, "Educational Videos", () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -81,7 +96,7 @@ class VideosScreen extends StatelessWidget {
                 );
               }),
               const SizedBox(height: 8),
-              _videoSlider(cardWidth, [
+              _videoSlider(context, cardWidth, [
                 {
                   "title": "What Are Real World Assets (RWAs)?",
                   "image": "assets/thumbnail1.png",
@@ -91,7 +106,7 @@ class VideosScreen extends StatelessWidget {
                   "image": "assets/thumbnail2.png",
                 },
               ]),
-              _videoSlider(cardWidth, [
+              _videoSlider(context, cardWidth, [
                 {
                   "title": "How Tokenization Works",
                   "image": "assets/thumbnail2.png",
@@ -101,7 +116,9 @@ class VideosScreen extends StatelessWidget {
                   "image": "assets/thumbnail2.png",
                 },
               ]),
-              _sectionTitle("Upcoming Interviews", () {
+              const SizedBox(height: 8),
+
+              _sectionTitle(context, "Upcoming Interviews", () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -110,17 +127,19 @@ class VideosScreen extends StatelessWidget {
                 );
               }),
               _interviewTile(
+                context,
                 "Chat with Condo CEO",
                 "April 21 at 5:00 PM",
                 "LIVE",
               ),
               _interviewTile(
+                context,
                 "How RealT Fractionalizes Real Estate",
                 "April 27 at 5:00 PM",
                 "Scheduled",
               ),
               const SizedBox(height: 10),
-              _sectionTitle("Recorded Interviews", () {
+              _sectionTitle(context, "Recorded Interviews", () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -129,6 +148,7 @@ class VideosScreen extends StatelessWidget {
                 );
               }),
               _recordedInterviewCard(
+                context,
                 "Goldfinch: Driving Innovation in Real-World Lending",
                 "Guest: Mike Sall, Co-Founder of Goldfinch",
                 "assets/thumbnail1.png",
@@ -140,17 +160,20 @@ class VideosScreen extends StatelessWidget {
     );
   }
 
-  static Widget _sectionTitle(String title, VoidCallback onSeeAll) {
+  Widget _sectionTitle(
+    BuildContext context,
+    String title,
+    VoidCallback onSeeAll,
+  ) {
+    final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Flexible(
           child: Text(
             title,
-            style: const TextStyle(
-              fontSize: 16,
+            style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
-              color: Color(0xFF000000),
             ),
           ),
         ),
@@ -165,28 +188,41 @@ class VideosScreen extends StatelessWidget {
     );
   }
 
-  static Widget _videoSlider(
+  Widget _videoSlider(
+    BuildContext context,
     double cardWidth,
     List<Map<String, String>> videos,
   ) {
-    return SizedBox(
-      height: 160,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: videos.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
-          final video = videos[index];
-          return SizedBox(
-            width: cardWidth,
-            child: _videoCard(video['image']!, video['title']!, "8:20"),
-          );
-        },
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children:
+            videos.map((video) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: SizedBox(
+                  width: cardWidth,
+                  child: _videoCard(
+                    context,
+                    video['image']!,
+                    video['title']!,
+                    "8:20",
+                  ),
+                ),
+              );
+            }).toList(),
       ),
     );
   }
 
-  static Widget _videoCard(String imagePath, String title, String duration) {
+  Widget _videoCard(
+    BuildContext context,
+    String imagePath,
+    String title,
+    String duration,
+  ) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
       child: Column(
@@ -225,23 +261,19 @@ class VideosScreen extends StatelessWidget {
             title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 12,
+            style: theme.textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.w500,
-              color: Color(0xFF000000),
-              height: 1.2,
             ),
           ),
           const SizedBox(height: 2),
-          const Text(
+          Text(
             "Subtitle here",
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
+            style: theme.textTheme.bodySmall?.copyWith(
               fontSize: 10,
               fontWeight: FontWeight.w400,
-              color: Color(0xFF818181),
-              height: 1.2,
+              color: theme.hintColor,
             ),
           ),
         ],
@@ -249,7 +281,13 @@ class VideosScreen extends StatelessWidget {
     );
   }
 
-  static Widget _interviewTile(String title, String time, String badge) {
+  Widget _interviewTile(
+    BuildContext context,
+    String title,
+    String time,
+    String badge,
+  ) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -265,21 +303,12 @@ class VideosScreen extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: Color(0xFF000000),
-                    height: 1.2,
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  time,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF525252),
-                  ),
-                ),
+                Text(time, style: theme.textTheme.bodySmall),
               ],
             ),
           ),
@@ -304,21 +333,23 @@ class VideosScreen extends StatelessWidget {
     );
   }
 
-  static Widget _recordedInterviewCard(
+  Widget _recordedInterviewCard(
+    BuildContext context,
     String title,
     String guest,
     String imagePath, {
     String subtitle =
         "Exclusive discussion on unlocking credit for emerging markets through real-world lending protocols.",
   }) {
+    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        color: Colors.white,
+        color: theme.cardColor,
         boxShadow: [
           BoxShadow(
-            color: const Color.fromARGB(33, 236, 236, 236),
+            color: Colors.black.withOpacity(0.02),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -347,10 +378,8 @@ class VideosScreen extends StatelessWidget {
                       title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                        color: Color(0xFF000000),
                         height: 1.3,
                       ),
                     ),
@@ -368,12 +397,7 @@ class VideosScreen extends StatelessWidget {
                       subtitle,
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xFF818181),
-                        height: 1.3,
-                      ),
+                      style: theme.textTheme.bodySmall?.copyWith(height: 1.3),
                     ),
                   ],
                 ),
