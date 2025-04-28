@@ -6,18 +6,39 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rwa_app/provider/settings_provider.dart';
 import 'package:rwa_app/screens/my_account_screen.dart';
 import 'package:rwa_app/screens/select_language_screen.dart';
-import 'package:rwa_app/screens/login_screen.dart'; // 👈 Import LoginScreen to redirect
+import 'package:rwa_app/screens/onboarding_screen.dart'; // ✅ Correct: Go to Onboarding screen after login
 
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  String? token;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      token = prefs.getString('token');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final isDarkMode = ref.watch(themeModeProvider) == ThemeMode.dark;
     final selectedCurrency = ref.watch(currencyProvider);
     final selectedLanguage = ref.watch(languageProvider);
+
+    final isLoggedIn = token != null && token!.isNotEmpty;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -48,161 +69,110 @@ class ProfileScreen extends ConsumerWidget {
               children: [
                 const SizedBox(height: 24),
                 Text(
-                  "Hi, Ghost", // (optionally replace with actual user name)
+                  "Hi, ${isLoggedIn ? "Ghost" : "Guest"}",
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  "Login to track your favorite coins easily.",
+                  isLoggedIn
+                      ? "Manage your account easily."
+                      : "Login to track your favorite coins easily.",
                   style: theme.textTheme.bodySmall,
                 ),
                 const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const MyAccountScreen(),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF348F6C),
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          minimumSize: const Size.fromHeight(44),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                        ),
-                        child: const Text(
-                          "My Account",
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => _logout(context),
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor: theme.cardColor,
-                          foregroundColor: theme.textTheme.bodyLarge?.color,
-                          minimumSize: const Size.fromHeight(46),
-                          side: BorderSide(color: theme.dividerColor),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                        ),
-                        child: const Text(
-                          "Logout",
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Preferences",
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Container(
-                  decoration: boxDecoration(theme),
-                  child: Column(
+
+                if (isLoggedIn) ...[
+                  Row(
                     children: [
-                      settingTile(
-                        context,
-                        title: "Dark Mode",
-                        trailing: FlutterSwitch(
-                          width: 40,
-                          height: 20,
-                          toggleSize: 16,
-                          value: isDarkMode,
-                          activeColor: const Color(0xFF348F6C),
-                          inactiveColor: const Color.fromRGBO(91, 91, 91, 1),
-                          toggleColor: Colors.white,
-                          onToggle: (val) {
-                            ref.read(themeModeProvider.notifier).toggle(val);
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const MyAccountScreen(),
+                              ),
+                            );
                           },
-                        ),
-                      ),
-                      divider(theme),
-                      settingTile(
-                        context,
-                        title: "Currency",
-                        trailing: Text(
-                          selectedCurrency,
-                          style: theme.textTheme.bodySmall,
-                        ),
-                      ),
-                      divider(theme),
-                      InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const SelectLanguageScreen(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF348F6C),
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            minimumSize: const Size.fromHeight(44),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
                             ),
-                          );
-                        },
-                        child: settingTile(
-                          context,
-                          title: "Language",
-                          trailing: Text(
-                            selectedLanguage,
-                            style: theme.textTheme.bodySmall,
+                          ),
+                          child: const Text(
+                            "My Account",
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => _logout(context),
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: theme.cardColor,
+                            foregroundColor: theme.textTheme.bodyLarge?.color,
+                            minimumSize: const Size.fromHeight(44),
+                            side: BorderSide(color: theme.dividerColor),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                          ),
+                          child: const Text(
+                            "Logout",
+                            style: TextStyle(fontWeight: FontWeight.w600),
                           ),
                         ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  "Others",
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w500,
+                ] else ...[
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const OnboardingScreen(),
+                          ),
+                          (route) =>
+                              false, // 🚫 Remove all previous screens from stack
+                        );
+                      },
+
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF348F6C),
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size.fromHeight(44),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                      child: const Text(
+                        "Login",
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
                   ),
+                ],
+
+                const SizedBox(height: 24),
+                _preferencesSection(
+                  context,
+                  theme,
+                  isDarkMode,
+                  selectedCurrency,
+                  selectedLanguage,
                 ),
-                const SizedBox(height: 10),
-                Container(
-                  decoration: boxDecoration(theme),
-                  child: Column(
-                    children: [
-                      othersTile(title: "Privacy Policy", theme: theme),
-                      divider(theme),
-                      othersTile(title: "Cookie Preference", theme: theme),
-                      divider(theme),
-                      othersTile(title: "Terms of Service", theme: theme),
-                      divider(theme),
-                      othersTile(title: "Disclaimer", theme: theme),
-                      divider(theme),
-                      othersTile(title: "Rate the RWA App", theme: theme),
-                      divider(theme),
-                      othersTile(title: "Share the RWA App", theme: theme),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children:
-                      List.generate(
-                          4,
-                          (_) => _socialIcon(theme),
-                        ).expand((e) => [e, const SizedBox(width: 8)]).toList()
-                        ..removeLast(),
-                ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
+                _othersSection(theme),
               ],
             ),
           ),
@@ -213,12 +183,114 @@ class ProfileScreen extends ConsumerWidget {
 
   Future<void> _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear(); // ✅ Clear all saved user data
+    await prefs.remove('token');
+    setState(() {
+      token = null;
+    });
+  }
 
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-      (route) => false,
+  Widget _preferencesSection(
+    BuildContext context,
+    ThemeData theme,
+    bool isDarkMode,
+    String selectedCurrency,
+    String selectedLanguage,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Preferences",
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Container(
+          decoration: boxDecoration(theme),
+          child: Column(
+            children: [
+              settingTile(
+                context,
+                title: "Dark Mode",
+                trailing: FlutterSwitch(
+                  width: 40,
+                  height: 20,
+                  toggleSize: 16,
+                  value: isDarkMode,
+                  activeColor: const Color(0xFF348F6C),
+                  inactiveColor: const Color.fromRGBO(91, 91, 91, 1),
+                  toggleColor: Colors.white,
+                  onToggle: (val) {
+                    ref.read(themeModeProvider.notifier).toggle(val);
+                  },
+                ),
+              ),
+              divider(theme),
+              settingTile(
+                context,
+                title: "Currency",
+                trailing: Text(
+                  selectedCurrency,
+                  style: theme.textTheme.bodySmall,
+                ),
+              ),
+              divider(theme),
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const SelectLanguageScreen(),
+                    ),
+                  );
+                },
+                child: settingTile(
+                  context,
+                  title: "Language",
+                  trailing: Text(
+                    selectedLanguage,
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _othersSection(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Others",
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Container(
+          decoration: boxDecoration(theme),
+          child: Column(
+            children: [
+              othersTile(title: "Privacy Policy", theme: theme),
+              divider(theme),
+              othersTile(title: "Cookie Preference", theme: theme),
+              divider(theme),
+              othersTile(title: "Terms of Service", theme: theme),
+              divider(theme),
+              othersTile(title: "Disclaimer", theme: theme),
+              divider(theme),
+              othersTile(title: "Rate the RWA App", theme: theme),
+              divider(theme),
+              othersTile(title: "Share the RWA App", theme: theme),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -270,16 +342,6 @@ class ProfileScreen extends ConsumerWidget {
           blurRadius: 1,
         ),
       ],
-    );
-  }
-
-  Widget _socialIcon(ThemeData theme) {
-    return Container(
-      decoration: boxDecoration(theme),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Image.asset('assets/logo.png', width: 18, height: 18),
-      ),
     );
   }
 }
