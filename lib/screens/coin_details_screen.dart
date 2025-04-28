@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CoinDetailScreen extends StatefulWidget {
   final String coin;
@@ -165,6 +166,10 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
         const SizedBox(height: 24),
         _buildOverviewSection(theme),
         const SizedBox(height: 24),
+        _buildAboutSection(theme),
+        const SizedBox(height: 24),
+        _buildLinksSection(theme),
+        const SizedBox(height: 24),
       ],
     );
   }
@@ -208,6 +213,14 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
     );
   }
 
+  String _formatYAxisValue(double value) {
+    if (value >= 1e12) return '${(value / 1e12).toStringAsFixed(2)}T';
+    if (value >= 1e9) return '${(value / 1e9).toStringAsFixed(2)}B';
+    if (value >= 1e6) return '${(value / 1e6).toStringAsFixed(2)}M';
+    if (value >= 1e3) return '${(value / 1e3).toStringAsFixed(2)}K';
+    return value.toStringAsFixed(2);
+  }
+
   Widget _buildChartSection(
     ThemeData theme,
     List<FlSpot> chartData,
@@ -230,17 +243,18 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                 sideTitles: SideTitles(
                   showTitles: true,
                   reservedSize: 40,
-                  getTitlesWidget:
-                      (value, meta) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: Text(
-                          _formatYAxisValue(value),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontSize: 10,
-                            color: Colors.grey,
-                          ),
+                  getTitlesWidget: (value, meta) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Text(
+                        _formatYAxisValue(value),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontSize: 10,
+                          color: Colors.grey,
                         ),
                       ),
+                    );
+                  },
                 ),
               ),
               bottomTitles: AxisTitles(
@@ -304,14 +318,6 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
     );
   }
 
-  String _formatYAxisValue(double value) {
-    if (value >= 1e12) return '${(value / 1e12).toStringAsFixed(2)}T';
-    if (value >= 1e9) return '${(value / 1e9).toStringAsFixed(2)}B';
-    if (value >= 1e6) return '${(value / 1e6).toStringAsFixed(2)}M';
-    if (value >= 1e3) return '${(value / 1e3).toStringAsFixed(2)}K';
-    return value.toStringAsFixed(2);
-  }
-
   Widget _buildOverviewSection(ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -357,8 +363,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
     String value2,
   ) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark; // 🔥 detect dark mode
-
+    final isDark = theme.brightness == Brightness.dark;
     return Row(
       children: [
         Expanded(
@@ -374,8 +379,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                 value1,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color:
-                      isDark ? Colors.white : Colors.black, // ✅ dynamic color
+                  color: isDark ? Colors.white : Colors.black,
                 ),
               ),
             ],
@@ -395,14 +399,175 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                 value2,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color:
-                      isDark ? Colors.white : Colors.black, // ✅ dynamic color
+                  color: isDark ? Colors.white : Colors.black,
                 ),
               ),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildAboutSection(ThemeData theme) {
+    final about = coin?['description']?['en'] ?? '';
+    if (about.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'About',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            about,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontSize: 12,
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLinksSection(ThemeData theme) {
+    final homepage = (coin?['links']?['homepage'] as List?)?.first ?? '';
+    final whitepaper = coin?['links']?['whitepaper'] ?? '';
+    final twitter = coin?['links']?['twitter_screen_name'] ?? '';
+    final telegram = coin?['links']?['telegram_channel_identifier'] ?? '';
+    final announcement =
+        (coin?['links']?['announcement_url'] as List?)?.first ?? '';
+
+    if (homepage.isEmpty &&
+        whitepaper.isEmpty &&
+        twitter.isEmpty &&
+        telegram.isEmpty &&
+        announcement.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Important Links',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              if (homepage.isNotEmpty) _buildLinkItem('Website', homepage),
+              if (whitepaper.isNotEmpty)
+                _buildLinkItem('Whitepaper', whitepaper),
+
+              if (twitter.isNotEmpty)
+                _buildLinkItem('Twitter', 'https://twitter.com/$twitter'),
+              // if (telegram.isNotEmpty)
+              //   _buildLinkItem('Telegram', 'https://t.me/$telegram'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLinkItem(String label, String url) {
+    final theme = Theme.of(context); // 🧠 access dark/light mode
+    final isDark = theme.brightness == Brightness.dark;
+
+    Widget icon;
+
+    switch (label.toLowerCase()) {
+      case 'website':
+        icon = Image.asset(
+          'assets/web.png',
+          width: 26,
+          height: 26,
+          color: isDark ? Colors.white : null, // 🔥 make white in dark mode
+          colorBlendMode: BlendMode.srcIn,
+        );
+        ;
+        break;
+      case 'whitepaper':
+        icon = Image.asset(
+          'assets/google-docs.png',
+          width: 26,
+          height: 26,
+          color: isDark ? Colors.white : null, // 🔥 make white in dark mode
+          colorBlendMode: BlendMode.srcIn,
+        );
+        ;
+        break;
+      case 'blog':
+        icon = Image.asset(
+          'assets/google-docs.png',
+          width: 26,
+          height: 26,
+          color: isDark ? Colors.white : null, // 🔥 make white in dark mode
+          colorBlendMode: BlendMode.srcIn,
+        );
+
+        break;
+      case 'twitter':
+        icon = Image.asset(
+          'assets/twitter.png',
+          width: 26,
+          height: 26,
+          color: isDark ? Colors.white : null, // 🔥 make white in dark mode
+          colorBlendMode: BlendMode.srcIn,
+        );
+        break;
+      case 'telegram':
+        icon = Icon(Icons.send, size: 26, color: Colors.green);
+        break;
+      default:
+        icon = Icon(Icons.link, size: 26, color: Colors.green);
+    }
+
+    return GestureDetector(
+      onTap: () async {
+        try {
+          Uri uri = Uri.parse(url);
+
+          if (label.toLowerCase() == 'telegram') {
+            final webTelegramUrl =
+                url.startsWith('https') ? url : 'https://t.me/$url';
+            if (!await launchUrl(
+              Uri.parse(webTelegramUrl),
+              mode: LaunchMode.externalApplication,
+            )) {
+              await launchUrl(
+                Uri.parse(webTelegramUrl),
+                mode: LaunchMode.inAppWebView,
+              );
+            }
+          } else {
+            if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+              await launchUrl(uri, mode: LaunchMode.inAppWebView);
+            }
+          }
+        } catch (e) {
+          debugPrint('❌ Launch Error: $e');
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Could not open $label link')),
+            );
+          }
+        }
+      },
+      child: Padding(padding: const EdgeInsets.only(right: 16), child: icon),
     );
   }
 }
