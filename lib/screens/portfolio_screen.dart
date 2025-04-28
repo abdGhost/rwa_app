@@ -3,6 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rwa_app/screens/add_portfolio_transaction_screen.dart';
+import 'package:rwa_app/screens/onboarding_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:rwa_app/screens/add_coin_to_portfolio.dart';
@@ -132,55 +133,88 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
   }
 
   Widget _buildEmptyState(ThemeData theme) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset('assets/portfolio.png', height: 200),
-          const SizedBox(height: 20),
-          Text(
-            "Almost there!\nJust few steps left",
-            textAlign: TextAlign.center,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              "Add your first coin to begin tracking your assets.",
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.hintColor,
+    return FutureBuilder<SharedPreferences>(
+      future: SharedPreferences.getInstance(),
+      builder: (context, snapshot) {
+        final isLoggedIn =
+            snapshot.hasData &&
+            (snapshot.data?.getString('token')?.isNotEmpty ?? false);
+
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset('assets/portfolio.png', height: 200),
+              const SizedBox(height: 20),
+              Text(
+                isLoggedIn
+                    ? "Almost there!\nJust a few steps left"
+                    : "Welcome!\nPlease log in to track your portfolio",
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ),
-          const SizedBox(height: 30),
-          ElevatedButton(
-            onPressed:
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const AddCoinToPortfolioScreen(),
+              const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Text(
+                  isLoggedIn
+                      ? "Add your first coin to start tracking your assets."
+                      : "Sign in to add, manage, and track your crypto portfolio easily.",
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.hintColor,
                   ),
                 ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF348F6C),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
               ),
-            ),
-            child: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              child: Text(
-                "Add Coin",
-                style: TextStyle(color: Colors.white, fontSize: 16),
+              const SizedBox(height: 30),
+
+              // 🔥 Updated Full Width Button
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (isLoggedIn) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AddCoinToPortfolioScreen(),
+                          ),
+                        );
+                      } else {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const OnboardingScreen(),
+                          ),
+                          (route) =>
+                              false, // 🚫 Remove all previous screens from stack
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF348F6C),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                      ), // 🔥 Good height
+                    ),
+                    child: Text(
+                      isLoggedIn ? "Add Coin" : "Login",
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 

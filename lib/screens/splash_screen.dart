@@ -54,7 +54,7 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              isDark ? 'assets/splash-screen.png' : 'assets/splash-screen.png',
+              isDark ? 'assets/splash-screen.png' : 'assets/onboarding.png',
               width: 150,
               height: 150,
               fit: BoxFit.contain,
