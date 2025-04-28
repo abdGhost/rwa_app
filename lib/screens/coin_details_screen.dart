@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
 
 class CoinDetailScreen extends StatefulWidget {
-  final String coin; // coin ID like 'chainlink'
+  final String coin;
 
   const CoinDetailScreen({super.key, required this.coin});
 
@@ -65,14 +65,6 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
         final List<double> closePrices =
             chartRaw.map((e) => (e[4] as num).toDouble()).toList();
 
-        // 🛑 PRINT FULL graphRaw DATA HERE
-        debugPrint('📈 Full Graph Data:');
-        for (var point in chartRaw) {
-          debugPrint(
-            'Time: ${point[0]}, Open: ${point[1]}, High: ${point[2]}, Low: ${point[3]}, Close: ${point[4]}',
-          );
-        }
-
         setState(() {
           coin = coinData;
           trend = closePrices;
@@ -96,59 +88,9 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
-        titleSpacing: 0,
-        iconTheme: theme.iconTheme,
-        title: Row(
-          children: [
-            if (coin != null && coin?['image']?['small'] != null)
-              Image.network(
-                coin?['image']['small'],
-                width: 24,
-                height: 24,
-                errorBuilder: (_, __, ___) => const Icon(Icons.error, size: 18),
-              ),
-            const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  coin?['symbol']?.toUpperCase() ?? '',
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(coin?['name'] ?? '', style: theme.textTheme.bodySmall),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.share,
-              color: isDark ? Colors.white : Colors.black,
-            ),
-            onPressed: _shareCoin,
-          ),
-          IconButton(
-            icon: Icon(
-              isFavorite ? Icons.favorite : Icons.favorite_border,
-              color:
-                  isFavorite
-                      ? const Color(0xFF16C784)
-                      : (isDark ? Colors.white : Colors.black),
-            ),
-            onPressed: _toggleFavorite,
-          ),
-        ],
-      ),
+      appBar: _buildAppBar(theme),
       body:
           isLoading
               ? const Center(
@@ -158,18 +100,68 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
     );
   }
 
+  PreferredSizeWidget _buildAppBar(ThemeData theme) {
+    return AppBar(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      elevation: 0,
+      titleSpacing: 0,
+      iconTheme: theme.iconTheme,
+      title: Row(
+        children: [
+          if (coin != null && coin?['image']?['small'] != null)
+            Image.network(
+              coin?['image']['small'],
+              width: 24,
+              height: 24,
+              errorBuilder: (_, __, ___) => const Icon(Icons.error, size: 18),
+            ),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                coin?['symbol']?.toUpperCase() ?? '',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(coin?['name'] ?? '', style: theme.textTheme.bodySmall),
+            ],
+          ),
+        ],
+      ),
+      actions: [
+        IconButton(
+          icon: Icon(Icons.share, color: Colors.grey),
+          onPressed: _shareCoin,
+        ),
+        IconButton(
+          icon: Icon(
+            isFavorite ? Icons.favorite : Icons.favorite_border,
+            color: isFavorite ? Colors.green : Colors.grey,
+          ),
+          onPressed: _toggleFavorite,
+        ),
+      ],
+    );
+  }
+
   Widget _buildBody(ThemeData theme) {
     final chartData = List.generate(
       trend.length,
       (i) => FlSpot(i.toDouble(), trend[i]),
     );
+    final double minPrice =
+        trend.isEmpty ? 0 : trend.reduce((a, b) => a < b ? a : b).toDouble();
+    final double maxPrice =
+        trend.isEmpty ? 0 : trend.reduce((a, b) => a > b ? a : b).toDouble();
 
     return ListView(
       padding: const EdgeInsets.only(top: 16),
       children: [
         _buildPriceSection(theme),
         const SizedBox(height: 12),
-        _buildChartSection(theme, chartData),
+        _buildChartSection(theme, chartData, minPrice, maxPrice),
         const SizedBox(height: 24),
         _buildOverviewSection(theme),
         const SizedBox(height: 24),
@@ -216,32 +208,19 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
     );
   }
 
-  Widget _buildChartSection(ThemeData theme, List<FlSpot> chartData) {
-    final minPrice = trend.isEmpty ? 0 : trend.reduce((a, b) => a < b ? a : b);
-    final maxPrice = trend.isEmpty ? 0 : trend.reduce((a, b) => a > b ? a : b);
-
+  Widget _buildChartSection(
+    ThemeData theme,
+    List<FlSpot> chartData,
+    double minPrice,
+    double maxPrice,
+  ) {
     return SizedBox(
       height: 250,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: LineChart(
           LineChartData(
-            gridData: FlGridData(
-              show: true,
-              drawVerticalLine: true,
-              horizontalInterval: (maxPrice - minPrice) / 4,
-              verticalInterval: 5,
-              getDrawingHorizontalLine:
-                  (_) => FlLine(
-                    color: Colors.grey.withOpacity(0.2),
-                    strokeWidth: 1,
-                  ),
-              getDrawingVerticalLine:
-                  (_) => FlLine(
-                    color: Colors.grey.withOpacity(0.2),
-                    strokeWidth: 1,
-                  ),
-            ),
+            gridData: FlGridData(show: true, drawVerticalLine: true),
             borderData: FlBorderData(
               show: true,
               border: Border.all(color: Colors.grey.withOpacity(0.3)),
@@ -250,27 +229,24 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
               leftTitles: AxisTitles(
                 sideTitles: SideTitles(
                   showTitles: true,
-                  reservedSize: 50, // ⬅️ add padding space for Y-axis
-                  getTitlesWidget: (value, meta) {
-                    return Padding(
-                      padding: const EdgeInsets.only(
-                        right: 8,
-                      ), // ⬅️ move inside a bit
-                      child: Text(
-                        '\$${value.toStringAsFixed(2)}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontSize: 10,
-                          color: Colors.grey,
+                  reservedSize: 40,
+                  getTitlesWidget:
+                      (value, meta) => Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: Text(
+                          _formatYAxisValue(value),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontSize: 10,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
-                    );
-                  },
                 ),
               ),
               bottomTitles: AxisTitles(
                 sideTitles: SideTitles(
                   showTitles: true,
-                  reservedSize: 30, // ⬅️ space below for X-axis titles
+                  reservedSize: 30,
                   interval: 8,
                   getTitlesWidget: (value, meta) {
                     if (value < 0 || value.toInt() >= trend.length)
@@ -278,14 +254,10 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                     DateTime time = DateTime.now().subtract(
                       Duration(minutes: (trend.length - value.toInt()) * 30),
                     );
-                    String formatted =
-                        '${time.hour}:${time.minute.toString().padLeft(2, '0')}';
                     return Padding(
-                      padding: const EdgeInsets.only(
-                        top: 6,
-                      ), // ⬅️ move text down
+                      padding: const EdgeInsets.only(top: 6),
                       child: Text(
-                        formatted,
+                        '${time.hour}:${time.minute.toString().padLeft(2, '0')}',
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontSize: 10,
                           color: Colors.grey,
@@ -317,7 +289,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                   show: true,
                   gradient: LinearGradient(
                     colors: [
-                      const Color(0xFF16C784).withOpacity(0.2),
+                      Color(0xFF16C784).withOpacity(0.2),
                       Colors.transparent,
                     ],
                     begin: Alignment.topCenter,
@@ -332,6 +304,14 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
     );
   }
 
+  String _formatYAxisValue(double value) {
+    if (value >= 1e12) return '${(value / 1e12).toStringAsFixed(2)}T';
+    if (value >= 1e9) return '${(value / 1e9).toStringAsFixed(2)}B';
+    if (value >= 1e6) return '${(value / 1e6).toStringAsFixed(2)}M';
+    if (value >= 1e3) return '${(value / 1e3).toStringAsFixed(2)}K';
+    return value.toStringAsFixed(2);
+  }
+
   Widget _buildOverviewSection(ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -339,7 +319,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
         decoration: BoxDecoration(
           color: theme.cardColor,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.grey.withOpacity(0.2), width: 0.5),
+          border: Border.all(color: Colors.grey.withOpacity(0.2)),
         ),
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -347,28 +327,22 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
             _buildOverviewRow(
               'Market Cap',
               '\$${_formatValue(coin?['market_data']['market_cap']['usd'])}',
-              'Total value of all circulating coins.',
               'Fully Diluted Value',
               '\$${_formatValue(coin?['market_data']['fully_diluted_valuation']['usd'])}',
-              'Estimated market cap at full supply.',
             ),
             const SizedBox(height: 12),
             _buildOverviewRow(
               'Circulating Supply',
               _formatValue(coin?['market_data']['circulating_supply']),
-              'Coins actively trading.',
               'Total Supply',
               _formatValue(coin?['market_data']['total_supply']),
-              'Maximum coins in existence.',
             ),
             const SizedBox(height: 12),
             _buildOverviewRow(
               'ATH',
               '\$${coin?['market_data']['ath']['usd']?.toStringAsFixed(2) ?? '--'}',
-              'All-Time Highest price.',
               'ATL',
               '\$${coin?['market_data']['atl']['usd']?.toStringAsFixed(2) ?? '--'}',
-              'All-Time Lowest price.',
             ),
           ],
         ),
@@ -379,54 +353,67 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
   Widget _buildOverviewRow(
     String title1,
     String value1,
-    String subtitle1,
     String title2,
     String value2,
-    String subtitle2,
   ) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark; // 🔥 detect dark mode
+
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(child: _buildOverviewItem(theme, title1, value1)),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title1,
+                style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value1,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color:
+                      isDark ? Colors.white : Colors.black, // ✅ dynamic color
+                ),
+              ),
+            ],
+          ),
+        ),
         const SizedBox(width: 16),
-        Expanded(child: _buildOverviewItem(theme, title2, value2)),
-      ],
-    );
-  }
-
-  Widget _buildOverviewItem(ThemeData theme, String title, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: Colors.grey,
-            fontSize: 12,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: theme.textTheme.bodyLarge?.color,
-            fontSize: 14,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title2,
+                style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value2,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color:
+                      isDark ? Colors.white : Colors.black, // ✅ dynamic color
+                ),
+              ),
+            ],
           ),
         ),
       ],
     );
   }
+}
 
-  String _formatValue(dynamic numVal) {
-    if (numVal == null) return "--";
-    final num number =
-        (numVal is num) ? numVal : double.tryParse(numVal.toString()) ?? 0;
-    if (number >= 1e12) return '${(number / 1e12).toStringAsFixed(2)}T';
-    if (number >= 1e9) return '${(number / 1e9).toStringAsFixed(2)}B';
-    if (number >= 1e6) return '${(number / 1e6).toStringAsFixed(2)}M';
-    if (number >= 1e3) return '${(number / 1e3).toStringAsFixed(2)}K';
-    return number.toStringAsFixed(2);
-  }
+String _formatValue(dynamic numVal) {
+  if (numVal == null) return "--";
+  final num number =
+      (numVal is num) ? numVal : double.tryParse(numVal.toString()) ?? 0;
+  if (number >= 1e12) return '${(number / 1e12).toStringAsFixed(2)}T';
+  if (number >= 1e9) return '${(number / 1e9).toStringAsFixed(2)}B';
+  if (number >= 1e6) return '${(number / 1e6).toStringAsFixed(2)}M';
+  if (number >= 1e3) return '${(number / 1e3).toStringAsFixed(2)}K';
+  return number.toStringAsFixed(2);
 }
