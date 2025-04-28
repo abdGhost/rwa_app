@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MyAccountScreen extends StatefulWidget {
   const MyAccountScreen({super.key});
@@ -10,6 +11,22 @@ class MyAccountScreen extends StatefulWidget {
 
 class _MyAccountScreenState extends State<MyAccountScreen> {
   bool isDarkMode = false;
+  String? _userName;
+  String? _userEmail;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _userName = prefs.getString('name'); // Load name
+      _userEmail = prefs.getString('email'); // Load email
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,16 +61,13 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
               children: [
                 const SizedBox(height: 24),
                 Text(
-                  "Hi, Ghost",
+                  "Hi, ${_userName ?? 'User'}", // Display real name if available, fallback to 'User'
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color:
-                        isDark
-                            ? Colors.white
-                            : Colors
-                                .black, // Ensuring text visibility in dark mode
+                    color: isDark ? Colors.white : Colors.black,
                   ),
                 ),
+
                 const SizedBox(height: 6),
                 Text(
                   "Login to track your favorite coins easily.",
@@ -84,13 +98,15 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                       settingTile(
                         title: "Email",
                         trailing: Text(
-                          "ghost@gmail.com",
+                          _userEmail ??
+                              "No email found", // Show real email or fallback text
                           style: TextStyle(
                             color: theme.textTheme.bodySmall?.color,
                             fontSize: 13,
                           ),
                         ),
                       ),
+
                       divider(theme),
                       settingTile(
                         title: "Subscription",
