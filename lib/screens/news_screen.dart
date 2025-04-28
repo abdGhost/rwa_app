@@ -27,6 +27,9 @@ class _NewsScreenState extends State<NewsScreen> {
 
   List<Map<String, dynamic>> newsItems = [];
   List<Map<String, dynamic>> blogItems = [];
+  List<Map<String, dynamic>> filteredNews = [];
+  List<Map<String, dynamic>> filteredBlogs = [];
+
   bool _isLoading = true;
 
   @override
@@ -37,6 +40,7 @@ class _NewsScreenState extends State<NewsScreen> {
 
   Future<void> fetchAllData() async {
     await Future.wait([fetchNews(), fetchBlogs()]);
+    _applySearch(); // Apply initial search
     setState(() => _isLoading = false);
   }
 
@@ -71,7 +75,6 @@ class _NewsScreenState extends State<NewsScreen> {
   Future<void> fetchBlogs() async {
     const url =
         'https://rwa-f1623a22e3ed.herokuapp.com/api/currencies/rwa/blog';
-
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
@@ -83,12 +86,8 @@ class _NewsScreenState extends State<NewsScreen> {
 
       final response = await http.get(
         Uri.parse(url),
-        headers: {
-          'Authorization': 'Bearer $token', // 👈 Attach the token here
-        },
+        headers: {'Authorization': 'Bearer $token'},
       );
-
-      print('Blogs API Response: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -103,7 +102,7 @@ class _NewsScreenState extends State<NewsScreen> {
                 'author': blog['author'],
                 'time': blog['publishDate'],
                 'category': blog['category'],
-                'content': blog['sections'], // HTML content
+                'content': blog['sections'],
                 'blockQuote': blog['blockQuote'],
               };
             }).toList();
@@ -113,6 +112,35 @@ class _NewsScreenState extends State<NewsScreen> {
     } catch (e) {
       print('❌ Error fetching blogs: $e');
     }
+  }
+
+  void _applySearch() {
+    final query = _searchController.text.toLowerCase();
+    if (query.isEmpty) {
+      filteredNews = List.from(newsItems);
+      filteredBlogs = List.from(blogItems);
+    } else {
+      filteredNews =
+          newsItems.where((item) {
+            final title = (item['title'] ?? '').toLowerCase();
+            final subtitle = (item['subtitle'] ?? '').toLowerCase();
+            final source = (item['source'] ?? '').toLowerCase();
+            return title.contains(query) ||
+                subtitle.contains(query) ||
+                source.contains(query);
+          }).toList();
+
+      filteredBlogs =
+          blogItems.where((item) {
+            final title = (item['title'] ?? '').toLowerCase();
+            final subtitle = (item['subtitle'] ?? '').toLowerCase();
+            final author = (item['author'] ?? '').toLowerCase();
+            return title.contains(query) ||
+                subtitle.contains(query) ||
+                author.contains(query);
+          }).toList();
+    }
+    setState(() {}); // Update UI
   }
 
   @override
@@ -133,10 +161,12 @@ class _NewsScreenState extends State<NewsScreen> {
               _isSearching
                   ? SearchAppBarField(
                     controller: _searchController,
+                    onChanged: (_) => _applySearch(), // 🔥 Search live
                     onCancel: () {
                       setState(() {
                         _isSearching = false;
                         _searchController.clear();
+                        _applySearch();
                       });
                     },
                   )
@@ -197,19 +227,19 @@ class _NewsScreenState extends State<NewsScreen> {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       children: [
-        if (newsItems.isNotEmpty) ...[
+        if (filteredNews.isNotEmpty) ...[
           GestureDetector(
             onTap:
                 () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => NewsDetailScreen(news: newsItems.first),
+                    builder: (_) => NewsDetailScreen(news: filteredNews.first),
                   ),
                 ),
-            child: NewsCardMain(item: newsItems.first),
+            child: NewsCardMain(item: filteredNews.first),
           ),
           const SizedBox(height: 10),
-          ...newsItems
+          ...filteredNews
               .skip(1)
               .map(
                 (item) => NewsCardSide(
@@ -226,9 +256,12 @@ class _NewsScreenState extends State<NewsScreen> {
               ),
         ] else
           const Center(
-            child: Text(
-              'No news available.',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
+            child: Padding(
+              padding: EdgeInsets.only(top: 100),
+              child: Text(
+                'No news found.',
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+              ),
             ),
           ),
       ],
@@ -239,21 +272,33 @@ class _NewsScreenState extends State<NewsScreen> {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       children:
-          blogItems
-              .map(
-                (blog) => BlogCard(
-                  blog: blog,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => BlogDetailScreen(blog: blog),
-                      ),
-                    );
-                  },
+          filteredBlogs.isNotEmpty
+              ? filteredBlogs
+                  .map(
+                    (blog) => BlogCard(
+                      blog: blog,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => BlogDetailScreen(blog: blog),
+                          ),
+                        );
+                      },
+                    ),
+                  )
+                  .toList()
+              : [
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 100),
+                    child: Text(
+                      'No blogs found.',
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  ),
                 ),
-              )
-              .toList(),
+              ],
     );
   }
 }

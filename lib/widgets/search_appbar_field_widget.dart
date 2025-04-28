@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class SearchAppBarField extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onCancel;
+  final ValueChanged<String>? onChanged; // 🔥 Added onChanged
 
   const SearchAppBarField({
     super.key,
     required this.controller,
     required this.onCancel,
+    this.onChanged, // 🔥 Added onChanged optional
   });
 
   @override
@@ -30,6 +32,7 @@ class SearchAppBarField extends StatelessWidget {
               controller: controller,
               autofocus: true,
               cursorColor: const Color(0xFF16C784),
+              onChanged: onChanged, // 🔥 Listen when user types
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: const Color(0xFF16C784),
               ),
@@ -46,6 +49,24 @@ class SearchAppBarField extends StatelessWidget {
                   size: 20,
                   color: Colors.grey,
                 ),
+                suffixIcon:
+                    controller
+                            .text
+                            .isNotEmpty // 🔥 Show clear button
+                        ? IconButton(
+                          icon: const Icon(
+                            Icons.close,
+                            size: 18,
+                            color: Colors.grey,
+                          ),
+                          onPressed: () {
+                            controller.clear();
+                            if (onChanged != null) {
+                              onChanged!('');
+                            }
+                          },
+                        )
+                        : null,
                 border: InputBorder.none,
               ),
             ),
