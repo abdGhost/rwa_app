@@ -1,5 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:intl/intl.dart';
 
 class BlogDetailScreen extends StatelessWidget {
@@ -18,17 +19,25 @@ class BlogDetailScreen extends StatelessWidget {
     }
   }
 
+  void printFullBlog(Map<String, dynamic> blog) {
+    const JsonEncoder encoder = JsonEncoder.withIndent('  ');
+    final prettyBlog = encoder.convert(blog);
+    debugPrint(prettyBlog);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
+    printFullBlog(blog);
 
     final String? image = blog['image'];
     final String? title = blog['title'];
     final String? subtitle = blog['subtitle'];
     final String? author = blog['author'];
     final String? time = blog['time'];
-    final String? content = blog['content']; // HTML content
+    final String? rawContent = blog['content'];
     final Map<String, dynamic>? blockQuote = blog['blockQuote'];
     final List<String> bulletPoints = List<String>.from(
       blog['bulletPoints'] ?? [],
@@ -36,13 +45,19 @@ class BlogDetailScreen extends StatelessWidget {
 
     final formattedTime = time != null ? formatTime(time) : '';
 
+    // 🧹 Clean the HTML content by removing inline color styles
+    final String cleanContent = (rawContent ?? '').replaceAll(
+      RegExp(r'color:\s*rgb\(\d+,\s*\d+,\s*\d+\);?'),
+      '',
+    );
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         elevation: 0.5,
         backgroundColor: theme.appBarTheme.backgroundColor ?? theme.cardColor,
         leading: BackButton(color: theme.iconTheme.color),
-        title: Text("Blog", style: theme.textTheme.bodyLarge),
+        title: Text("Ghost", style: theme.textTheme.bodyLarge),
       ),
       body: ListView(
         children: [
@@ -81,6 +96,7 @@ class BlogDetailScreen extends StatelessWidget {
                       height: 1.5,
                     ),
                   ),
+                const SizedBox(height: 8),
                 RichText(
                   text: TextSpan(
                     style: theme.textTheme.bodySmall,
@@ -97,19 +113,21 @@ class BlogDetailScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 16),
 
                 if (blockQuote != null && blockQuote.isNotEmpty) ...[
                   Container(
-                    padding: const EdgeInsets.only(left: 12, right: 12),
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 14,
+                    ),
+                    margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
                       color:
                           isDark ? Colors.grey.shade900 : Colors.grey.shade100,
-                      border: Border(
-                        left: BorderSide(
-                          color: const Color(0xFF1CB379),
-                          width: 4,
-                        ),
+                      border: const Border(
+                        left: BorderSide(color: Color(0xFF1CB379), width: 4),
                       ),
                     ),
                     child: Text(
@@ -122,46 +140,34 @@ class BlogDetailScreen extends StatelessWidget {
                   ),
                 ],
 
-                // Render HTML content
-                if (content != null && content.isNotEmpty) ...[
-                  Html(
-                    data: content,
-                    style: {
-                      'p': Style(
-                        margin: Margins.only(bottom: 12),
-                        fontSize: FontSize(12),
-                        lineHeight: LineHeight(1.5),
-                        color: theme.textTheme.bodyMedium?.color,
-                      ),
-                      'h2': Style(
-                        fontSize: FontSize(20),
-                        fontWeight: FontWeight.bold,
-                        margin: Margins.only(bottom: 12),
-                      ),
-                      'li': Style(
-                        fontSize: FontSize(16),
-                        lineHeight: LineHeight(1.5),
-                      ),
-                    },
+                if (cleanContent.isNotEmpty) ...[
+                  HtmlWidget(
+                    cleanContent,
+                    textStyle: theme.textTheme.bodyMedium?.copyWith(
+                      height: 1.6,
+                      fontSize: 14,
+                      color: theme.textTheme.bodyMedium?.color,
+                    ),
                   ),
                 ],
 
                 if (bulletPoints.isNotEmpty) ...[
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
                   Text(
                     "Key Insights:",
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   ...bulletPoints.map(
                     (point) => Padding(
-                      padding: const EdgeInsets.only(bottom: 6),
+                      padding: const EdgeInsets.only(bottom: 8),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text("• "),
+                          const SizedBox(width: 6),
                           Expanded(
                             child: Text(
                               point,
