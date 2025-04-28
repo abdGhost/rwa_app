@@ -45,11 +45,12 @@ class StatCard extends StatelessWidget {
       width: width,
       height: 90,
       padding: const EdgeInsets.all(8),
+      // 0xFF348F6C
       decoration: BoxDecoration(
         color:
             isDark
                 ? const Color(0xFF1E1E1E) // Dark card color
-                : const Color.fromARGB(255, 63, 167, 127), // Light mode green
+                : const Color(0xFF348F6C),
         borderRadius: BorderRadius.horizontal(
           left: isFirst ? const Radius.circular(12) : Radius.zero,
           right: isLast ? const Radius.circular(12) : Radius.zero,

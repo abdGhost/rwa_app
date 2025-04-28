@@ -143,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     title: 'Market Cap',
                     value: '\$2.79 T',
                     change: '5.78%',
-                    changeColor: Colors.green,
+                    changeColor: Color.fromARGB(255, 30, 225, 151),
                     width: (MediaQuery.of(context).size.width - 24 - 6) / 4,
                     isFirst: true,
                   ),
@@ -152,7 +152,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     title: 'Volume',
                     value: '\$3.48 T',
                     change: '8.59%',
-                    changeColor: Colors.green,
+                    changeColor: Color.fromARGB(255, 30, 225, 151),
+
                     width: (MediaQuery.of(context).size.width - 24 - 6) / 4,
                   ),
                   const SizedBox(width: 2),
