@@ -117,17 +117,29 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
               errorBuilder: (_, __, ___) => const Icon(Icons.error, size: 18),
             ),
           const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                coin?['symbol']?.toUpperCase() ?? '',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+          Expanded(
+            // 🔥 Added Expanded here to prevent overflow
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize:
+                  MainAxisSize.min, // important for tight vertical space
+              children: [
+                Text(
+                  coin?['symbol']?.toUpperCase() ?? '',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis, // ✨ show "..." if too long
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              Text(coin?['name'] ?? '', style: theme.textTheme.bodySmall),
-            ],
+                Text(
+                  coin?['name'] ?? '',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis, // ✨ show "..." if too long
+                  style: theme.textTheme.bodySmall,
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -438,18 +450,11 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
   }
 
   Widget _buildLinksSection(ThemeData theme) {
-    final homepage = (coin?['links']?['homepage'] as List?)?.first ?? '';
+    final homepage = _safeFirst(coin?['links']?['homepage']);
     final whitepaper = coin?['links']?['whitepaper'] ?? '';
     final twitter = coin?['links']?['twitter_screen_name'] ?? '';
-    final telegram = coin?['links']?['telegram_channel_identifier'] ?? '';
-    final announcement =
-        (coin?['links']?['announcement_url'] as List?)?.first ?? '';
 
-    if (homepage.isEmpty &&
-        whitepaper.isEmpty &&
-        twitter.isEmpty &&
-        telegram.isEmpty &&
-        announcement.isEmpty) {
+    if (homepage.isEmpty && whitepaper.isEmpty && twitter.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -470,12 +475,12 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
             children: [
               if (homepage.isNotEmpty) _buildLinkItem('Website', homepage),
               if (whitepaper.isNotEmpty)
-                _buildLinkItem('Whitepaper', whitepaper),
-
+                _buildLinkItem(
+                  'Docs',
+                  whitepaper,
+                ), // 📄 Docs icon for whitepaper
               if (twitter.isNotEmpty)
                 _buildLinkItem('Twitter', 'https://twitter.com/$twitter'),
-              // if (telegram.isNotEmpty)
-              //   _buildLinkItem('Telegram', 'https://t.me/$telegram'),
             ],
           ),
         ],
@@ -483,8 +488,15 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
     );
   }
 
+  String _safeFirst(dynamic listData) {
+    if (listData is List && listData.isNotEmpty) {
+      return listData.first ?? '';
+    }
+    return '';
+  }
+
   Widget _buildLinkItem(String label, String url) {
-    final theme = Theme.of(context); // 🧠 access dark/light mode
+    final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     Widget icon;
@@ -495,42 +507,27 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
           'assets/web.png',
           width: 26,
           height: 26,
-          color: isDark ? Colors.white : null, // 🔥 make white in dark mode
+          color: isDark ? Colors.white : null,
           colorBlendMode: BlendMode.srcIn,
         );
-        ;
         break;
-      case 'whitepaper':
+      case 'docs':
         icon = Image.asset(
           'assets/google-docs.png',
           width: 26,
           height: 26,
-          color: isDark ? Colors.white : null, // 🔥 make white in dark mode
+          color: isDark ? Colors.white : null,
           colorBlendMode: BlendMode.srcIn,
         );
-        ;
-        break;
-      case 'blog':
-        icon = Image.asset(
-          'assets/google-docs.png',
-          width: 26,
-          height: 26,
-          color: isDark ? Colors.white : null, // 🔥 make white in dark mode
-          colorBlendMode: BlendMode.srcIn,
-        );
-
         break;
       case 'twitter':
         icon = Image.asset(
           'assets/twitter.png',
           width: 26,
           height: 26,
-          color: isDark ? Colors.white : null, // 🔥 make white in dark mode
+          color: isDark ? Colors.white : null,
           colorBlendMode: BlendMode.srcIn,
         );
-        break;
-      case 'telegram':
-        icon = Icon(Icons.send, size: 26, color: Colors.green);
         break;
       default:
         icon = Icon(Icons.link, size: 26, color: Colors.green);
@@ -540,23 +537,8 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
       onTap: () async {
         try {
           Uri uri = Uri.parse(url);
-
-          if (label.toLowerCase() == 'telegram') {
-            final webTelegramUrl =
-                url.startsWith('https') ? url : 'https://t.me/$url';
-            if (!await launchUrl(
-              Uri.parse(webTelegramUrl),
-              mode: LaunchMode.externalApplication,
-            )) {
-              await launchUrl(
-                Uri.parse(webTelegramUrl),
-                mode: LaunchMode.inAppWebView,
-              );
-            }
-          } else {
-            if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-              await launchUrl(uri, mode: LaunchMode.inAppWebView);
-            }
+          if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+            await launchUrl(uri, mode: LaunchMode.inAppWebView);
           }
         } catch (e) {
           debugPrint('❌ Launch Error: $e');
