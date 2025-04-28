@@ -160,13 +160,18 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                     ),
                     child: Text(
                       'Overview',
-                      style: TextStyle(
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: Colors.black,
+                        color:
+                            Theme.of(context)
+                                .textTheme
+                                .bodyLarge
+                                ?.color, // ✅ Proper theme color
                         fontSize: 14,
                       ),
                     ),
                   ),
+
                   _buildOverviewSection(theme),
                   const SizedBox(height: 24),
                 ],
@@ -366,7 +371,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
           value,
           style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w600,
-            color: Colors.black,
+            color: theme.textTheme.bodyLarge?.color, // ✅ FIXED here
             fontSize: 14,
           ),
         ),
