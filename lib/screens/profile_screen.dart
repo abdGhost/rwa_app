@@ -17,6 +17,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   String? token;
+  String? _userName;
 
   @override
   void initState() {
@@ -28,6 +29,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       token = prefs.getString('token');
+      _userName = prefs.getString('name'); // 🔥 Load user's real name
     });
   }
 
@@ -69,11 +71,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               children: [
                 const SizedBox(height: 24),
                 Text(
-                  "Hi, ${isLoggedIn ? "Ghost" : "Guest"}",
+                  "Hi, ${isLoggedIn ? (_userName?.split(' ').first ?? 'User') : "Guest"}",
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+
                 const SizedBox(height: 6),
                 Text(
                   isLoggedIn
@@ -184,9 +187,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Future<void> _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
+
+    // Optional: show a small visual feedback like setState if you want
     setState(() {
       token = null;
     });
+
+    // 🕒 Add a small delay (e.g., 500ms = half second)
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    // 🚀 Now navigate to OnboardingScreen and clear stack
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+      (route) => false,
+    );
   }
 
   Widget _preferencesSection(

@@ -24,6 +24,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
   double _totalAmount = 0.0;
   double _totalReturn = 0.0;
   double _totalPercentage = 0.0;
+  String? _userName;
 
   @override
   void initState() {
@@ -35,6 +36,19 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
+      final userName = prefs.getString('name'); // fetch name
+
+      if (token.isEmpty) {
+        setState(() {
+          _coins = [];
+          _totalAmount = 0.0;
+          _totalReturn = 0.0;
+          _totalPercentage = 0.0;
+          _userName = userName;
+          _isLoading = false;
+        });
+        return;
+      }
 
       final response = await http.get(
         Uri.parse(
@@ -50,19 +64,22 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
           _totalAmount = (data['totalAmount'] ?? 0).toDouble();
           _totalReturn = (data['totalReturn'] ?? 0).toDouble();
           _totalPercentage = (data['totalPercentage'] ?? 0).toDouble();
+          _userName = userName; // 🔥 Add this line
           _isLoading = false;
         });
       } else {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to fetch portfolio.')),
-        );
+        setState(() {
+          _coins = [];
+          _userName = userName;
+          _isLoading = false;
+        });
       }
     } catch (e) {
-      setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error fetching portfolio data.')),
-      );
+      setState(() {
+        _coins = [];
+        _userName = null;
+        _isLoading = false;
+      });
     }
   }
 
@@ -78,11 +95,14 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
         elevation: 1,
         titleSpacing: _coins.isNotEmpty ? 16 : 0,
         title: Text(
-          _coins.isNotEmpty ? "Hi, John Doe" : "Portfolio",
+          _coins.isNotEmpty
+              ? "Hi, ${_userName?.split(' ').first ?? 'User'}"
+              : "Portfolio",
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ),
+
         centerTitle: _coins.isEmpty,
         actions: [
           Padding(
