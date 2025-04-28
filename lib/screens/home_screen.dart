@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:rwa_app/api/api_service.dart';
 import 'package:rwa_app/models/coin_model.dart';
 import 'package:rwa_app/screens/chat_screen.dart';
+import 'package:rwa_app/screens/coin_search_screen.dart';
 import 'package:rwa_app/screens/coins_table_widget.dart';
 import 'package:rwa_app/screens/profile_screen.dart';
 import 'package:rwa_app/widgets/stats_card_widget.dart';
@@ -85,13 +86,20 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           actions: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: SvgPicture.asset(
-                'assets/search_outline.svg',
-                width: 24,
-                height: 24,
-                color: theme.iconTheme.color,
+            GestureDetector(
+              onTap:
+                  () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const CoinSearchScreen()),
+                  ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: SvgPicture.asset(
+                  'assets/search_outline.svg',
+                  width: 24,
+                  height: 24,
+                  color: theme.iconTheme.color,
+                ),
               ),
             ),
             Padding(
