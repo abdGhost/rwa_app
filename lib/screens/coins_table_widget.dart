@@ -144,30 +144,26 @@ class CoinsTable extends StatelessWidget {
       height: 40,
       child: Row(
         children: [
-          const SizedBox(
-            width: 20,
+          SizedBox(
+            width: 24,
             child: Center(
               child: Text(
                 '#',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                  color: Colors.black,
-                ),
+                style: style, // ✅ Use the passed style here
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 14),
           const SizedBox(width: 20),
           SizedBox(width: 40, child: Center(child: Text('Coin', style: style))),
-          const SizedBox(width: 20),
+          const SizedBox(width: 10),
           SizedBox(
-            width: 50,
+            width: 60,
             child: Center(child: Text('Price', style: style)),
           ),
-          const SizedBox(width: 8),
-          SizedBox(width: 50, child: Center(child: Text('24H', style: style))),
-          const SizedBox(width: 10),
+          const SizedBox(width: 5),
+          SizedBox(width: 48, child: Center(child: Text('24H', style: style))),
+          const SizedBox(width: 5),
           SizedBox(
             width: 110,
             child: Center(child: Text('Market Cap', style: style)),

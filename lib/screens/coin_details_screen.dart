@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class CoinDetailScreen extends StatefulWidget {
   final String coin; // coin ID like 'chainlink'
@@ -27,14 +26,6 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
   }
 
   Future<void> _fetchCoinDetails() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-
-    if (token == null || token.isEmpty) {
-      debugPrint('Token not found');
-      return;
-    }
-
     final detailUrl = Uri.parse(
       'https://rwa-f1623a22e3ed.herokuapp.com/api/currencies/rwa/coin/${widget.coin}',
     );
@@ -42,34 +33,33 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
       'https://rwa-f1623a22e3ed.herokuapp.com/api/currencies/rwa/graph/coinOHLC/${widget.coin}',
     );
 
-    final detailRes = await http.get(
-      detailUrl,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
-    final chartRes = await http.get(
-      chartUrl,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
+    try {
+      final detailRes = await http.get(detailUrl);
+      final chartRes = await http.get(chartUrl);
 
-    if (detailRes.statusCode == 200 && chartRes.statusCode == 200) {
-      final coinData = json.decode(detailRes.body)['detail'];
-      final List<dynamic> chartRaw = json.decode(chartRes.body)['graphData'];
-      final List<double> closePrices =
-          chartRaw.map((e) => (e[4] as num).toDouble()).toList();
+      debugPrint('🟢 Detail Response: ${detailRes.body}');
+      debugPrint('🟢 Chart Response: ${chartRes.body}');
 
-      setState(() {
-        coin = coinData;
-        trend = closePrices;
-        isLoading = false;
-      });
-    } else {
-      debugPrint('Error fetching data');
+      if (detailRes.statusCode == 200 && chartRes.statusCode == 200) {
+        final coinData = json.decode(detailRes.body)['detail'];
+        final List<dynamic> chartRaw = json.decode(chartRes.body)['graphData'];
+        final List<double> closePrices =
+            chartRaw.map((e) => (e[4] as num).toDouble()).toList();
+
+        setState(() {
+          coin = coinData;
+          trend = closePrices;
+          isLoading = false;
+        });
+      } else {
+        debugPrint(
+          '❌ API failed with status: ${detailRes.statusCode}, ${chartRes.statusCode}',
+        );
+        setState(() => isLoading = false);
+      }
+    } catch (e) {
+      debugPrint('❌ Exception while fetching data: $e');
+      setState(() => isLoading = false);
     }
   }
 
@@ -77,10 +67,6 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final chartData = List.generate(
-      trend.length,
-      (i) => FlSpot(i.toDouble(), trend[i]),
-    );
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -145,37 +131,37 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
               ? const Center(
                 child: CircularProgressIndicator(color: Colors.green),
               )
-              : ListView(
-                padding: const EdgeInsets.only(top: 16),
-                children: [
-                  _buildPriceSection(theme),
-                  const SizedBox(height: 12),
-                  _buildChartSection(theme, chartData),
-                  const SizedBox(height: 24),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      left: 16,
-                      top: 16,
-                      bottom: 12,
-                    ),
-                    child: Text(
-                      'Overview',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color:
-                            Theme.of(context)
-                                .textTheme
-                                .bodyLarge
-                                ?.color, // ✅ Proper theme color
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
+              : _buildBody(theme),
+    );
+  }
 
-                  _buildOverviewSection(theme),
-                  const SizedBox(height: 24),
-                ],
-              ),
+  Widget _buildBody(ThemeData theme) {
+    final chartData = List.generate(
+      trend.length,
+      (i) => FlSpot(i.toDouble(), trend[i]),
+    );
+
+    return ListView(
+      padding: const EdgeInsets.only(top: 16),
+      children: [
+        _buildPriceSection(theme),
+        const SizedBox(height: 12),
+        _buildChartSection(theme, chartData),
+        const SizedBox(height: 24),
+        Padding(
+          padding: const EdgeInsets.only(left: 16, top: 16, bottom: 12),
+          child: Text(
+            'Overview',
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: theme.textTheme.bodyLarge?.color,
+              fontSize: 14,
+            ),
+          ),
+        ),
+        _buildOverviewSection(theme),
+        const SizedBox(height: 24),
+      ],
     );
   }
 
@@ -232,22 +218,21 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
             gridData: FlGridData(
               show: true,
               drawVerticalLine: false,
-              getDrawingHorizontalLine: (value) {
-                return FlLine(
-                  color: Colors.grey.withOpacity(0.2),
-                  strokeWidth: 1,
-                );
-              },
+              getDrawingHorizontalLine:
+                  (_) => FlLine(
+                    color: Colors.grey.withOpacity(0.2),
+                    strokeWidth: 1,
+                  ),
             ),
             borderData: FlBorderData(show: false),
             titlesData: FlTitlesData(
               leftTitles: AxisTitles(
                 sideTitles: SideTitles(
                   showTitles: true,
-                  interval: ((maxPrice - minPrice) / 3).abs(),
+                  interval: (maxPrice - minPrice) / 3,
                   reservedSize: 60,
                   getTitlesWidget:
-                      (value, meta) => Padding(
+                      (value, _) => Padding(
                         padding: const EdgeInsets.only(left: 4),
                         child: Text(
                           "\$${value.toStringAsFixed(2)}",
@@ -312,7 +297,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
           children: [
             _buildOverviewRow(
               "Market Cap",
-              "\$${coin?['market_data']['market_cap']['usd']}",
+              "\$${coin?['market_data']['market_cap']['usd'] ?? '--'}",
               "Fully Diluted Value",
               "\$${_abbreviateNumber(coin?['market_data']['fully_diluted_valuation']['usd'])}",
             ),
@@ -371,7 +356,7 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
           value,
           style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w600,
-            color: theme.textTheme.bodyLarge?.color, // ✅ FIXED here
+            color: theme.textTheme.bodyLarge?.color,
             fontSize: 14,
           ),
         ),
@@ -379,17 +364,16 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
     );
   }
 
-  String _abbreviateNumber(dynamic numVal, {String suffix = ""}) {
+  String _abbreviateNumber(dynamic numVal) {
     if (numVal == null) return "--";
     final num number =
         (numVal is int || numVal is double)
             ? numVal
             : double.tryParse(numVal.toString()) ?? 0;
-    if (number >= 1e12)
-      return (number / 1e12).toStringAsFixed(2) + "T" + suffix;
-    if (number >= 1e9) return (number / 1e9).toStringAsFixed(2) + "B" + suffix;
-    if (number >= 1e6) return (number / 1e6).toStringAsFixed(2) + "M" + suffix;
-    if (number >= 1e3) return (number / 1e3).toStringAsFixed(2) + "K" + suffix;
-    return number.toStringAsFixed(2) + suffix;
+    if (number >= 1e12) return '${(number / 1e12).toStringAsFixed(2)}T';
+    if (number >= 1e9) return '${(number / 1e9).toStringAsFixed(2)}B';
+    if (number >= 1e6) return '${(number / 1e6).toStringAsFixed(2)}M';
+    if (number >= 1e3) return '${(number / 1e3).toStringAsFixed(2)}K';
+    return number.toStringAsFixed(2);
   }
 }
