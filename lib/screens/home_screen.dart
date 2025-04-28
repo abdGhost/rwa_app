@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,6 +10,7 @@ import 'package:rwa_app/screens/coins_table_widget.dart';
 import 'package:rwa_app/screens/profile_screen.dart';
 import 'package:rwa_app/widgets/stats_card_widget.dart';
 import 'package:rwa_app/widgets/tabbar_section_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,11 +20,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String selectedCoin = 'None';
   bool _isLoading = false;
   int _selectedTabIndex = 0;
   final ApiService _apiService = ApiService();
-  List<Coin> coins = [];
+  List<Coin> allCoins = [];
+  List<Coin> displayedCoins = [];
 
   @override
   void initState() {
@@ -34,24 +36,37 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _isLoading = true);
     try {
       final coinList = await _apiService.fetchCoins();
-      coins = coinList;
-      print(coins);
+      allCoins = coinList;
+      displayedCoins = allCoins;
     } catch (e) {
       print('❌ Error fetching coins: $e');
     }
     setState(() => _isLoading = false);
   }
 
-  void _onTabChanged(int index) async {
+  Future<List<String>> getFavoriteCoinIds() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList('favorites') ?? [];
+  }
+
+  Future<void> _onTabChanged(int index) async {
     if (_selectedTabIndex == index) return;
 
     setState(() {
-      _isLoading = true;
       _selectedTabIndex = index;
+      _isLoading = true;
     });
 
-    // Optional: simulate a small delay to show loading spinner (even if using same coins)
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    if (index == 2) {
+      // 3rd tab = Watchlist
+      final favIds = await getFavoriteCoinIds();
+      displayedCoins =
+          allCoins.where((coin) => favIds.contains(coin.id)).toList();
+    } else {
+      displayedCoins = allCoins;
+    }
 
     setState(() {
       _isLoading = false;
@@ -61,8 +76,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return DefaultTabController(
       length: 5,
       initialIndex: _selectedTabIndex,
@@ -164,81 +177,25 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 2),
             TabBarSection(onTap: _onTabChanged),
-            // const SizedBox(height: 4),
-
-            // Padding(
-            //   padding: const EdgeInsets.symmetric(horizontal: 12),
-            //   child: Row(
-            //     children: [
-            //       ElevatedButton(
-            //         onPressed: () {},
-            //         style: ElevatedButton.styleFrom(
-            //           backgroundColor:
-            //               isDark ? Colors.grey[800] : const Color(0xFFEFEFEF),
-            //           foregroundColor: theme.textTheme.bodyMedium?.color,
-            //           elevation: 0,
-            //           padding: const EdgeInsets.symmetric(
-            //             horizontal: 10,
-            //             vertical: 4,
-            //           ),
-            //           shape: RoundedRectangleBorder(
-            //             borderRadius: BorderRadius.circular(6),
-            //           ),
-            //           textStyle: GoogleFonts.inter(
-            //             fontWeight: FontWeight.w500,
-            //             fontSize: 12,
-            //           ),
-            //           minimumSize: const Size(0, 28),
-            //           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            //         ),
-            //         child: const Text('USD'),
-            //       ),
-            //       const SizedBox(width: 8),
-            //       ElevatedButton.icon(
-            //         onPressed: () {},
-            //         icon: Icon(
-            //           Icons.tune,
-            //           size: 14,
-            //           color: theme.iconTheme.color,
-            //         ),
-            //         label: const Text('Customize'),
-            //         style: ElevatedButton.styleFrom(
-            //           backgroundColor:
-            //               isDark ? Colors.grey[800] : const Color(0xFFEFEFEF),
-            //           foregroundColor: theme.textTheme.bodyMedium?.color,
-            //           elevation: 0,
-            //           padding: const EdgeInsets.symmetric(
-            //             horizontal: 10,
-            //             vertical: 4,
-            //           ),
-            //           shape: RoundedRectangleBorder(
-            //             borderRadius: BorderRadius.circular(6),
-            //           ),
-            //           textStyle: GoogleFonts.inter(
-            //             fontWeight: FontWeight.w500,
-            //             fontSize: 12,
-            //           ),
-            //           minimumSize: const Size(0, 28),
-            //           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            //         ),
-            //       ),
-            //     ],
-            //   ),
-            // ),
             Expanded(
               child:
                   _isLoading
                       ? const Center(
                         child: CircularProgressIndicator(color: Colors.green),
                       )
-                      : coins.isEmpty
-                      ? const Center(
+                      : displayedCoins.isEmpty
+                      ? Center(
                         child: Text(
-                          'No data available',
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                          _selectedTabIndex == 2
+                              ? 'No favorite coins added yet'
+                              : 'No data available',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
                         ),
                       )
-                      : CoinsTable(coins: coins),
+                      : CoinsTable(coins: displayedCoins),
             ),
           ],
         ),
