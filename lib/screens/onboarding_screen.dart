@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rwa_app/screens/login_screen.dart';
+import 'package:rwa_app/screens/setting_screen.dart';
 import 'package:rwa_app/theme/theme.dart';
 import 'package:rwa_app/widgets/social_auth_widget.dart';
 
@@ -40,7 +41,6 @@ class OnboardingScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 60),
-
                   // Email Button
                   SocialAuthButton(
                     label: 'Continue with Email & Password',
@@ -53,9 +53,7 @@ class OnboardingScreen extends StatelessWidget {
                     backgroundColor: AppColors.primaryDark,
                     textColor: Colors.white,
                   ),
-
                   const SizedBox(height: 20),
-
                   // Divider
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -75,9 +73,7 @@ class OnboardingScreen extends StatelessWidget {
                       const SizedBox(width: 40, child: Divider(thickness: 0.5)),
                     ],
                   ),
-
                   const SizedBox(height: 20),
-
                   // Google Button
                   SocialAuthButton(
                     label: 'Continue with Google',
@@ -85,9 +81,7 @@ class OnboardingScreen extends StatelessWidget {
                     onPressed: () {},
                     textColor: textColor,
                   ),
-
                   const SizedBox(height: 12),
-
                   // Apple Button
                   SocialAuthButton(
                     label: 'Continue with Apple',
@@ -95,9 +89,7 @@ class OnboardingScreen extends StatelessWidget {
                     onPressed: () {},
                     textColor: textColor,
                   ),
-
                   const SizedBox(height: 20),
-
                   // Terms and Privacy
                   Text.rich(
                     TextSpan(
@@ -137,7 +129,11 @@ class OnboardingScreen extends StatelessWidget {
               right: 16,
               child: TextButton(
                 onPressed: () {
-                  // Handle skip logic
+                  // ✅ Navigate to FinishScreen
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                  );
                 },
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 8),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'onboarding_screen.dart';
-import 'package:rwa_app/screens/botttom_nav_screen.dart'; // Import BottomNavScreen
+import 'package:rwa_app/screens/botttom_nav_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -18,22 +18,26 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _navigate() async {
-    await Future.delayed(const Duration(seconds: 2)); // Splash duration
+    await Future.delayed(const Duration(seconds: 2)); // Show splash for 2 sec
 
     final prefs = await SharedPreferences.getInstance();
+    final isFirstLaunch = prefs.getBool('isFirstLaunch') ?? true;
     final token = prefs.getString('token');
 
-    if (token != null && token.isNotEmpty) {
-      // 🔥 If token exists, user is logged in → Go to Home
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const BottomNavScreen()),
-      );
-    } else {
-      // 🚪 No token → Go to Onboarding
+    if (isFirstLaunch) {
+      // 👀 If it's the first time, set isFirstLaunch to false
+      await prefs.setBool('isFirstLaunch', false);
+
+      // 🔥 Navigate to Onboarding/Login Screen
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+      );
+    } else {
+      // ✅ After first time, always show BottomNavScreen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const BottomNavScreen()),
       );
     }
   }
@@ -58,9 +62,7 @@ class _SplashScreenState extends State<SplashScreen> {
             const SizedBox(height: 12),
             const CircularProgressIndicator(
               strokeWidth: 2.5,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                Color(0xFF348F6C), // App primary green
-              ),
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF348F6C)),
             ),
           ],
         ),
