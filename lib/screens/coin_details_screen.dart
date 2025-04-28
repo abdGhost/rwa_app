@@ -15,7 +15,6 @@ class CoinDetailScreen extends StatefulWidget {
 }
 
 class _CoinDetailScreenState extends State<CoinDetailScreen> {
-  int selectedIndex = 1;
   bool isFavorite = false;
   bool isLoading = true;
   Map<String, dynamic>? coin;
@@ -65,6 +64,14 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
         final List<dynamic> chartRaw = json.decode(chartRes.body)['graphData'];
         final List<double> closePrices =
             chartRaw.map((e) => (e[4] as num).toDouble()).toList();
+
+        // 🛑 PRINT FULL graphRaw DATA HERE
+        debugPrint('📈 Full Graph Data:');
+        for (var point in chartRaw) {
+          debugPrint(
+            'Time: ${point[0]}, Open: ${point[1]}, High: ${point[2]}, Low: ${point[3]}, Close: ${point[4]}',
+          );
+        }
 
         setState(() {
           coin = coinData;
@@ -210,15 +217,91 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
   }
 
   Widget _buildChartSection(ThemeData theme, List<FlSpot> chartData) {
+    final minPrice = trend.isEmpty ? 0 : trend.reduce((a, b) => a < b ? a : b);
+    final maxPrice = trend.isEmpty ? 0 : trend.reduce((a, b) => a > b ? a : b);
+
     return SizedBox(
-      height: 220,
+      height: 250,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: LineChart(
           LineChartData(
-            gridData: FlGridData(show: false),
-            borderData: FlBorderData(show: false),
-            titlesData: FlTitlesData(show: false),
+            gridData: FlGridData(
+              show: true,
+              drawVerticalLine: true,
+              horizontalInterval: (maxPrice - minPrice) / 4,
+              verticalInterval: 5,
+              getDrawingHorizontalLine:
+                  (_) => FlLine(
+                    color: Colors.grey.withOpacity(0.2),
+                    strokeWidth: 1,
+                  ),
+              getDrawingVerticalLine:
+                  (_) => FlLine(
+                    color: Colors.grey.withOpacity(0.2),
+                    strokeWidth: 1,
+                  ),
+            ),
+            borderData: FlBorderData(
+              show: true,
+              border: Border.all(color: Colors.grey.withOpacity(0.3)),
+            ),
+            titlesData: FlTitlesData(
+              leftTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: 50, // ⬅️ add padding space for Y-axis
+                  getTitlesWidget: (value, meta) {
+                    return Padding(
+                      padding: const EdgeInsets.only(
+                        right: 8,
+                      ), // ⬅️ move inside a bit
+                      child: Text(
+                        '\$${value.toStringAsFixed(2)}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontSize: 10,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  reservedSize: 30, // ⬅️ space below for X-axis titles
+                  interval: 8,
+                  getTitlesWidget: (value, meta) {
+                    if (value < 0 || value.toInt() >= trend.length)
+                      return const SizedBox.shrink();
+                    DateTime time = DateTime.now().subtract(
+                      Duration(minutes: (trend.length - value.toInt()) * 30),
+                    );
+                    String formatted =
+                        '${time.hour}:${time.minute.toString().padLeft(2, '0')}';
+                    return Padding(
+                      padding: const EdgeInsets.only(
+                        top: 6,
+                      ), // ⬅️ move text down
+                      child: Text(
+                        formatted,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontSize: 10,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              rightTitles: AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
+            ),
+            minY: minPrice * 0.98,
+            maxY: maxPrice * 1.02,
             lineBarsData: [
               LineChartBarData(
                 spots: chartData,
@@ -230,7 +313,17 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
                 ),
                 barWidth: 2,
                 dotData: FlDotData(show: false),
-                belowBarData: BarAreaData(show: false),
+                belowBarData: BarAreaData(
+                  show: true,
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFF16C784).withOpacity(0.2),
+                      Colors.transparent,
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
               ),
             ],
           ),
@@ -242,67 +335,94 @@ class _CoinDetailScreenState extends State<CoinDetailScreen> {
   Widget _buildOverviewSection(ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        children: [
-          _buildOverviewRow(
-            'Market Cap',
-            '\$${coin?['market_data']['market_cap']['usd'] ?? '--'}',
-          ),
-          _buildOverviewRow(
-            'Fully Diluted Value',
-            '\$${_abbreviateNumber(coin?['market_data']['fully_diluted_valuation']['usd'])}',
-          ),
-          _buildOverviewRow(
-            'Circulating Supply',
-            _abbreviateNumber(coin?['market_data']['circulating_supply']),
-          ),
-          _buildOverviewRow(
-            'Total Supply',
-            _abbreviateNumber(coin?['market_data']['total_supply']),
-          ),
-          _buildOverviewRow(
-            'ATH',
-            '\$${coin?['market_data']['ath']['usd']?.toStringAsFixed(2) ?? '--'}',
-          ),
-          _buildOverviewRow(
-            'ATL',
-            '\$${coin?['market_data']['atl']['usd']?.toStringAsFixed(2) ?? '--'}',
-          ),
-        ],
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.grey.withOpacity(0.2), width: 0.5),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            _buildOverviewRow(
+              'Market Cap',
+              '\$${_formatValue(coin?['market_data']['market_cap']['usd'])}',
+              'Total value of all circulating coins.',
+              'Fully Diluted Value',
+              '\$${_formatValue(coin?['market_data']['fully_diluted_valuation']['usd'])}',
+              'Estimated market cap at full supply.',
+            ),
+            const SizedBox(height: 12),
+            _buildOverviewRow(
+              'Circulating Supply',
+              _formatValue(coin?['market_data']['circulating_supply']),
+              'Coins actively trading.',
+              'Total Supply',
+              _formatValue(coin?['market_data']['total_supply']),
+              'Maximum coins in existence.',
+            ),
+            const SizedBox(height: 12),
+            _buildOverviewRow(
+              'ATH',
+              '\$${coin?['market_data']['ath']['usd']?.toStringAsFixed(2) ?? '--'}',
+              'All-Time Highest price.',
+              'ATL',
+              '\$${coin?['market_data']['atl']['usd']?.toStringAsFixed(2) ?? '--'}',
+              'All-Time Lowest price.',
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildOverviewRow(String title, String value) {
+  Widget _buildOverviewRow(
+    String title1,
+    String value1,
+    String subtitle1,
+    String title2,
+    String value2,
+    String subtitle2,
+  ) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              title,
-              style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              textAlign: TextAlign.end,
-              style: theme.textTheme.bodyMedium,
-            ),
-          ),
-        ],
-      ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: _buildOverviewItem(theme, title1, value1)),
+        const SizedBox(width: 16),
+        Expanded(child: _buildOverviewItem(theme, title2, value2)),
+      ],
     );
   }
 
-  String _abbreviateNumber(dynamic numVal) {
+  Widget _buildOverviewItem(ThemeData theme, String title, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: Colors.grey,
+            fontSize: 12,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: theme.textTheme.bodyLarge?.color,
+            fontSize: 14,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatValue(dynamic numVal) {
     if (numVal == null) return "--";
     final num number =
-        (numVal is int || numVal is double)
-            ? numVal
-            : double.tryParse(numVal.toString()) ?? 0;
+        (numVal is num) ? numVal : double.tryParse(numVal.toString()) ?? 0;
     if (number >= 1e12) return '${(number / 1e12).toStringAsFixed(2)}T';
     if (number >= 1e9) return '${(number / 1e9).toStringAsFixed(2)}B';
     if (number >= 1e6) return '${(number / 1e6).toStringAsFixed(2)}M';
