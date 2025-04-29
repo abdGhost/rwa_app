@@ -77,17 +77,15 @@ class _NewsScreenState extends State<NewsScreen> {
         'https://rwa-f1623a22e3ed.herokuapp.com/api/currencies/rwa/blog';
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? '';
+      final token = prefs.getString('token'); // Don't default to ''
 
-      if (token.isEmpty) {
-        print('❌ Token not found!');
-        return;
+      Map<String, String> headers = {};
+
+      if (token != null && token.isNotEmpty) {
+        headers['Authorization'] = 'Bearer $token';
       }
 
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {'Authorization': 'Bearer $token'},
-      );
+      final response = await http.get(Uri.parse(url), headers: headers);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -107,7 +105,7 @@ class _NewsScreenState extends State<NewsScreen> {
               };
             }).toList();
       } else {
-        print('Failed to load blogs: ${response.statusCode}');
+        print('❌ Failed to load blogs: ${response.statusCode}');
       }
     } catch (e) {
       print('❌ Error fetching blogs: $e');
