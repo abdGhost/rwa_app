@@ -9,6 +9,9 @@ class AirdropCard extends StatelessWidget {
   final String eligibility;
   final String status;
   final bool isDarkMode; // Add isDarkMode parameter
+  final VoidCallback onTap;
+  final String image;
+  final String description;
 
   const AirdropCard({
     super.key,
@@ -20,6 +23,9 @@ class AirdropCard extends StatelessWidget {
     required this.eligibility,
     required this.status,
     required this.isDarkMode, // Accept the isDarkMode flag here
+    required this.onTap,
+    required this.image,
+    required this.description,
   });
 
   @override
@@ -128,14 +134,17 @@ class AirdropCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    "🔍 View Details",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color:
-                          isDarkMode
-                              ? Colors.blue[200]
-                              : Color.fromRGBO(48, 96, 184, 1),
+                  GestureDetector(
+                    onTap: onTap,
+                    child: Text(
+                      "🔍 View Details",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color:
+                            isDarkMode
+                                ? Colors.blue[200]
+                                : const Color.fromRGBO(48, 96, 184, 1),
+                      ),
                     ),
                   ),
                   Text(
@@ -147,6 +156,29 @@ class AirdropCard extends StatelessWidget {
                   ),
                 ],
               ),
+
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //   children: [
+              //     Text(
+              //       "🔍 View Details",
+              //       style: TextStyle(
+              //         fontSize: 14,
+              //         color:
+              //             isDarkMode
+              //                 ? Colors.blue[200]
+              //                 : Color.fromRGBO(48, 96, 184, 1),
+              //       ),
+              //     ),
+              //     Text(
+              //       "⏰ Set Reminder",
+              //       style: TextStyle(
+              //         fontSize: 14,
+              //         color: isDarkMode ? Colors.white : Colors.black,
+              //       ),
+              //     ),
+              //   ],
+              // ),
             ],
           ),
         ),
