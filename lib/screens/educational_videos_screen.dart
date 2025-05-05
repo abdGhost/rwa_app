@@ -1,34 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:rwa_app/screens/videos_screen.dart';
 
 class EducationalVideosScreen extends StatelessWidget {
-  const EducationalVideosScreen({super.key});
+  final List<EducationalVideo> videos;
+
+  const EducationalVideosScreen({super.key, required this.videos});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
-    final titles = [
-      "What Are Real World Assets (RWAs)?",
-      "Why Invest in RWA Tokens?",
-      "How Tokenization Works",
-      "RWA vs DeFi: What's the Difference?",
-    ];
-
-    final subtitles = [
-      "An easy-to-understand introduction to RWAs, how they work, and their benefits.",
-      "Learn why investors are turning to RWAs for stability, yield, and real value.",
-      "A step-by-step breakdown of how RWAs are converted into digital tokens.",
-      "Explore the key differences and overlaps between Real World Assets and DeFi.",
-    ];
-
-    final images = [
-      "assets/thumbnail1.png",
-      "assets/thumbnail2.png",
-      "assets/thumbnail2.png",
-      "assets/thumbnail1.png",
-    ];
 
     return Scaffold(
       appBar: AppBar(
@@ -49,8 +31,9 @@ class EducationalVideosScreen extends StatelessWidget {
       backgroundColor: theme.scaffoldBackgroundColor,
       body: ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        itemCount: titles.length,
+        itemCount: videos.length,
         itemBuilder: (context, index) {
+          final video = videos[index];
           return Container(
             margin: const EdgeInsets.only(bottom: 16),
             child: Row(
@@ -61,8 +44,8 @@ class EducationalVideosScreen extends StatelessWidget {
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      Image.asset(
-                        images[index],
+                      Image.network(
+                        video.thumbnail,
                         width: 140,
                         height: 90,
                         fit: BoxFit.cover,
@@ -93,7 +76,7 @@ class EducationalVideosScreen extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              titles[index],
+                              video.title,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.bodyMedium?.copyWith(
@@ -112,7 +95,7 @@ class EducationalVideosScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        subtitles[index],
+                        video.subtitle,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall?.copyWith(
@@ -123,7 +106,7 @@ class EducationalVideosScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        "CryptoHub",
+                        video.channel,
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           color:
@@ -136,7 +119,7 @@ class EducationalVideosScreen extends StatelessWidget {
                       Row(
                         children: [
                           Text(
-                            "563 Views",
+                            "563 Views", // Optional: make dynamic if available
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontSize: 10,
                               color: theme.hintColor,
@@ -144,7 +127,7 @@ class EducationalVideosScreen extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            "2 days ago",
+                            "2 days ago", // Optional: format `video.date`
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontSize: 10,
                               color: theme.hintColor,

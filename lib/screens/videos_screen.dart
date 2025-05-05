@@ -1,11 +1,57 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:rwa_app/screens/chat_screen.dart';
 import 'package:rwa_app/screens/educational_videos_screen.dart';
 import 'package:rwa_app/screens/profile_screen.dart';
 import 'package:rwa_app/screens/upcoming_interviews_screen.dart';
 import 'package:rwa_app/screens/recorded_interviews_screen.dart';
+
+class EducationalVideo {
+  final String title;
+  final String thumbnail;
+  final String subtitle;
+  final String channel;
+  final String videoUrl;
+  final String date;
+
+  EducationalVideo({
+    required this.title,
+    required this.thumbnail,
+    required this.subtitle,
+    required this.channel,
+    required this.videoUrl,
+    required this.date,
+  });
+
+  factory EducationalVideo.fromJson(Map<String, dynamic> json) {
+    return EducationalVideo(
+      title: json['videoTitle'],
+      thumbnail: json['videoThumbImg'],
+      subtitle: json['videoSubTitle'],
+      channel: json['channelName'],
+      videoUrl: json['videoLink'],
+      date: json['videoDate'],
+    );
+  }
+}
+
+Future<List<EducationalVideo>> fetchEducationalVideos() async {
+  const url =
+      'https://airdrop-production-61b7.up.railway.app/api/get/allEducationalVideo';
+  final response = await http.get(Uri.parse(url));
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    return (data['data'] as List)
+        .map((video) => EducationalVideo.fromJson(video))
+        .toList();
+  } else {
+    throw Exception('Failed to load videos');
+  }
+}
 
 class VideosScreen extends StatelessWidget {
   const VideosScreen({super.key});
@@ -18,155 +64,146 @@ class VideosScreen extends StatelessWidget {
     final cardWidth = screenWidth * 0.4;
 
     return Scaffold(
-      body: Center(
-        child: Text(
-          'Coming Soon',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: isDark ? Colors.black : theme.scaffoldBackgroundColor,
+        elevation: 1,
+        automaticallyImplyLeading: false,
+        toolbarHeight: 40,
+        title: Row(
+          children: [
+            Text(
+              'Video',
+              style: GoogleFonts.inter(
+                color: theme.textTheme.titleLarge?.color ?? Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfileScreen()),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: SvgPicture.asset(
+                'assets/profile_outline.svg',
+                width: 30,
+                height: 30,
+                colorFilter: ColorFilter.mode(
+                  theme.iconTheme.color ?? Colors.black,
+                  BlendMode.srcIn,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: SizedBox(
+        width: 56,
+        height: 56,
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ChatScreen()),
+            );
+          },
+          backgroundColor: const Color(0xFF348F6C),
+          shape: const CircleBorder(),
+          child: SvgPicture.asset(
+            'assets/bot_light.svg',
+            width: 40,
+            height: 40,
+            fit: BoxFit.contain,
+            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+          ),
+        ),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _sectionTitle(context, "Educational Videos", () async {
+                final videos = await fetchEducationalVideos();
+                if (context.mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => EducationalVideosScreen(videos: videos),
+                    ),
+                  );
+                }
+              }),
+
+              const SizedBox(height: 8),
+              FutureBuilder<List<EducationalVideo>>(
+                future: fetchEducationalVideos(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Text("Error: ${snapshot.error}");
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Text("No videos available");
+                  }
+
+                  return _videoSliderFromApi(
+                    context,
+                    cardWidth,
+                    snapshot.data!,
+                  );
+                },
+              ),
+              const SizedBox(height: 8),
+              _sectionTitle(context, "Upcoming Interviews", () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const UpcomingInterviewsScreen(),
+                  ),
+                );
+              }),
+              _interviewTile(
+                context,
+                "Chat with Condo CEO",
+                "April 21 at 5:00 PM",
+                "LIVE",
+              ),
+              _interviewTile(
+                context,
+                "How RealT Fractionalizes Real Estate",
+                "April 27 at 5:00 PM",
+                "Scheduled",
+              ),
+              const SizedBox(height: 10),
+              _sectionTitle(context, "Recorded Interviews", () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const RecordedInterviewsScreen(),
+                  ),
+                );
+              }),
+              _recordedInterviewCard(
+                context,
+                "Goldfinch: Driving Innovation in Real-World Lending",
+                "Guest: Mike Sall, Co-Founder of Goldfinch",
+                "assets/thumbnail1.png",
+              ),
+            ],
+          ),
         ),
       ),
     );
-
-    // return Scaffold(
-    //   backgroundColor: theme.scaffoldBackgroundColor,
-    //   appBar: AppBar(
-    //     backgroundColor: isDark ? Colors.black : theme.scaffoldBackgroundColor,
-    //     elevation: 1,
-    //     automaticallyImplyLeading: false,
-    //     toolbarHeight: 40,
-    //     title: Row(
-    //       children: [
-    //         Text(
-    //           'Video',
-    //           style: GoogleFonts.inter(
-    //             color: theme.textTheme.titleLarge?.color ?? Colors.black,
-    //             fontWeight: FontWeight.bold,
-    //             fontSize: 18,
-    //           ),
-    //         ),
-    //       ],
-    //     ),
-    //     actions: [
-    //       InkWell(
-    //         onTap: () {
-    //           Navigator.push(
-    //             context,
-    //             MaterialPageRoute(builder: (context) => const ProfileScreen()),
-    //           );
-    //         },
-    //         child: Padding(
-    //           padding: const EdgeInsets.only(right: 12),
-    //           child: SvgPicture.asset(
-    //             'assets/profile_outline.svg',
-    //             width: 30,
-    //             height: 30,
-    //             colorFilter: ColorFilter.mode(
-    //               theme.iconTheme.color ?? Colors.black,
-    //               BlendMode.srcIn,
-    //             ),
-    //           ),
-    //         ),
-    //       ),
-    //     ],
-    //   ),
-
-    //   floatingActionButton: SizedBox(
-    //     width: 56,
-    //     height: 56,
-    //     child: FloatingActionButton(
-    //       onPressed: () {
-    //         Navigator.push(
-    //           context,
-    //           MaterialPageRoute(builder: (context) => const ChatScreen()),
-    //         );
-    //       },
-    //       backgroundColor: const Color(0xFF348F6C),
-    //       shape: const CircleBorder(),
-    //       child: SvgPicture.asset(
-    //         'assets/bot_light.svg',
-    //         width: 40,
-    //         height: 40,
-    //         fit: BoxFit.contain,
-    //         colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-    //       ),
-    //     ),
-    //   ),
-    //   body: SafeArea(
-    //     child: SingleChildScrollView(
-    //       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-    //       child: Column(
-    //         crossAxisAlignment: CrossAxisAlignment.start,
-    //         children: [
-    //           _sectionTitle(context, "Educational Videos", () {
-    //             Navigator.push(
-    //               context,
-    //               MaterialPageRoute(
-    //                 builder: (_) => const EducationalVideosScreen(),
-    //               ),
-    //             );
-    //           }),
-    //           const SizedBox(height: 8),
-    //           _videoSlider(context, cardWidth, [
-    //             {
-    //               "title": "What Are Real World Assets (RWAs)?",
-    //               "image": "assets/thumbnail1.png",
-    //             },
-    //             {
-    //               "title": "Why Invest in RWA Tokens?",
-    //               "image": "assets/thumbnail2.png",
-    //             },
-    //           ]),
-    //           _videoSlider(context, cardWidth, [
-    //             {
-    //               "title": "How Tokenization Works",
-    //               "image": "assets/thumbnail2.png",
-    //             },
-    //             {
-    //               "title": "RWA vs DeFi: What's the Difference?",
-    //               "image": "assets/thumbnail2.png",
-    //             },
-    //           ]),
-    //           const SizedBox(height: 8),
-
-    //           _sectionTitle(context, "Upcoming Interviews", () {
-    //             Navigator.push(
-    //               context,
-    //               MaterialPageRoute(
-    //                 builder: (_) => const UpcomingInterviewsScreen(),
-    //               ),
-    //             );
-    //           }),
-    //           _interviewTile(
-    //             context,
-    //             "Chat with Condo CEO",
-    //             "April 21 at 5:00 PM",
-    //             "LIVE",
-    //           ),
-    //           _interviewTile(
-    //             context,
-    //             "How RealT Fractionalizes Real Estate",
-    //             "April 27 at 5:00 PM",
-    //             "Scheduled",
-    //           ),
-    //           const SizedBox(height: 10),
-    //           _sectionTitle(context, "Recorded Interviews", () {
-    //             Navigator.push(
-    //               context,
-    //               MaterialPageRoute(
-    //                 builder: (_) => const RecordedInterviewsScreen(),
-    //               ),
-    //             );
-    //           }),
-    //           _recordedInterviewCard(
-    //             context,
-    //             "Goldfinch: Driving Innovation in Real-World Lending",
-    //             "Guest: Mike Sall, Co-Founder of Goldfinch",
-    //             "assets/thumbnail1.png",
-    //           ),
-    //         ],
-    //       ),
-    //     ),
-    //   ),
-    // );
   }
 
   Widget _sectionTitle(
@@ -197,40 +234,44 @@ class VideosScreen extends StatelessWidget {
     );
   }
 
-  Widget _videoSlider(
+  Widget _videoSliderFromApi(
     BuildContext context,
     double cardWidth,
-    List<Map<String, String>> videos,
+    List<EducationalVideo> videos,
   ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children:
-            videos.map((video) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: SizedBox(
-                  width: cardWidth,
-                  child: _videoCard(
-                    context,
-                    video['image']!,
-                    video['title']!,
-                    "8:20",
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children:
+              videos.map((video) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: SizedBox(
+                    width: cardWidth,
+                    child: _videoCard(
+                      context,
+                      video.thumbnail,
+                      video.title,
+                      "8:20",
+                      subtitle: video.subtitle,
+                    ),
                   ),
-                ),
-              );
-            }).toList(),
+                );
+              }).toList(),
+        ),
       ),
     );
   }
 
   Widget _videoCard(
     BuildContext context,
-    String imagePath,
+    String imageUrl,
     String title,
-    String duration,
-  ) {
+    String duration, {
+    String subtitle = "Subtitle here",
+  }) {
     final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
@@ -241,8 +282,8 @@ class VideosScreen extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
-                  imagePath,
+                child: Image.network(
+                  imageUrl,
                   width: double.infinity,
                   height: 100,
                   fit: BoxFit.cover,
@@ -276,7 +317,7 @@ class VideosScreen extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            "Subtitle here",
+            subtitle,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodySmall?.copyWith(
