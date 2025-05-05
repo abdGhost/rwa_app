@@ -1,26 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:rwa_app/screens/video_player_modal.dart';
 import 'package:rwa_app/widgets/video_widegt.dart';
+import 'package:rwa_app/screens/videos_screen.dart'; // for Interview class
 
 class RecordedInterviewsScreen extends StatelessWidget {
-  const RecordedInterviewsScreen({super.key});
+  final List<Interview> interviews;
+
+  const RecordedInterviewsScreen({super.key, required this.interviews});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    final interviews = [
-      {
-        "title": "Goldfinch: Driving Innovation in Real-World Lending",
-        "guest": "Guest: Mike Sall, Co-Founder of Goldfinch",
-        "image": "assets/thumbnail1.png",
-      },
-      {
-        "title": "Tokeny: Unlocking Capital in Private Markets",
-        "guest": "Guest: Luc Falempin, CEO of Tokeny",
-        "image": "assets/thumbnail1.png",
-      },
-    ];
 
     return Scaffold(
       appBar: AppBar(
@@ -34,10 +24,33 @@ class RecordedInterviewsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         itemCount: interviews.length,
         itemBuilder: (context, index) {
-          final item = interviews[index];
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: videoCard(item["image"]!, item["title"]!, item["guest"]!),
+          final i = interviews[index];
+          return GestureDetector(
+            onTap: () {
+              if (i.videoLinkUrl != null) {
+                showDialog(
+                  context: context,
+                  barrierColor: Colors.black.withOpacity(0.95),
+                  builder:
+                      (_) => Dialog(
+                        backgroundColor: Colors.transparent,
+                        insetPadding: EdgeInsets.zero,
+                        child: VideoPlayerModal(
+                          videoUrl: i.videoLinkUrl!,
+                          title: i.topicTitle,
+                        ),
+                      ),
+                );
+              }
+            },
+            child: recordedInterviewCard(
+              i.topicTitle,
+              "Guest: ${i.founderName}, ${i.designation}",
+              i.videoThumbnail ?? '',
+              subtitle:
+                  i.topicDescription ?? '', // or any other description field
+              isAsset: false,
+            ),
           );
         },
       ),

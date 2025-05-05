@@ -38,11 +38,45 @@ class EducationalVideo {
   }
 }
 
+class Interview {
+  final String founderName;
+  final String founderImg;
+  final String designation;
+  final String topicTitle;
+  final String topicDescription;
+  final String? videoLinkUrl;
+  final String? videoThumbnail;
+  final String videoDate;
+
+  Interview({
+    required this.founderName,
+    required this.founderImg,
+    required this.designation,
+    required this.topicTitle,
+    required this.topicDescription,
+    required this.videoDate,
+    this.videoLinkUrl,
+    this.videoThumbnail,
+  });
+
+  factory Interview.fromJson(Map<String, dynamic> json) {
+    return Interview(
+      founderName: json['founderName'],
+      founderImg: json['founderImg'],
+      designation: json['foundersDesignation'],
+      topicTitle: json['topicTitle'],
+      topicDescription: json['topicDescription'],
+      videoLinkUrl: json['videoLinkUrl'],
+      videoThumbnail: json['videoThumbnail'],
+      videoDate: json['videoDate'],
+    );
+  }
+}
+
 Future<List<EducationalVideo>> fetchEducationalVideos() async {
   const url =
       'https://airdrop-production-61b7.up.railway.app/api/get/allEducationalVideo';
   final response = await http.get(Uri.parse(url));
-
   if (response.statusCode == 200) {
     final data = jsonDecode(response.body);
     return (data['data'] as List)
@@ -50,6 +84,20 @@ Future<List<EducationalVideo>> fetchEducationalVideos() async {
         .toList();
   } else {
     throw Exception('Failed to load videos');
+  }
+}
+
+Future<List<Interview>> fetchInterviews() async {
+  const url =
+      'https://airdrop-production-61b7.up.railway.app/api/get/allInterviews';
+  final response = await http.get(Uri.parse(url));
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    return (data['data'] as List)
+        .map((item) => Interview.fromJson(item))
+        .toList();
+  } else {
+    throw Exception('Failed to load interviews');
   }
 }
 
@@ -127,80 +175,70 @@ class VideosScreen extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _sectionTitle(context, "Educational Videos", () async {
-                final videos = await fetchEducationalVideos();
-                if (context.mounted) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => EducationalVideosScreen(videos: videos),
-                    ),
-                  );
-                }
-              }),
+        child: FutureBuilder(
+          future: Future.wait([fetchEducationalVideos(), fetchInterviews()]),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text("Error: ${snapshot.error}"));
+            }
+            final videos = snapshot.data![0] as List<EducationalVideo>;
+            final interviews = snapshot.data![1] as List<Interview>;
 
-              const SizedBox(height: 8),
-              FutureBuilder<List<EducationalVideo>>(
-                future: fetchEducationalVideos(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Text("Error: ${snapshot.error}");
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Text("No videos available");
-                  }
+            final upcoming =
+                interviews.where((i) => i.videoLinkUrl == null).toList();
+            final recorded =
+                interviews.where((i) => i.videoLinkUrl != null).toList();
 
-                  return _videoSliderFromApi(
-                    context,
-                    cardWidth,
-                    snapshot.data!,
-                  );
-                },
-              ),
-              const SizedBox(height: 8),
-              _sectionTitle(context, "Upcoming Interviews", () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const UpcomingInterviewsScreen(),
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _sectionTitle(context, "Educational Videos", () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => EducationalVideosScreen(videos: videos),
+                      ),
+                    );
+                  }),
+                  const SizedBox(height: 8),
+                  _videoSliderFromApi(context, cardWidth, videos),
+                  const SizedBox(height: 12),
+                  _sectionTitle(context, "Upcoming Interviews", () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (_) =>
+                                UpcomingInterviewsScreen(interviews: upcoming),
+                      ),
+                    );
+                  }),
+
+                  const SizedBox(height: 6),
+                  ...upcoming.map((i) => _interviewTileFromApi(context, i)),
+                  const SizedBox(height: 12),
+                  _sectionTitle(context, "Recorded Interviews", () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (_) =>
+                                RecordedInterviewsScreen(interviews: recorded),
+                      ),
+                    );
+                  }),
+                  const SizedBox(height: 6),
+                  ...recorded.map(
+                    (i) => _recordedInterviewCardFromApi(context, i),
                   ),
-                );
-              }),
-              _interviewTile(
-                context,
-                "Chat with Condo CEO",
-                "April 21 at 5:00 PM",
-                "LIVE",
+                ],
               ),
-              _interviewTile(
-                context,
-                "How RealT Fractionalizes Real Estate",
-                "April 27 at 5:00 PM",
-                "Scheduled",
-              ),
-              const SizedBox(height: 10),
-              _sectionTitle(context, "Recorded Interviews", () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const RecordedInterviewsScreen(),
-                  ),
-                );
-              }),
-              _recordedInterviewCard(
-                context,
-                "Goldfinch: Driving Innovation in Real-World Lending",
-                "Guest: Mike Sall, Co-Founder of Goldfinch",
-                "assets/thumbnail1.png",
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
@@ -239,28 +277,25 @@ class VideosScreen extends StatelessWidget {
     double cardWidth,
     List<EducationalVideo> videos,
   ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children:
-              videos.map((video) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                  child: SizedBox(
-                    width: cardWidth,
-                    child: _videoCard(
-                      context,
-                      video.thumbnail,
-                      video.title,
-                      "8:20",
-                      subtitle: video.subtitle,
-                    ),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children:
+            videos.map((video) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: SizedBox(
+                  width: cardWidth,
+                  child: _videoCard(
+                    context,
+                    video.thumbnail,
+                    video.title,
+                    "8:20",
+                    subtitle: video.subtitle,
                   ),
-                );
-              }).toList(),
-        ),
+                ),
+              );
+            }).toList(),
       ),
     );
   }
@@ -270,7 +305,7 @@ class VideosScreen extends StatelessWidget {
     String imageUrl,
     String title,
     String duration, {
-    String subtitle = "Subtitle here",
+    String subtitle = "Subtitle",
   }) {
     final theme = Theme.of(context);
     return Container(
@@ -331,34 +366,29 @@ class VideosScreen extends StatelessWidget {
     );
   }
 
-  Widget _interviewTile(
-    BuildContext context,
-    String title,
-    String time,
-    String badge,
-  ) {
+  Widget _interviewTileFromApi(BuildContext context, Interview i) {
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          const CircleAvatar(
-            radius: 26,
-            backgroundImage: AssetImage("assets/interview1.png"),
-          ),
+          CircleAvatar(radius: 26, backgroundImage: NetworkImage(i.founderImg)),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  i.topicTitle,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(time, style: theme.textTheme.bodySmall),
+                Text(
+                  i.videoDate.split('T')[0],
+                  style: theme.textTheme.bodySmall,
+                ),
               ],
             ),
           ),
@@ -366,12 +396,12 @@ class VideosScreen extends StatelessWidget {
             margin: const EdgeInsets.only(left: 8),
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: badge == "LIVE" ? Colors.red : Colors.grey,
+              color: Colors.orange,
               borderRadius: BorderRadius.circular(4),
             ),
-            child: Text(
-              badge,
-              style: const TextStyle(
+            child: const Text(
+              "Scheduled",
+              style: TextStyle(
                 color: Colors.white,
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
@@ -383,14 +413,7 @@ class VideosScreen extends StatelessWidget {
     );
   }
 
-  Widget _recordedInterviewCard(
-    BuildContext context,
-    String title,
-    String guest,
-    String imagePath, {
-    String subtitle =
-        "Exclusive discussion on unlocking credit for emerging markets through real-world lending protocols.",
-  }) {
+  Widget _recordedInterviewCardFromApi(BuildContext context, Interview i) {
     final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -414,7 +437,14 @@ class VideosScreen extends StatelessWidget {
                 topLeft: Radius.circular(8),
                 bottomLeft: Radius.circular(8),
               ),
-              child: Image.asset(imagePath, width: 120, fit: BoxFit.cover),
+              child:
+                  i.videoThumbnail != null
+                      ? Image.network(
+                        i.videoThumbnail!,
+                        width: 120,
+                        fit: BoxFit.cover,
+                      )
+                      : Container(width: 120, color: Colors.grey),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -425,17 +455,16 @@ class VideosScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      title,
+                      i.topicTitle,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
-                        height: 1.3,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      guest,
+                      i.founderName,
                       style: const TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
@@ -444,7 +473,7 @@ class VideosScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      subtitle,
+                      i.topicDescription,
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(height: 1.3),

@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 
-// Public video card widget with dark mode support
-Widget videoCard(String imagePath, String title, String duration) {
+/// Displays a video card (e.g., for educational videos or recorded interviews)
+Widget videoCard(
+  String imageUrl,
+  String title,
+  String duration, {
+  String subtitle = "Subtitle here",
+  bool isAsset = false,
+}) {
   return Builder(
     builder: (context) {
       final theme = Theme.of(context);
+
       return Container(
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
         child: Column(
@@ -14,12 +21,31 @@ Widget videoCard(String imagePath, String title, String duration) {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: Image.asset(
-                    imagePath,
-                    width: double.infinity,
-                    height: 100,
-                    fit: BoxFit.cover,
-                  ),
+                  child:
+                      isAsset
+                          ? Image.asset(
+                            imageUrl,
+                            width: double.infinity,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          )
+                          : Image.network(
+                            imageUrl,
+                            width: double.infinity,
+                            height: 100,
+                            fit: BoxFit.cover,
+                            errorBuilder:
+                                (_, __, ___) => Container(
+                                  width: double.infinity,
+                                  height: 100,
+                                  color: Colors.grey.shade300,
+                                  alignment: Alignment.center,
+                                  child: const Icon(
+                                    Icons.broken_image,
+                                    size: 32,
+                                  ),
+                                ),
+                          ),
                 ),
                 Positioned(
                   bottom: 4,
@@ -51,7 +77,7 @@ Widget videoCard(String imagePath, String title, String duration) {
             ),
             const SizedBox(height: 2),
             Text(
-              "Subtitle here",
+              subtitle,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(
@@ -68,11 +94,11 @@ Widget videoCard(String imagePath, String title, String duration) {
   );
 }
 
+/// Displays a circular avatar interview tile with title and badge
 Widget interviewTile(String title, String time, String badge) {
   return Builder(
     builder: (context) {
       final theme = Theme.of(context);
-      final isDark = theme.brightness == Brightness.dark;
 
       return Padding(
         padding: const EdgeInsets.only(top: 10, bottom: 2),
@@ -114,7 +140,10 @@ Widget interviewTile(String title, String time, String badge) {
               margin: const EdgeInsets.only(left: 8),
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: badge == "LIVE" ? Colors.red : Colors.grey,
+                color:
+                    badge.toUpperCase() == "LIVE"
+                        ? Colors.red
+                        : theme.hintColor,
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
@@ -133,12 +162,14 @@ Widget interviewTile(String title, String time, String badge) {
   );
 }
 
+/// Displays a recorded interview card with guest, title, subtitle and thumbnail
 Widget recordedInterviewCard(
   String title,
   String guest,
-  String imagePath, {
+  String imageUrl, {
   String subtitle =
       "Exclusive discussion on unlocking credit for emerging markets through real-world lending protocols.",
+  bool isAsset = false,
 }) {
   return Builder(
     builder: (context) {
@@ -160,12 +191,55 @@ Widget recordedInterviewCard(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(8),
-                  bottomLeft: Radius.circular(8),
+              SizedBox(
+                width: 120,
+                height: 100,
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(8),
+                    bottomLeft: Radius.circular(8),
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      isAsset
+                          ? Image.asset(
+                            imageUrl,
+                            width: 120,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          )
+                          : Image.network(
+                            imageUrl,
+                            width: 120,
+                            height: 100,
+                            fit: BoxFit.cover,
+                            errorBuilder:
+                                (_, __, ___) => Container(
+                                  width: 120,
+                                  height: 100,
+                                  color: Colors.grey.shade300,
+                                  alignment: Alignment.center,
+                                  child: const Icon(
+                                    Icons.broken_image,
+                                    size: 32,
+                                  ),
+                                ),
+                          ),
+                      Container(
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.black45,
+                        ),
+                        child: const Icon(
+                          Icons.play_circle_fill,
+                          size: 36,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                child: Image.asset(imagePath, width: 120, fit: BoxFit.cover),
               ),
               const SizedBox(width: 8),
               Expanded(
