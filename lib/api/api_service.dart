@@ -160,9 +160,17 @@ class ApiService {
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
       if (json['status'] == true && json['trend'] is List) {
-        return (json['trend'] as List)
-            .map((item) => Coin.fromJson(item))
-            .toList();
+        final List<Coin> coins =
+            (json['trend'] as List).map((item) => Coin.fromJson(item)).toList();
+
+        print('📊 Trending Coins from API (${coins.length}):');
+        for (final coin in coins) {
+          print(
+            '- ${coin.name} (${coin.symbol}) | \$${coin.currentPrice} | 24h: ${coin.priceChange24h}%',
+          );
+        }
+
+        return coins;
       } else {
         throw Exception("Invalid trending response structure");
       }

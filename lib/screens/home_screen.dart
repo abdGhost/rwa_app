@@ -69,18 +69,29 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _scrollListener() {
+    final isLoadableTab = _selectedTabIndex == 0 || _selectedTabIndex == 3;
+    final isTrendingTabWithLimitedData =
+        _selectedTabIndex == 3 && displayedCoins.length < _itemsPerPage;
+
     if (_scrollController.position.pixels >=
             _scrollController.position.maxScrollExtent - 100 &&
         !_isLoadingMore &&
         _hasMoreData &&
         !_isLoading &&
-        _selectedTabIndex != 2) {
+        isLoadableTab &&
+        !isTrendingTabWithLimitedData) {
       _loadMoreCoins();
     }
   }
 
   Future<void> fetchInitialData(int index) async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _currentPage = 1;
+      _hasMoreData = true;
+      allCoins = [];
+      displayedCoins = [];
+    });
     try {
       final highlightData = await _apiService.fetchHighlightData();
       final topTrending = await _apiService.fetchTopTrendingCoin();
@@ -120,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen>
     try {
       final nextPage = _currentPage + 1;
       final newCoins = await _apiService.fetchCoinsPaginated(
-        page: _currentPage,
+        page: nextPage,
         size: _itemsPerPage,
       );
 
@@ -128,7 +139,13 @@ class _HomeScreenState extends State<HomeScreen>
         _hasMoreData = false;
       } else {
         _currentPage = nextPage;
-        allCoins.addAll(newCoins);
+
+        // 🔥 Deduplicate by coin ID
+        final existingIds = allCoins.map((coin) => coin.id).toSet();
+        final filteredCoins =
+            newCoins.where((coin) => !existingIds.contains(coin.id)).toList();
+
+        allCoins.addAll(filteredCoins);
         if (_selectedTabIndex != 2) {
           displayedCoins = List.from(allCoins);
         }
@@ -145,6 +162,8 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Future<void> _onTabChanged(int index) async {
+    print('🟢 Tab changed to index: $index');
+
     if (_selectedTabIndex == index) return;
 
     setState(() {
@@ -154,21 +173,45 @@ class _HomeScreenState extends State<HomeScreen>
 
     await Future.delayed(const Duration(milliseconds: 300));
 
-    if (index == 3) {
-      // Trending tab
-      try {
+    try {
+      if (index == 1) {
+        // Top Coins → show top 10 trending coins (as-is)
         final trendingCoins = await _apiService.fetchTrendingCoins();
-        displayedCoins = trendingCoins;
-      } catch (e) {
-        print('❌ Error loading trending coins: $e');
+        print('🏅 Top Coins API Response:');
+        for (final coin in trendingCoins) {
+          print(
+            '- ${coin.name} (${coin.symbol}) | \$${coin.currentPrice} | 24h: ${coin.priceChange24h}%',
+          );
+        }
+        displayedCoins = trendingCoins.take(10).toList();
+      } else if (index == 4) {
+        // Top Gainers → sort trending by 24h gain and take top 10
+        final trendingCoins = await _apiService.fetchTrendingCoins();
+        trendingCoins.sort(
+          (a, b) => b.priceChange24h.compareTo(a.priceChange24h),
+        );
+        print('📈 Top Gainers Sorted by 24h % Change:');
+        for (final coin in trendingCoins.take(10)) {
+          print(
+            '- ${coin.name} (${coin.symbol}) | \$${coin.currentPrice} | 24h: ${coin.priceChange24h}%',
+          );
+        }
+        displayedCoins = trendingCoins.take(10).toList();
+      } else if (index == 2) {
+        // Watchlist
+        final favIds = await getFavoriteCoinIds();
+        displayedCoins =
+            allCoins.where((coin) => favIds.contains(coin.id)).toList();
+        print(
+          '⭐ Watchlist Coins: ${displayedCoins.map((e) => e.symbol).toList()}',
+        );
+      } else {
+        // All Coins (0) or Trending (3)
+        displayedCoins = List.from(allCoins);
+        print('📦 Loaded All Coins (${displayedCoins.length})');
       }
-    } else if (index == 2) {
-      // Favorites
-      final favIds = await getFavoriteCoinIds();
-      displayedCoins =
-          allCoins.where((coin) => favIds.contains(coin.id)).toList();
-    } else {
-      displayedCoins = List.from(allCoins);
+    } catch (e) {
+      print('❌ Error loading tab data: $e');
     }
 
     setState(() => _isLoading = false);

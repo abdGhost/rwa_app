@@ -2,15 +2,76 @@ import 'package:flutter/material.dart';
 import 'package:rwa_app/models/coin_model.dart';
 import 'package:rwa_app/screens/coin_details_screen.dart';
 
-class CoinsTable extends StatelessWidget {
+class CoinsTable extends StatefulWidget {
   final List<Coin> coins;
-  final ScrollController? scrollController; // ✅ Added
+  final ScrollController? scrollController;
 
-  const CoinsTable({
-    super.key,
-    required this.coins,
-    this.scrollController, // ✅ Added
-  });
+  const CoinsTable({super.key, required this.coins, this.scrollController});
+
+  @override
+  State<CoinsTable> createState() => _CoinsTableState();
+}
+
+class _CoinsTableState extends State<CoinsTable> {
+  late List<Coin> _sortedCoins;
+  String _sortBy = 'rank';
+  bool _isAscending = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _sortedCoins = List.from(widget.coins);
+  }
+
+  @override
+  void didUpdateWidget(covariant CoinsTable oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.coins != widget.coins) {
+      _sortedCoins = List.from(widget.coins);
+      _sortCoins();
+    }
+  }
+
+  void _onSort(String column) {
+    setState(() {
+      if (_sortBy == column) {
+        _isAscending = !_isAscending;
+      } else {
+        _sortBy = column;
+        _isAscending = true;
+      }
+      _sortCoins();
+    });
+  }
+
+  void _sortCoins() {
+    _sortedCoins.sort((a, b) {
+      int compare;
+      switch (_sortBy) {
+        case 'price':
+          compare = a.currentPrice.compareTo(b.currentPrice);
+          break;
+        case 'marketCap':
+          compare = a.marketCap.compareTo(b.marketCap);
+          break;
+        case 'name':
+          compare = a.name.toLowerCase().compareTo(b.name.toLowerCase());
+          break;
+        default:
+          compare = a.marketCapRank.compareTo(b.marketCapRank);
+      }
+      return _isAscending ? compare : -compare;
+    });
+  }
+
+  String formatNumber(num? value) {
+    if (value == null) return '...';
+    if (value >= 1e12) return '\$${(value / 1e12).toStringAsFixed(2)}T';
+    if (value >= 1e9) return '\$${(value / 1e9).toStringAsFixed(2)}B';
+    if (value >= 1e6) return '\$${(value / 1e6).toStringAsFixed(2)}M';
+    if (value >= 1e3) return '\$${(value / 1e3).toStringAsFixed(2)}K';
+    return '\$${value.toStringAsFixed(2)}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,31 +100,21 @@ class CoinsTable extends StatelessWidget {
         ),
         Expanded(
           child: ListView.builder(
-            controller: scrollController, // ✅ Used for pagination
-            itemCount: coins.length,
+            controller: widget.scrollController,
+            itemCount: _sortedCoins.length,
             itemBuilder: (context, index) {
-              final coin = coins[index];
-              final name = coin.name;
-              final id = coin.id;
-              final symbol = coin.symbol.toUpperCase();
-              final icon = coin.image;
-              final price = coin.currentPrice;
-              final change = coin.priceChange24h;
-              final rank = coin.marketCapRank.toString();
-              final marketCap = coin.marketCap.toString();
-
-              final isNegative = change < 0;
-              final isPositive = change > 0;
+              final coin = _sortedCoins[index];
+              final isNegative = coin.priceChange24h < 0;
+              final isPositive = coin.priceChange24h > 0;
 
               return InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CoinDetailScreen(coin: id),
+                onTap:
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CoinDetailScreen(coin: coin.id),
+                      ),
                     ),
-                  );
-                },
                 child: Column(
                   children: [
                     Padding(
@@ -80,17 +131,22 @@ class CoinsTable extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 14),
-                          _buildCoinIcon(icon),
+                          _buildCoinIcon(coin.image),
                           SizedBox(
                             width: 40,
-                            child: Center(child: Text(symbol, style: rowStyle)),
+                            child: Center(
+                              child: Text(
+                                coin.symbol.toUpperCase(),
+                                style: rowStyle,
+                              ),
+                            ),
                           ),
                           const SizedBox(width: 10),
                           SizedBox(
                             width: 60,
                             child: Center(
                               child: Text(
-                                '\$${price.toStringAsFixed(2)}',
+                                '\$${coin.currentPrice.toStringAsFixed(2)}',
                                 style: rowStyle,
                               ),
                             ),
@@ -104,7 +160,7 @@ class CoinsTable extends StatelessWidget {
                                     ? '-'
                                     : isPositive
                                     ? '+'
-                                    : ''}${change.abs().toStringAsFixed(2)}%',
+                                    : ''}${coin.priceChange24h.abs().toStringAsFixed(2)}%',
                                 style: rowStyle.copyWith(
                                   color:
                                       isNegative
@@ -120,7 +176,7 @@ class CoinsTable extends StatelessWidget {
                           SizedBox(
                             width: 110,
                             child: Text(
-                              marketCap,
+                              formatNumber(coin.marketCap),
                               textAlign: TextAlign.center,
                               style: rowStyle,
                               overflow: TextOverflow.ellipsis,
@@ -152,20 +208,38 @@ class CoinsTable extends StatelessWidget {
           SizedBox(width: 24, child: Center(child: Text('#', style: style))),
           const SizedBox(width: 14),
           const SizedBox(width: 20),
-          SizedBox(width: 40, child: Center(child: Text('Coin', style: style))),
+          _headerCell('Coin', 'name', style, 40),
           const SizedBox(width: 10),
-          SizedBox(
-            width: 60,
-            child: Center(child: Text('Price', style: style)),
-          ),
+          _headerCell('Price', 'price', style, 60),
           const SizedBox(width: 5),
           SizedBox(width: 48, child: Center(child: Text('24H', style: style))),
           const SizedBox(width: 5),
-          SizedBox(
-            width: 110,
-            child: Center(child: Text('Market Cap', style: style)),
-          ),
+          _headerCell('Market Cap', 'marketCap', style, 110),
         ],
+      ),
+    );
+  }
+
+  Widget _headerCell(String title, String key, TextStyle style, double width) {
+    final isActive = _sortBy == key;
+    final icon = _isAscending ? Icons.arrow_upward : Icons.arrow_downward;
+
+    return GestureDetector(
+      onTap: () => _onSort(key),
+      child: SizedBox(
+        width: width,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              title,
+              style: style.copyWith(
+                fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+            if (isActive) Icon(icon, size: 12, color: style.color),
+          ],
+        ),
       ),
     );
   }
