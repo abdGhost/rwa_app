@@ -71,11 +71,7 @@ class ApiService {
   }
 
   Future<List<News>> fetchNews() async {
-    final response = await http.get(
-      Uri.parse(
-        'https://rwa-f1623a22e3ed.herokuapp.com/api/currencies/rwa/news',
-      ),
-    );
+    final response = await http.get(Uri.parse("$_baseUrl/currencies/rwa/news"));
 
     if (response.statusCode == 200) {
       final jsonBody = json.decode(response.body);
@@ -91,9 +87,7 @@ class ApiService {
     final token = prefs.getString('token') ?? '';
 
     final response = await http.get(
-      Uri.parse(
-        'https://rwa-f1623a22e3ed.herokuapp.com/api/user/token/portfolio',
-      ),
+      Uri.parse("$_baseUrl/user/token/portfolio"),
       headers: {'Authorization': 'Bearer $token'},
     );
 
@@ -106,6 +100,43 @@ class ApiService {
           .toList();
     } else {
       throw Exception('Failed to fetch portfolio');
+    }
+  }
+
+  // ✅ NEW METHOD: Fetch highlight data for market cap and volume
+  Future<Map<String, dynamic>> fetchHighlightData() async {
+    final url = Uri.parse("$_baseUrl/currencies/rwa/highlight");
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      if (json['status'] == true) {
+        return json['highlightData'];
+      } else {
+        throw Exception("Highlight status false");
+      }
+    } else {
+      throw Exception("Failed to fetch highlight data: ${response.body}");
+    }
+  }
+
+  // 👇 Add this method to your ApiService class
+  Future<Map<String, dynamic>?> fetchTopTrendingCoin() async {
+    final url = Uri.parse("$_baseUrl/currencies/rwa/trend");
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      if (json['status'] == true &&
+          json['trend'] != null &&
+          json['trend'] is List &&
+          json['trend'].isNotEmpty) {
+        return json['trend'][0]; // return first trending coin only
+      } else {
+        throw Exception("No trending coins found or status false");
+      }
+    } else {
+      throw Exception("Failed to fetch trending data: ${response.body}");
     }
   }
 }

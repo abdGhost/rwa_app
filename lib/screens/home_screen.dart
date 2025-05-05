@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:rwa_app/api/api_service.dart';
 import 'package:rwa_app/models/coin_model.dart';
 import 'package:rwa_app/screens/chat_screen.dart';
@@ -26,20 +25,44 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Coin> allCoins = [];
   List<Coin> displayedCoins = [];
 
+  double? marketCap;
+  double? volume24h;
+  double? marketCapChange;
+
+  String? trendingCoinSymbol;
+  String? trendingCoinDominance;
+  String? trendingCoinImage; // ✅ New: coin image for Dominance card
+
   @override
   void initState() {
     super.initState();
-    fetchCoins();
+    fetchCoinsAndHighlight();
   }
 
-  Future<void> fetchCoins() async {
+  Future<void> fetchCoinsAndHighlight() async {
     setState(() => _isLoading = true);
     try {
       final coinList = await _apiService.fetchCoins();
+      final highlightData = await _apiService.fetchHighlightData();
+      final topTrending = await _apiService.fetchTopTrendingCoin();
+
       allCoins = coinList;
       displayedCoins = allCoins;
+
+      marketCap = highlightData['market_cap'];
+      volume24h = highlightData['volume_24h'];
+      marketCapChange = highlightData['market_cap_change_24h'];
+
+      if (topTrending != null) {
+        trendingCoinDominance =
+            (topTrending['market_cap_change_percentage_24h'] ?? 0.0)
+                .toStringAsFixed(2);
+        trendingCoinSymbol =
+            (topTrending['symbol'] ?? '').toString().toUpperCase();
+        trendingCoinImage = topTrending['image']; // ✅ Assign image
+      }
     } catch (e) {
-      print('❌ Error fetching coins: $e');
+      print('❌ Error fetching data: $e');
     }
     setState(() => _isLoading = false);
   }
@@ -60,7 +83,6 @@ class _HomeScreenState extends State<HomeScreen> {
     await Future.delayed(const Duration(milliseconds: 300));
 
     if (index == 2) {
-      // 3rd tab = Watchlist
       final favIds = await getFavoriteCoinIds();
       displayedCoins =
           allCoins.where((coin) => favIds.contains(coin.id)).toList();
@@ -68,14 +90,23 @@ class _HomeScreenState extends State<HomeScreen> {
       displayedCoins = allCoins;
     }
 
-    setState(() {
-      _isLoading = false;
-    });
+    setState(() => _isLoading = false);
+  }
+
+  String formatNumber(double? value) {
+    if (value == null) return '...';
+    if (value >= 1e12) return '\$${(value / 1e12).toStringAsFixed(2)} T';
+    if (value >= 1e9) return '\$${(value / 1e9).toStringAsFixed(2)} B';
+    if (value >= 1e6) return '\$${(value / 1e6).toStringAsFixed(2)} M';
+    if (value >= 1e3) return '\$${(value / 1e3).toStringAsFixed(2)} K';
+    return '\$${value.toStringAsFixed(2)}';
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cardWidth = (MediaQuery.of(context).size.width - 24 - 6) / 4;
+
     return DefaultTabController(
       length: 5,
       initialIndex: _selectedTabIndex,
@@ -141,35 +172,46 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   StatCard(
                     title: 'Market Cap',
-                    value: '\$2.79 T',
-                    change: '5.78%',
-                    changeColor: Color.fromARGB(255, 30, 225, 151),
-                    width: (MediaQuery.of(context).size.width - 24 - 6) / 4,
+                    value: formatNumber(marketCap),
+                    change:
+                        marketCapChange != null
+                            ? '${marketCapChange! >= 0 ? '+' : ''}${marketCapChange!.toStringAsFixed(1)}%'
+                            : '',
+                    changeColor:
+                        marketCapChange == null
+                            ? Colors.grey
+                            : marketCapChange! >= 0
+                            ? Colors.green
+                            : Colors.red,
+                    width: cardWidth,
                     isFirst: true,
                   ),
                   const SizedBox(width: 2),
                   StatCard(
                     title: 'Volume',
-                    value: '\$3.48 T',
-                    change: '8.59%',
-                    changeColor: Color.fromARGB(255, 30, 225, 151),
-
-                    width: (MediaQuery.of(context).size.width - 24 - 6) / 4,
+                    value: formatNumber(volume24h),
+                    change: '24H',
+                    changeColor: Colors.white,
+                    width: cardWidth,
                   ),
                   const SizedBox(width: 2),
                   StatCard(
                     title: 'Dominance',
-                    value: '26.46%',
-                    subtitle: 'LINK',
+                    value:
+                        trendingCoinDominance != null
+                            ? '$trendingCoinDominance%'
+                            : '...',
+                    subtitle: trendingCoinSymbol ?? '',
+                    imageUrl: trendingCoinImage, // ✅ Use live image
                     changeColor: Colors.blue,
-                    width: (MediaQuery.of(context).size.width - 24 - 6) / 4,
+                    width: cardWidth,
                   ),
                   const SizedBox(width: 2),
                   StatCard(
                     title: 'Fear & Greed',
-                    value: '31',
+                    value: _isLoading ? '...' : '31', // ✅ Show loading state
                     changeColor: Colors.red,
-                    width: (MediaQuery.of(context).size.width - 24 - 6) / 4,
+                    width: cardWidth,
                     isLast: true,
                     isFearGreed: true,
                   ),
@@ -207,7 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed:
                 () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ChatScreen()),
+                  MaterialPageRoute(builder: (_) => const ChatScreen()),
                 ),
             backgroundColor: const Color(0xFF348F6C),
             shape: const CircleBorder(),

@@ -125,7 +125,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
                 BlendMode.srcIn,
               ),
             ),
-            label: 'Video',
+            label: 'Learn',
           ),
         ],
       ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class StatCard extends StatelessWidget {
@@ -7,6 +7,7 @@ class StatCard extends StatelessWidget {
   final String value;
   final String? subtitle;
   final String? change;
+  final String? imageUrl;
   final Color changeColor;
   final double width;
   final bool isFirst;
@@ -19,6 +20,7 @@ class StatCard extends StatelessWidget {
     required this.value,
     this.subtitle,
     this.change,
+    this.imageUrl,
     required this.changeColor,
     required this.width,
     this.isFirst = false,
@@ -38,109 +40,161 @@ class StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final bool isLoading = value == '...';
     final int indexValue =
         int.tryParse(value.replaceAll(RegExp(r'\D'), '')) ?? 0;
 
     return Container(
       width: width,
-      height: 90,
+      height: 80,
       padding: const EdgeInsets.all(8),
-      // 0xFF348F6C
       decoration: BoxDecoration(
-        color:
-            isDark
-                ? const Color(0xFF1E1E1E) // Dark card color
-                : const Color(0xFF348F6C),
+        color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFF348F6C),
         borderRadius: BorderRadius.horizontal(
           left: isFirst ? const Radius.circular(12) : Radius.zero,
           right: isLast ? const Radius.circular(12) : Radius.zero,
         ),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment:
-            isFearGreed ? CrossAxisAlignment.center : CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: GoogleFonts.inter(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 4),
-          if (isFearGreed)
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                SvgPicture.asset(
-                  _getFearGreedSvg(indexValue),
-                  width: 42,
-                  height: 42,
-                  fit: BoxFit.contain,
-                ),
-                Text(
-                  '$indexValue',
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            )
-          else ...[
-            Text(
-              value,
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 1),
-            if (subtitle != null && subtitle!.isNotEmpty)
-              Row(
+      child:
+          isFearGreed
+              ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset(
-                    'assets/icons/${subtitle!.toLowerCase()}.png',
-                    width: 14,
-                    height: 14,
-                    errorBuilder:
-                        (_, __, ___) => Image.asset(
-                          'assets/default-coin.png',
-                          width: 16,
-                          height: 16,
+                  Text(
+                    title,
+                    style: GoogleFonts.inter(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  isLoading
+                      ? Text(
+                        '...',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    subtitle!,
-                    style: GoogleFonts.inter(fontSize: 12, color: Colors.white),
-                  ),
+                      )
+                      : Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          SvgPicture.asset(
+                            _getFearGreedSvg(indexValue),
+                            width: 42,
+                            height: 42,
+                            fit: BoxFit.contain,
+                          ),
+                          Text(
+                            '$indexValue',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
                 ],
-              ),
-            if (change != null)
-              Row(
+              )
+              : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    change!.startsWith('+')
-                        ? Icons.arrow_upward
-                        : Icons.arrow_downward,
-                    size: 12,
-                    color: changeColor,
-                  ),
-                  const SizedBox(width: 2),
                   Text(
-                    change!.replaceAll(RegExp(r'^[\+\-]'), ''),
-                    style: GoogleFonts.inter(fontSize: 12, color: changeColor),
+                    title,
+                    style: GoogleFonts.inter(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
                   ),
+                  const SizedBox(height: 4),
+                  isLoading
+                      ? Text(
+                        '...',
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      )
+                      : Text(
+                        value,
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                  if (!isLoading && subtitle != null && subtitle!.isNotEmpty)
+                    Row(
+                      children: [
+                        imageUrl != null
+                            ? Image.network(
+                              imageUrl!,
+                              width: 14,
+                              height: 14,
+                              errorBuilder:
+                                  (_, __, ___) => Image.asset(
+                                    'assets/default-coin.png',
+                                    width: 16,
+                                    height: 16,
+                                  ),
+                            )
+                            : Image.asset(
+                              'assets/icons/${subtitle!.toLowerCase()}.png',
+                              width: 14,
+                              height: 14,
+                              errorBuilder:
+                                  (_, __, ___) => Image.asset(
+                                    'assets/default-coin.png',
+                                    width: 16,
+                                    height: 16,
+                                  ),
+                            ),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            subtitle!,
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color: Colors.white,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  if (!isLoading && change != null)
+                    Row(
+                      children: [
+                        if (change!.contains('%'))
+                          Icon(
+                            change!.startsWith('+')
+                                ? Icons.arrow_upward
+                                : Icons.arrow_downward,
+                            size: 12,
+                            color: changeColor,
+                          ),
+                        if (change!.contains('%')) const SizedBox(width: 2),
+                        Flexible(
+                          child: Text(
+                            change!.replaceAll(RegExp(r'^[\+\-]'), ''),
+                            style: GoogleFonts.inter(
+                              fontSize: change == '24H' ? 10 : 14,
+                              color: changeColor,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                 ],
               ),
-          ],
-        ],
-      ),
     );
   }
 }

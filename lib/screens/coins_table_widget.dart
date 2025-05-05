@@ -72,8 +72,11 @@ class CoinsTable extends StatelessWidget {
                         children: [
                           SizedBox(
                             width: 24,
-                            child: Center(child: Text(rank, style: rowStyle)),
+                            child: Center(
+                              child: Text('${index + 1}', style: rowStyle),
+                            ),
                           ),
+
                           const SizedBox(width: 14),
                           _buildCoinIcon(icon),
                           SizedBox(

@@ -121,7 +121,7 @@ class VideosScreen extends StatelessWidget {
         title: Row(
           children: [
             Text(
-              'Video',
+              'Learn',
               style: GoogleFonts.inter(
                 color: theme.textTheme.titleLarge?.color ?? Colors.black,
                 fontWeight: FontWeight.bold,
