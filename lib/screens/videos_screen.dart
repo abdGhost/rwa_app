@@ -8,6 +8,7 @@ import 'package:rwa_app/screens/educational_videos_screen.dart';
 import 'package:rwa_app/screens/profile_screen.dart';
 import 'package:rwa_app/screens/upcoming_interviews_screen.dart';
 import 'package:rwa_app/screens/recorded_interviews_screen.dart';
+import 'package:rwa_app/screens/video_player_modal.dart';
 
 class EducationalVideo {
   final String title;
@@ -179,7 +180,9 @@ class VideosScreen extends StatelessWidget {
           future: Future.wait([fetchEducationalVideos(), fetchInterviews()]),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                child: CircularProgressIndicator(color: Colors.green),
+              );
             } else if (snapshot.hasError) {
               return Center(child: Text("Error: ${snapshot.error}"));
             }
@@ -213,7 +216,7 @@ class VideosScreen extends StatelessWidget {
                         ),
                       )
                       : _videoSliderFromApi(context, cardWidth, videos),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 20),
 
                   _sectionTitle(context, "Upcoming Interviews", () {
                     Navigator.push(
@@ -363,16 +366,31 @@ class VideosScreen extends StatelessWidget {
       child: Row(
         children:
             videos.map((video) {
+              print(video.videoUrl);
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: SizedBox(
-                  width: cardWidth,
-                  child: _videoCard(
-                    context,
-                    video.thumbnail,
-                    video.title,
-                    "8:20",
-                    subtitle: video.subtitle,
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (_) => VideoPlayerModal(
+                              videoUrl: video.videoUrl,
+                              title: video.title,
+                            ),
+                      ),
+                    );
+                  },
+                  child: SizedBox(
+                    width: cardWidth,
+                    child: _videoCard(
+                      context,
+                      video.thumbnail,
+                      video.title,
+                      "8:20",
+                      subtitle: video.subtitle,
+                    ),
                   ),
                 ),
               );
@@ -463,12 +481,16 @@ class VideosScreen extends StatelessWidget {
                   i.topicTitle,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
+                    fontSize: 12,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   i.videoDate.split('T')[0],
-                  style: theme.textTheme.bodySmall,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w400,
+                    fontSize: 10,
+                  ),
                 ),
               ],
             ),

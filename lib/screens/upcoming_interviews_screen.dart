@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rwa_app/screens/videos_screen.dart';
+import 'package:rwa_app/theme/theme.dart';
 
 class UpcomingInterviewsScreen extends StatelessWidget {
   final List<Interview> interviews;
@@ -103,8 +104,9 @@ class UpcomingInterviewsScreen extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            height: 1.3,
+                            height: 1.2,
                             color: theme.hintColor,
+                            fontSize: 12,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -113,7 +115,7 @@ class UpcomingInterviewsScreen extends StatelessWidget {
                           style: theme.textTheme.bodySmall?.copyWith(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
-                            color: Colors.blue,
+                            color: AppColors.primaryDark,
                           ),
                         ),
                       ],
