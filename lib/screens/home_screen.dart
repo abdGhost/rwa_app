@@ -20,8 +20,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _isLoading = false;
+  bool _isLoadingMore = false;
+  bool _hasMoreData = true;
+
+  int _currentPage = 1;
+  final int _itemsPerPage = 25;
+
   int _selectedTabIndex = 0;
   final ApiService _apiService = ApiService();
+  final ScrollController _scrollController = ScrollController();
+
   List<Coin> allCoins = [];
   List<Coin> displayedCoins = [];
 
@@ -31,23 +39,44 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String? trendingCoinSymbol;
   String? trendingCoinDominance;
-  String? trendingCoinImage; // ✅ New: coin image for Dominance card
+  String? trendingCoinImage;
 
   @override
   void initState() {
     super.initState();
-    fetchCoinsAndHighlight();
+    _scrollController.addListener(_scrollListener);
+    fetchInitialData();
   }
 
-  Future<void> fetchCoinsAndHighlight() async {
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 100 &&
+        !_isLoadingMore &&
+        _hasMoreData &&
+        !_isLoading &&
+        _selectedTabIndex != 2) {
+      _loadMoreCoins();
+    }
+  }
+
+  Future<void> fetchInitialData() async {
     setState(() => _isLoading = true);
     try {
-      final coinList = await _apiService.fetchCoins();
       final highlightData = await _apiService.fetchHighlightData();
       final topTrending = await _apiService.fetchTopTrendingCoin();
+      final firstPageCoins = await _apiService.fetchCoinsPaginated(
+        page: _currentPage,
+        size: _itemsPerPage,
+      );
 
-      allCoins = coinList;
-      displayedCoins = allCoins;
+      allCoins = firstPageCoins;
+      displayedCoins = List.from(allCoins);
 
       marketCap = highlightData['market_cap'];
       volume24h = highlightData['volume_24h'];
@@ -59,12 +88,36 @@ class _HomeScreenState extends State<HomeScreen> {
                 .toStringAsFixed(2);
         trendingCoinSymbol =
             (topTrending['symbol'] ?? '').toString().toUpperCase();
-        trendingCoinImage = topTrending['image']; // ✅ Assign image
+        trendingCoinImage = topTrending['image'];
       }
     } catch (e) {
       print('❌ Error fetching data: $e');
     }
     setState(() => _isLoading = false);
+  }
+
+  Future<void> _loadMoreCoins() async {
+    setState(() => _isLoadingMore = true);
+    try {
+      final nextPage = _currentPage + 1;
+      final newCoins = await _apiService.fetchCoinsPaginated(
+        page: _currentPage,
+        size: _itemsPerPage,
+      );
+
+      if (newCoins.isEmpty) {
+        _hasMoreData = false;
+      } else {
+        _currentPage = nextPage;
+        allCoins.addAll(newCoins);
+        if (_selectedTabIndex != 2) {
+          displayedCoins = List.from(allCoins);
+        }
+      }
+    } catch (e) {
+      print('❌ Error loading more coins: $e');
+    }
+    setState(() => _isLoadingMore = false);
   }
 
   Future<List<String>> getFavoriteCoinIds() async {
@@ -87,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
       displayedCoins =
           allCoins.where((coin) => favIds.contains(coin.id)).toList();
     } else {
-      displayedCoins = allCoins;
+      displayedCoins = List.from(allCoins);
     }
 
     setState(() => _isLoading = false);
@@ -202,14 +255,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             ? '$trendingCoinDominance%'
                             : '...',
                     subtitle: trendingCoinSymbol ?? '',
-                    imageUrl: trendingCoinImage, // ✅ Use live image
+                    imageUrl: trendingCoinImage,
                     changeColor: Colors.blue,
                     width: cardWidth,
                   ),
                   const SizedBox(width: 2),
                   StatCard(
                     title: 'Fear & Greed',
-                    value: _isLoading ? '...' : '31', // ✅ Show loading state
+                    value: _isLoading ? '...' : '31',
                     changeColor: Colors.red,
                     width: cardWidth,
                     isLast: true,
@@ -226,19 +279,23 @@ class _HomeScreenState extends State<HomeScreen> {
                       ? const Center(
                         child: CircularProgressIndicator(color: Colors.green),
                       )
-                      : displayedCoins.isEmpty
-                      ? Center(
-                        child: Text(
-                          _selectedTabIndex == 2
-                              ? 'No favorite coins added yet'
-                              : 'No data available',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey,
+                      : Column(
+                        children: [
+                          Expanded(
+                            child: CoinsTable(
+                              coins: displayedCoins,
+                              scrollController: _scrollController,
+                            ),
                           ),
-                        ),
-                      )
-                      : CoinsTable(coins: displayedCoins),
+                          if (_isLoadingMore)
+                            const Padding(
+                              padding: EdgeInsets.all(10),
+                              child: CircularProgressIndicator(
+                                color: Colors.green,
+                              ),
+                            ),
+                        ],
+                      ),
             ),
           ],
         ),

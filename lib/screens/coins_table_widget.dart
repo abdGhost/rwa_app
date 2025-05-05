@@ -4,7 +4,13 @@ import 'package:rwa_app/screens/coin_details_screen.dart';
 
 class CoinsTable extends StatelessWidget {
   final List<Coin> coins;
-  const CoinsTable({super.key, required this.coins});
+  final ScrollController? scrollController; // ✅ Added
+
+  const CoinsTable({
+    super.key,
+    required this.coins,
+    this.scrollController, // ✅ Added
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +28,6 @@ class CoinsTable extends StatelessWidget {
 
     return Column(
       children: [
-        // const SizedBox(height: 8),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: _buildHeaderRow(headerStyle),
@@ -34,12 +39,10 @@ class CoinsTable extends StatelessWidget {
         ),
         Expanded(
           child: ListView.builder(
+            controller: scrollController, // ✅ Used for pagination
             itemCount: coins.length,
             itemBuilder: (context, index) {
               final coin = coins[index];
-
-              print("Coin Name: ${coin.name}, ID: ${coin.id}");
-
               final name = coin.name;
               final id = coin.id;
               final symbol = coin.symbol.toUpperCase();
@@ -76,7 +79,6 @@ class CoinsTable extends StatelessWidget {
                               child: Text('${index + 1}', style: rowStyle),
                             ),
                           ),
-
                           const SizedBox(width: 14),
                           _buildCoinIcon(icon),
                           SizedBox(
@@ -147,15 +149,7 @@ class CoinsTable extends StatelessWidget {
       height: 40,
       child: Row(
         children: [
-          SizedBox(
-            width: 24,
-            child: Center(
-              child: Text(
-                '#',
-                style: style, // ✅ Use the passed style here
-              ),
-            ),
-          ),
+          SizedBox(width: 24, child: Center(child: Text('#', style: style))),
           const SizedBox(width: 14),
           const SizedBox(width: 20),
           SizedBox(width: 40, child: Center(child: Text('Coin', style: style))),

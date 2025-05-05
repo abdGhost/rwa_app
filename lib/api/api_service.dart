@@ -139,4 +139,17 @@ class ApiService {
       throw Exception("Failed to fetch trending data: ${response.body}");
     }
   }
+
+  Future<List<Coin>> fetchCoinsPaginated({int page = 1, int size = 25}) async {
+    final uri = Uri.parse("$_baseUrl/currencies?page=$page&size=$size");
+    final response = await http.get(uri);
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      final parsed = CurrenciesResponse.fromJson(json);
+      return parsed.currencies;
+    } else {
+      throw Exception("Failed to load coins: ${response.body}");
+    }
+  }
 }
