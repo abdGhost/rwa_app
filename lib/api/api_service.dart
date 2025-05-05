@@ -152,4 +152,22 @@ class ApiService {
       throw Exception("Failed to load coins: ${response.body}");
     }
   }
+
+  Future<List<Coin>> fetchTrendingCoins() async {
+    final url = Uri.parse("$_baseUrl/currencies/rwa/trend");
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final json = jsonDecode(response.body);
+      if (json['status'] == true && json['trend'] is List) {
+        return (json['trend'] as List)
+            .map((item) => Coin.fromJson(item))
+            .toList();
+      } else {
+        throw Exception("Invalid trending response structure");
+      }
+    } else {
+      throw Exception("Failed to load trending coins");
+    }
+  }
 }
