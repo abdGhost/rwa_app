@@ -57,7 +57,16 @@ class BlogDetailScreen extends StatelessWidget {
         elevation: 0.5,
         backgroundColor: theme.appBarTheme.backgroundColor ?? theme.cardColor,
         leading: BackButton(color: theme.iconTheme.color),
-        title: Text("Ghost", style: theme.textTheme.bodyLarge),
+        title: Text(
+          (title ?? 'Blog').length > 40
+              ? '${title!.substring(0, 40)}...'
+              : title ?? 'Blog',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
       body: ListView(
         children: [

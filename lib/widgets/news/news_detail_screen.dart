@@ -57,10 +57,14 @@ class NewsDetailScreen extends StatelessWidget {
         backgroundColor: theme.appBarTheme.backgroundColor,
         leading: BackButton(color: theme.iconTheme.color),
         title: Text(
-          "News Details",
+          (title ?? 'News').length > 30
+              ? '${title!.substring(0, 30)}...'
+              : title ?? 'News',
           style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ),
       body: ListView(

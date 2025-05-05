@@ -205,8 +205,16 @@ class VideosScreen extends StatelessWidget {
                     );
                   }),
                   const SizedBox(height: 8),
-                  _videoSliderFromApi(context, cardWidth, videos),
+                  videos.isEmpty
+                      ? Center(
+                        child: Text(
+                          "No educational videos available.",
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      )
+                      : _videoSliderFromApi(context, cardWidth, videos),
                   const SizedBox(height: 12),
+
                   _sectionTitle(context, "Upcoming Interviews", () {
                     Navigator.push(
                       context,
@@ -217,10 +225,22 @@ class VideosScreen extends StatelessWidget {
                       ),
                     );
                   }),
-
                   const SizedBox(height: 6),
-                  ...upcoming.map((i) => _interviewTileFromApi(context, i)),
+                  upcoming.isEmpty
+                      ? Center(
+                        child: Text(
+                          "No upcoming interviews.",
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      )
+                      : Column(
+                        children:
+                            upcoming
+                                .map((i) => _interviewTileFromApi(context, i))
+                                .toList(),
+                      ),
                   const SizedBox(height: 12),
+
                   _sectionTitle(context, "Recorded Interviews", () {
                     Navigator.push(
                       context,
@@ -232,12 +252,73 @@ class VideosScreen extends StatelessWidget {
                     );
                   }),
                   const SizedBox(height: 6),
-                  ...recorded.map(
-                    (i) => _recordedInterviewCardFromApi(context, i),
-                  ),
+                  recorded.isEmpty
+                      ? Center(
+                        child: Text(
+                          "No recorded interviews.",
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      )
+                      : Column(
+                        children:
+                            recorded
+                                .map(
+                                  (i) =>
+                                      _recordedInterviewCardFromApi(context, i),
+                                )
+                                .toList(),
+                      ),
                 ],
               ),
             );
+
+            // return SingleChildScrollView(
+            //   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            //   child: Column(
+            //     crossAxisAlignment: CrossAxisAlignment.start,
+            //     children: [
+            //       _sectionTitle(context, "Educational Videos", () {
+            //         Navigator.push(
+            //           context,
+            //           MaterialPageRoute(
+            //             builder: (_) => EducationalVideosScreen(videos: videos),
+            //           ),
+            //         );
+            //       }),
+            //       const SizedBox(height: 8),
+            //       _videoSliderFromApi(context, cardWidth, videos),
+            //       const SizedBox(height: 12),
+            //       _sectionTitle(context, "Upcoming Interviews", () {
+            //         Navigator.push(
+            //           context,
+            //           MaterialPageRoute(
+            //             builder:
+            //                 (_) =>
+            //                     UpcomingInterviewsScreen(interviews: upcoming),
+            //           ),
+            //         );
+            //       }),
+
+            //       const SizedBox(height: 6),
+            //       ...upcoming.map((i) => _interviewTileFromApi(context, i)),
+            //       const SizedBox(height: 12),
+            //       _sectionTitle(context, "Recorded Interviews", () {
+            //         Navigator.push(
+            //           context,
+            //           MaterialPageRoute(
+            //             builder:
+            //                 (_) =>
+            //                     RecordedInterviewsScreen(interviews: recorded),
+            //           ),
+            //         );
+            //       }),
+            //       const SizedBox(height: 6),
+            //       ...recorded.map(
+            //         (i) => _recordedInterviewCardFromApi(context, i),
+            //       ),
+            //     ],
+            //   ),
+            // );
           },
         ),
       ),
